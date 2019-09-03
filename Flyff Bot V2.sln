@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Flyff Bot Module", "Flyff Bot Module\Flyff Bot Module.vcxproj", "{203CD452-D487-4979-A989-4B8956E8CA6F}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Flyff Bot Loader", "Flyff Bot Loader\Flyff Bot Loader.vcxproj", "{2B55ADAE-2BA4-4DE8-9B98-80758133166F}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HWID Bypasser", "HWID Bypasser\HWID Bypasser.vcxproj", "{641E0537-8E66-495B-845A-1D636F99E6AB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{203CD452-D487-4979-A989-4B8956E8CA6F}.Debug|x86.ActiveCfg = Debug|Win32
+		{203CD452-D487-4979-A989-4B8956E8CA6F}.Debug|x86.Build.0 = Debug|Win32
+		{203CD452-D487-4979-A989-4B8956E8CA6F}.Release|x86.ActiveCfg = Release|Win32
+		{203CD452-D487-4979-A989-4B8956E8CA6F}.Release|x86.Build.0 = Release|Win32
+		{2B55ADAE-2BA4-4DE8-9B98-80758133166F}.Debug|x86.ActiveCfg = Debug|Win32
+		{2B55ADAE-2BA4-4DE8-9B98-80758133166F}.Debug|x86.Build.0 = Debug|Win32
+		{2B55ADAE-2BA4-4DE8-9B98-80758133166F}.Release|x86.ActiveCfg = Release|Win32
+		{2B55ADAE-2BA4-4DE8-9B98-80758133166F}.Release|x86.Build.0 = Release|Win32
+		{641E0537-8E66-495B-845A-1D636F99E6AB}.Debug|x86.ActiveCfg = Debug|Win32
+		{641E0537-8E66-495B-845A-1D636F99E6AB}.Debug|x86.Build.0 = Debug|Win32
+		{641E0537-8E66-495B-845A-1D636F99E6AB}.Release|x86.ActiveCfg = Release|Win32
+		{641E0537-8E66-495B-845A-1D636F99E6AB}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {51FA6EBC-59D4-4188-823F-6FFD28E202E5}
+	EndGlobalSection
+EndGlobal

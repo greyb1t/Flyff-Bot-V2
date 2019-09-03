@@ -1,0 +1,245 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\bot\back_camera.h" />
+    <ClInclude Include="src\bot\blocked_state_machine.h" />
+    <ClInclude Include="src\bot\bot.h" />
+    <ClInclude Include="src\bot\botcore.h" />
+    <ClInclude Include="src\bot\bot_initializer.h" />
+    <ClInclude Include="src\bot\bot_ai_one_vs_one.h" />
+    <ClInclude Include="src\bot\bot_options.h" />
+    <ClInclude Include="src\bot\bot_passive.h" />
+    <ClInclude Include="src\bot\crash_handler.h" />
+    <ClInclude Include="src\bot\entity_filter.h" />
+    <ClInclude Include="src\bot\flyff_client_factory.h" />
+    <ClInclude Include="src\bot\hook_manager.h" />
+    <ClInclude Include="src\bot\idle_state_machine.h" />
+    <ClInclude Include="src\bot\options\attack_sequence_option.h" />
+    <ClInclude Include="src\bot\options\auto_healing_pills_option.h" />
+    <ClInclude Include="src\bot\options\average_y_pos_option.h" />
+    <ClInclude Include="src\bot\options\bot_mode_option.h" />
+    <ClInclude Include="src\bot\options\character_rebuff.h" />
+    <ClInclude Include="src\bot\do_once.h" />
+    <ClInclude Include="src\bot\entity_replicate_box.h" />
+    <ClInclude Include="src\bot\focus_target_state_machine.h" />
+    <ClInclude Include="src\bot\frame_timer.h" />
+    <ClInclude Include="src\bot\key_sequence.h" />
+    <ClInclude Include="src\bot\logging.h" />
+    <ClInclude Include="src\bot\logic_specialization\local_player_ignite.h" />
+    <ClInclude Include="src\bot\monster_definitions.h" />
+    <ClInclude Include="src\bot\options\character_rebuff_list.h" />
+    <ClInclude Include="src\bot\options\key_sequence_option.h" />
+    <ClInclude Include="src\bot\options\level_area_option.h" />
+    <ClInclude Include="src\bot\options\lure_target_key_option.h" />
+    <ClInclude Include="src\bot\options\whitelisted_names_option.h" />
+    <ClInclude Include="src\bot\options\whitelisted_player_names_option.h" />
+    <ClInclude Include="src\bot\select_target_state_machine.h" />
+    <ClInclude Include="src\bot\options\auto_healing_option.h" />
+    <ClInclude Include="src\bot\options\ext\json.hpp" />
+    <ClInclude Include="src\bot\options\option.h" />
+    <ClInclude Include="src\bot\options\option_utils.h" />
+    <ClInclude Include="src\bot\options\value_list_option.h" />
+    <ClInclude Include="src\bot\simluation_state_machine.h" />
+    <ClInclude Include="src\bot\state_machine.h" />
+    <ClInclude Include="src\bot\timer_on_interval.h" />
+    <ClInclude Include="src\bot\walk_to_position_state_machine.h" />
+    <ClInclude Include="src\build_time.h" />
+    <ClInclude Include="src\pch\pch.h" />
+    <ClInclude Include="src\servers\flyff_client.h" />
+    <ClInclude Include="src\servers\flyff_client_dragon_crusade.h" />
+    <ClInclude Include="src\servers\flyff_client_ignite.h" />
+    <ClInclude Include="src\servers\flyff_client_mazey.h" />
+    <ClInclude Include="src\utils\d3d_drawing.h" />
+    <ClInclude Include="src\bot\entity.h" />
+    <ClInclude Include="src\bot\entity_list.h" />
+    <ClInclude Include="src\bot\local_player.h" />
+    <ClInclude Include="src\utils\stopwatch.h" />
+    <ClInclude Include="src\utils\string_utls.h" />
+    <ClInclude Include="src\utils\trace.h" />
+    <ClInclude Include="src\window\addresses_offsets_window.h" />
+    <ClInclude Include="src\window\loading_window.h" />
+    <ClInclude Include="src\window\main_window.h" />
+    <ClInclude Include="src\bot\math.h" />
+    <ClInclude Include="src\res\resource.h" />
+    <ClInclude Include="src\utils\simulation.h" />
+    <ClInclude Include="src\utils\thread_pool.h" />
+    <ClInclude Include="src\window\tab_window_1.h" />
+    <ClInclude Include="src\window\tab_window_2.h" />
+    <ClInclude Include="src\window\tab_window_3.h" />
+    <ClInclude Include="src\window\waiting_window.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\bot\blocked_state_machine.cpp" />
+    <ClCompile Include="src\bot\bot.cpp" />
+    <ClCompile Include="src\bot\botcore.cpp" />
+    <ClCompile Include="src\bot\bot_initializer.cpp" />
+    <ClCompile Include="src\bot\bot_ai_one_vs_one.cpp" />
+    <ClCompile Include="src\bot\bot_options.cpp" />
+    <ClCompile Include="src\bot\bot_passive.cpp" />
+    <ClCompile Include="src\bot\crash_handler.cpp" />
+    <ClCompile Include="src\bot\flyff_client_factory.cpp" />
+    <ClCompile Include="src\bot\focus_target_state_machine.cpp" />
+    <ClCompile Include="src\bot\frame_timer.cpp" />
+    <ClCompile Include="src\bot\hook_manager.cpp" />
+    <ClCompile Include="src\bot\idle_state_machine.cpp" />
+    <ClCompile Include="src\bot\key_sequence.cpp" />
+    <ClCompile Include="src\bot\logging.cpp" />
+    <ClCompile Include="src\bot\logic_specialization\local_player_ignite.cpp" />
+    <ClCompile Include="src\bot\options\attack_sequence_option.cpp" />
+    <ClCompile Include="src\bot\options\auto_healing_pills_option.cpp" />
+    <ClCompile Include="src\bot\options\bot_mode_option.cpp" />
+    <ClCompile Include="src\bot\options\character_rebuff.cpp" />
+    <ClCompile Include="src\bot\options\character_rebuff_list.cpp" />
+    <ClCompile Include="src\bot\options\key_sequence_option.cpp" />
+    <ClCompile Include="src\bot\options\level_area_option.cpp" />
+    <ClCompile Include="src\bot\options\lure_target_key_option.cpp" />
+    <ClCompile Include="src\bot\options\option.cpp" />
+    <ClCompile Include="src\bot\options\whitelisted_names_option.cpp" />
+    <ClCompile Include="src\bot\options\whitelisted_player_names_option.cpp" />
+    <ClCompile Include="src\bot\select_target_state_machine.cpp" />
+    <ClCompile Include="src\bot\options\auto_healing_option.cpp" />
+    <ClCompile Include="src\bot\options\option_utils.cpp" />
+    <ClCompile Include="src\bot\simluation_state_machine.cpp" />
+    <ClCompile Include="src\bot\walk_to_position_state_machine.cpp" />
+    <ClCompile Include="src\build_time.cpp" />
+    <ClCompile Include="src\pch\pch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="src\servers\flyff_client.cpp" />
+    <ClCompile Include="src\servers\flyff_client_dragon_crusade.cpp" />
+    <ClCompile Include="src\servers\flyff_client_ignite.cpp" />
+    <ClCompile Include="src\utils\d3d_drawing.cpp" />
+    <ClCompile Include="src\bot\entity.cpp" />
+    <ClCompile Include="src\bot\entity_list.cpp" />
+    <ClCompile Include="src\bot\local_player.cpp" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\utils\trace.cpp" />
+    <ClCompile Include="src\window\loading_window.cpp" />
+    <ClCompile Include="src\window\main_window.cpp" />
+    <ClCompile Include="src\bot\math.cpp" />
+    <ClCompile Include="src\utils\simulation.cpp" />
+    <ClCompile Include="src\utils\thread_pool.cpp" />
+    <ClCompile Include="src\window\tab_window_1.cpp" />
+    <ClCompile Include="src\window\tab_window_2.cpp" />
+    <ClCompile Include="src\window\tab_window_3.cpp" />
+    <ClCompile Include="src\window\waiting_window.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="src\res\Resource.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="NOTES.txt" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{203cd452-d487-4979-a989-4b8956e8ca6f}</ProjectGuid>
+    <RootNamespace>Flyff_Bot_Module</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)$(ProjectName)\intermediates\$(Platform)\$(Configuration)\</IntDir>
+    <TargetName>RIMJOB.module</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)$(ProjectName)\intermediates\$(Platform)\$(Configuration)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+    <TargetName>RIMJOB.module</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>G:\development\external dependencies\Detours Pro 3.0.316\include;G:\development\external dependencies\dxsdk_oct_2004\Include;G:\development\external dependencies\openssl-1.1.0e-vs2015\include;%(AdditionalIncludeDirectories);$(ProjectDir)\src\pch;G:\development\projects\C++\gwinmem\gwinmem\src;G:\development\projects\C++\gwingui_v2\gwingui_v2</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>G:\development\external dependencies\Detours Pro 3.0.316\lib.X86;G:\development\external dependencies\dxsdk_oct_2004\Lib;G:\development\projects\C++\gwinmem\bin\Win32\Debug;G:\development\projects\C++\gwingui_v2\bin\Win32\Debug</AdditionalLibraryDirectories>
+      <ModuleDefinitionFile>
+      </ModuleDefinitionFile>
+      <EntryPointSymbol>
+      </EntryPointSymbol>
+    </Link>
+    <PreBuildEvent>
+      <Command>del "$(ProjectDir)intermediates\$(PlatformName)\$(Configuration)\build_time.obj"</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>G:\development\external dependencies\Detours Pro 3.0.316\include;G:\development\external dependencies\dxsdk_oct_2004\Include;G:\development\external dependencies\openssl-1.1.0e-vs2015\include;%(AdditionalIncludeDirectories);$(ProjectDir)\src\pch;G:\development\projects\C++\gwinmem\gwinmem\src;G:\development\projects\C++\gwingui_v2\gwingui_v2</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>G:\development\external dependencies\Detours Pro 3.0.316\lib.X86;G:\development\external dependencies\dxsdk_oct_2004\Lib;G:\development\projects\C++\gwinmem\bin\Win32\Release;G:\development\projects\C++\gwingui_v2\bin\Win32\Release</AdditionalLibraryDirectories>
+      <ModuleDefinitionFile>
+      </ModuleDefinitionFile>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
+    </Link>
+    <ProjectReference />
+    <PreBuildEvent>
+      <Command>del "$(ProjectDir)intermediates\$(PlatformName)\$(Configuration)\build_time.obj"</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

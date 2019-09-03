@@ -1,0 +1,17 @@
+* Find all possible pointers in the memory.
+* Go through all pointers and read the memory of specific offset/offsets 
+  and compare them with a value that is unique to that pointer.
+* Example: Flyff Local Player
+	base + 0x4 = 2 (4 byte)
+	base + 0x8 = 0 (4 byte)
+	base + 0xC = 1 (4 byte)
+	base + 0x10 = 1 (4 byte)
+
+	The above values are unique to the local player structure, 
+	and if we brute force read these offsets and compare them to those 
+	values and all of them matches, we have found out local player address.
+	
+Look in these sources to find all pointers:
+Chaos code: https://www.unknowncheats.me/forum/pubg-releases/264897-method-uworld-gnames-aactors-offets-decryptions.html
+Hmm?: https://www.unknowncheats.me/forum/d3d-tutorials-source/121840-hook-directx-11-dynamically.html
+Best: https://www.unknowncheats.me/forum/d3d-tutorials-and-source/117793-hook-directx-9-10-11-dynamically.html

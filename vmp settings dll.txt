@@ -1,0 +1,10 @@
+Memory Protection : No
+Import Protection : Yes
+Resource Protection : Yes
+Pack the Output file : Yes
+Debugger : No
+Virtualization Tools : No
+VM Segments : .dick
+Strip Debug Information : Yes
+
+Then, right click "Functions for Protection" and add the functions that you want protected with the virtualization.

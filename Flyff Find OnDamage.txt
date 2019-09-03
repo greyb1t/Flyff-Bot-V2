@@ -1,0 +1,422 @@
+How to find:
+BOOL CMover::OnDamage(int nItemID, DWORD dwState, CMover *pHitObj, const D3DXVECTOR3 *pvDamagePos, DWORD dwAtkFlag)
+
+* Open IDA and search for immediate value 1617
+* Looking at the code below, OnDamage can be found and just below that is a define CONSTANT called XI_NPCSP1RANBOOM
+* That XI_NPCSP1RANBOOM value is 1617
+*Can maybe search string "CMover::OnDamage"
+
+Next Step:
+OnDamage contains a call to another method
+in the ida pro OnDamage you can find the line in the beginning: v7 = 1;
+That is the same as int nParam = 0x01;		//sun
+that v7 (nParam) is then only referenced in that function one more time.
+That function call that v7 is referenced (as an argument) in is 
+
+
+void	CMover::OnAttackMelee_ClockWorks( DWORD dwState, CMover *pHitObj )
+{
+	int		nItemID = GetActParam( 1 );	// 사용할 아이템 아이디
+
+#ifdef __WORLDSERVER
+	UpdateMatrix();		// 몸체의 특정부위에서 나는 데미지를 처리하기 위해선 서버에서도 매트릭스를 갱신해야한다.
+	CModelObject *pModel = (CModelObject *)m_pModel;
+	pModel->UpdateMatrixBone();		// 서버에서는 본애니메이션을 하지 않으므로 GetEventPos()를 사용할 일이 있을땐 업데이트를 해줘야 한다.
+#endif // WorldServer
+	
+	switch( dwState )
+	{
+	case OBJSTA_ATK1:		// 칼로 내려치기
+		{
+			D3DXVECTOR3 vPos;
+			CModelObject *pModel = (CModelObject *)m_pModel;
+			pModel->GetEventPos( &vPos, 0 );
+			D3DXVec3TransformCoord( &vPos, &vPos, GetMatrixWorldPtr() );
+
+			OnDamage( nItemID, dwState, NULL, &vPos );		// 이펙트가 발생하는 위치에 데미지를 주고
+#ifdef __CLIENT
+			GetWorld()->m_pCamera->SetQuake( 15, 0.5f );
+			CSfx *pSfx = CreateSfx( D3DDEVICE, XI_NPCSP1DIRFIRESP, vPos );	// 이펙트를 발생 - 서버에선 생성 안됨.
+			if( pSfx )
+				pSfx->SetAngle( -GetAngle() );
+#endif 
+		}
+		break;
+	case OBJSTA_ATK2:		// 포쏘기
+		{
+			D3DXVECTOR3 vPos;
+			CModelObject *pModel = (CModelObject *)m_pModel;
+			pModel->GetEventPos( &vPos, 1 );	// 왼손 집게발 위치.
+			D3DXVec3TransformCoord( &vPos, &vPos, GetMatrixWorldPtr() );
+#ifdef __CLIENT
+			CSfx *pSfx = CreateSfx( D3DDEVICE, XI_NPCSP1DIRCANNON, vPos, GetId() );	// 발사이펙트.
+			if( pSfx )
+			{
+				pSfx->SetAngle( -GetAngle() );
+				pSfx->SetScale( D3DXVECTOR3(4.0f, 4.0f, 4.0f) );
+			}
+#endif
+			CMover *pTarget = pHitObj;
+			if( IsValidObj(pTarget) )
+			{
+				OnDamage( nItemID, dwState, NULL, &pTarget->GetPos() );		// 타겟의 좌표를 중심으로 데미지를 줌.
+#ifdef __CLIENT
+				pSfx = CreateSfx( D3DDEVICE, XI_NPCSP1RANBALL, vPos, GetId(), pTarget->GetPos(), pTarget->GetId(), -1 );		// 포탄
+				if( pSfx )
+				{
+					pSfx->SetScale( D3DXVECTOR3(4.0f, 4.0f, 4.0f) );
+					{
+						FLOAT fAngXZ, fAngH;
+						D3DXVECTOR3 vDist = pTarget->GetPos() - vPos;
+						xGetDegree( &fAngXZ, &fAngH, vDist );		// 목표와의 각도구함.
+						((CSfxAtkStraight *)pSfx)->ShootSfx( fAngXZ, -fAngH, 2.0f, XI_NPCSP1RANBOOM );		// 날아가는 방향 설정.
+					}
+				}
+#endif
+			}
+		}
+		break;
+	case OBJSTA_ATK3:
+#ifdef __CLIENT
+		GetWorld()->m_pCamera->SetQuake( 30, 0.7f );
+#endif
+		break;
+	case OBJSTA_ATK4:	// 발로 밟기.
+		{
+			D3DXVECTOR3 vPos;
+
+			vPos = GetPos();
+			DWORD dwFlag = AF_GENERIC;
+			if( xRandom(100) < 15 )
+				dwFlag |= AF_FLYING;
+			OnDamage( nItemID, dwState, NULL, &vPos, dwFlag );		// 데미지는 몸중심을 기준으로 한다.
+
+			CModelObject *pModel = (CModelObject *)m_pModel;
+			pModel->GetEventPos( &vPos, 3 );
+			D3DXVec3TransformCoord( &vPos, &vPos, GetMatrixWorldPtr() );
+
+#ifdef __CLIENT
+			GetWorld()->m_pCamera->SetQuake( 60, 1.5f );
+
+			CSfx *pSfx = CreateSfx( D3DDEVICE, XI_NPCSP1DIRCIRCLE, vPos );
+			if( pSfx )
+				pSfx->SetScale( D3DXVECTOR3(2.0f, 2.0f, 2.0f) );
+			pModel->GetEventPos( &vPos, 4 );
+			D3DXVec3TransformCoord( &vPos, &vPos, GetMatrixWorldPtr() );
+
+			pSfx = CreateSfx( D3DDEVICE, XI_NPCSP1DIRCIRCLE, vPos );
+			if( pSfx )
+				pSfx->SetScale( D3DXVECTOR3(2.0f, 2.0f, 2.0f) );
+#endif
+		}
+		break;
+	}
+}
+
+
+IDA CODE CONTAINING THE CALL TO ONDAMAGE: The OnDamage is sub_136D110
+char __thiscall sub_136CA60(float *this, int a2, int a3)
+{
+  int v3; // eax
+  float *v4; // esi
+  int v5; // ecx
+  float v6; // eax
+  int v7; // ecx
+  float *v8; // edi
+  float v10; // [esp+54h] [ebp-38h]
+  float v11; // [esp+58h] [ebp-34h]
+  float v12; // [esp+5Ch] [ebp-30h]
+  int v13; // [esp+60h] [ebp-2Ch]
+  int v14; // [esp+64h] [ebp-28h]
+  int v15; // [esp+68h] [ebp-24h]
+  int v16; // [esp+6Ch] [ebp-20h]
+  __int64 v17; // [esp+70h] [ebp-1Ch]
+  float v18; // [esp+78h] [ebp-14h]
+  int v19; // [esp+7Ch] [ebp-10h]
+  int v20; // [esp+80h] [ebp-Ch]
+  int v21; // [esp+84h] [ebp-8h]
+
+  LOBYTE(v3) = a2;
+  v4 = this;
+  v5 = *((_DWORD *)this + 1591);
+  v16 = v5;
+  switch ( a2 )
+  {
+    case 0x10000:
+      if ( a3 && !(*(_BYTE *)(a3 + 4) & 1) )
+        LOBYTE(v3) = sub_136D110(v4, v5, 0x10000u, a3, 0, 1);
+      break;
+    case 0x30000:
+      v3 = *((_DWORD *)v4 + 210);
+      if ( !*(_DWORD *)(v3 + 10340) )
+      {
+        v7 = *((_DWORD *)v4 + 95);
+        sub_136AE80(&v17, 0);
+        LOBYTE(v3) = sub_12217DB(&v17, &v17, v4 + 57);
+        if ( a3 )
+        {
+          if ( !(*(_BYTE *)(a3 + 4) & 1) )
+          {
+            v15 = a3 + 0x164;
+            sub_136D110(v4, v16, 0x30000u, a3, a3 + 0x164, 1);
+            if ( (*(int (__thiscall **)(float *, int *, int *, signed int, signed int, const char *))(*(_DWORD *)v4 + 52))(
+                   v4,
+                   &v14,
+                   &v16,
+                   189,
+                   5,
+                   "SI_GEN_STUNSINGLE")
+              && sub_130C680() & 1 )
+            {
+              sub_132C8A0(v4, a3, v14, v16, 0, 0, 0, 0);
+            }
+            v8 = (float *)v15;
+            v3 = sub_13298E0(
+                   dword_178A308,
+                   1616,
+                   v17,
+                   LODWORD(v18),
+                   *((_DWORD *)v4 + 0xBC),
+                   *(_QWORD *)v15,
+                   *(_DWORD *)(v15 + 8),
+                   *(_DWORD *)(a3 + 0x2F0),
+                   -1);
+            if ( v3 )
+            {
+              v19 = 1082130432;
+              v20 = 1082130432;
+              v21 = 1082130432;
+              sub_13835E0(&v19);
+              v10 = *v8 - *(float *)&v17;
+              v11 = v8[1] - *((float *)&v17 + 1);
+              v12 = v8[2] - v18;
+              sub_13102B0(&v13, &v15, &v10);
+              LOBYTE(v3) = sub_13D36A0(v13, v15 ^ xmmword_15B1710, 0x40000000, 1617);
+            }
+          }
+        }
+      }
+      break;
+    case 0x40000:
+      v3 = *((_DWORD *)v4 + 210);
+      if ( !*(_DWORD *)(v3 + 10340) )
+      {
+        v3 = (*(int (__thiscall **)(float *, int *, int *, signed int, signed int, const char *))(*(_DWORD *)v4 + 52))(
+               v4,
+               &v16,
+               &v14,
+               308,
+               1,
+               "OnAttackMelee_Meteonyker");
+        if ( v3 )
+        {
+          v6 = v4[91];
+          v17 = *(_QWORD *)(v4 + 89);
+          v18 = v6;
+          nullsub_6(v4, 1, v16, v14, 0, 0, 1092616192, 0);
+          sub_136D110(v4, *(_DWORD *)(1696 * *((_DWORD *)v4 + 94) + dword_178D4A8 + 184), 0x40000u, 0, (int)&v17, 1);
+          v12 = 0.0;
+          LOBYTE(v3) = sub_13298E0(
+                         dword_178A308,
+                         1863,
+                         v17,
+                         LODWORD(v18),
+                         -1,
+                         *(_OWORD *)&_mm_unpacklo_ps((__m128)0i64, (__m128)0i64),
+                         0,
+                         -1,
+                         0);
+        }
+      }
+      break;
+  }
+  return v3;
+}
+
+BOOL	CMover::OnDamage( int nItemID, DWORD dwState, CMover *pHitObj, const D3DXVECTOR3 *pvDamagePos, DWORD dwAtkFlag )
+{
+	int nParam = 0x01;		//sun
+
+	if( IsPlayer() && IsDualWeapon() )		// ½OA®¸ðμa³A?
+	{
+		if( m_pActMover->m_dwAtkFlags & AF_GENERIC )	// ÆoA¸¸e
+		{
+			switch( dwState )
+			{
+			case OBJSTA_ATK1:	nParam |= 0x01;		break; // ¿A¸￥¼O
+			case OBJSTA_ATK2:	nParam |= 0x02;		break; // ¿Þ¼O
+			case OBJSTA_ATK3:	nParam |= 0x01;		break; // ¿A¸￥¼O
+			case OBJSTA_ATK4:	nParam |= 0x03;		break; // ¾c¼O
+			}
+		}
+	}
+
+
+#if defined(__CLIENT)
+	if( IsValidObj(pHitObj) )
+	{
+		CModelObject* pHitModel = (CModelObject*)pHitObj->m_pModel;
+		if( pHitModel )
+		{
+			D3DXVECTOR3 vDir;
+			pHitModel->m_SparkInfo.m_bUsed = TRUE;
+			pHitModel->m_SparkInfo.m_v3Color.x = 2.0f;
+			pHitModel->m_SparkInfo.m_v3Color.y = 2.0f;
+			pHitModel->m_SparkInfo.m_v3Color.z = 2.0f;
+			pHitModel->m_SparkInfo.m_nCnt = 0;
+			pHitModel->m_SparkInfo.m_fLerp= 1.0f;
+
+			vDir = pHitObj->GetPos() - GetPos();
+			D3DXVec3Normalize( &pHitModel->m_SparkInfo.m_v3SparkDir, &vDir );
+		}
+	}
+#endif //defined(__CLIENT) 
+	
+	int	nDamage = 0;
+	if( IsPlayer() )
+	{
+		// CA·¹AI¾i
+		nDamage = pHitObj->m_pActMover->SendDamage( m_pActMover->m_dwAtkFlags, GetId(), nParam );
+	}
+	else
+	{
+		// ¸o½ºAI
+		ItemProp *pItemProp = prj.GetItemProp( nItemID );
+		if( pItemProp )
+		{
+			if( pItemProp->dwSpellRegion == SRO_AROUND )
+			{
+				int nType = OBJTYPE_PLAYER;		// CA·¹AI¾iμe¸¸ μ￥¹IAo.
+				if( pHitObj )
+					pHitObj->SendDamageAround( dwAtkFlag, this, nType, nItemID, (float)pItemProp->_dwSkillRange, 1.0f, 1.0f ); 
+				else
+					GetWorld()->SendDamageAround( pvDamagePos, dwAtkFlag, this, nType, nItemID, (float)pItemProp->_dwSkillRange ); 
+			} else
+			{
+				if( pHitObj )
+					nDamage = pHitObj->m_pActMover->SendDamage( m_pActMover->m_dwAtkFlags, GetId(), 1 );
+			}
+		} else
+		{
+			if( pHitObj )
+				nDamage = pHitObj->m_pActMover->SendDamage( m_pActMover->m_dwAtkFlags, GetId(), 1 );
+		}
+	}
+
+
+ #ifdef __WORLDSERVER
+	if( nDamage > 0 )		// THIS°¡ °ø°YCß´Aμ￥ μ￥¹IAo ¸OAI´Aμ￥ ¼º°øCß´U
+	{
+		if( pHitObj->m_pActMover->GetState() & OBJSTA_ATK_MELEESKILL )	// ¸A´A³ðAI ½ºA³ ¸ð¼CAßAI¾u´U.
+		{
+			DWORD dwSkill = pHitObj->GetActParam(0);		// CoAc ≫c¿eCI°i AO´A ½ºA³. dwSkill
+			if( dwSkill == SI_MER_ONE_REFLEXHIT )			// ¸®CA·ºE÷Æ® ½ºA³A≫ ¾²°i AO´A Aß¿¡ ¸A¾O´U.
+			{
+				pHitObj->m_nReflexDmg += nDamage;			// ¸®CA·ºμ￥¹IAo´A ½×AO.
+			}
+		}
+	}
+ #endif
+	return nDamage > 0;
+}
+
+IDA PRO OnDamage:
+
+bool __thiscall sub_136D110(float *this, int a2, unsigned int a3, int a4, int a5, int a6)
+{
+  float *v6; // esi
+  signed int v7; // ebx
+  _DWORD *v8; // ecx
+  __m128 v9; // xmm2
+  __m128 v10; // xmm1
+  int v11; // eax
+  int v12; // eax
+  unsigned int v13; // eax
+  __m128i v14; // xmm0
+  unsigned int v15; // eax
+  double v16; // xmm0_8
+  int v17; // ecx
+  int v19; // [esp+34h] [ebp-14h]
+  __int64 v20; // [esp+38h] [ebp-10h]
+  float v21; // [esp+40h] [ebp-8h]
+
+  v6 = this;
+  v7 = 1;
+  if ( *((_DWORD *)this + 206) && sub_1363E40() && *(_BYTE *)(*((_DWORD *)v6 + 210) + 10332) & 1 )
+  {
+    if ( a3 > 0x30000 )
+    {
+      if ( a3 == 0x40000 )
+        v7 = 3;
+    }
+    else if ( a3 != 196608 && a3 != 0x10000 && a3 == 0x20000 )
+    {
+      v7 = 3;
+    }
+  }
+  if ( a4 )
+  {
+    if ( !(*(_BYTE *)(a4 + 4) & 1) )
+    {
+      v8 = *(_DWORD **)(a4 + 380);
+      if ( v8 )
+      {
+        v8[54] = 1;
+        v8[48] = 0x40000000;
+        v8[49] = 0x40000000;
+        v8[50] = 0x40000000;
+        v8[56] = 0;
+        v8[55] = 1065353216;
+        v9 = (__m128)*(unsigned int *)(a4 + 356);
+        v10 = (__m128)*(unsigned int *)(a4 + 360);
+        v9.m128_f32[0] = v9.m128_f32[0] - v6[89];
+        v10.m128_f32[0] = v10.m128_f32[0] - v6[90];
+        v21 = *(float *)(a4 + 364) - v6[91];
+        v20 = (unsigned __int128)_mm_unpacklo_ps(v9, v10);
+        sub_1221413(v8 + 51, &v20);
+      }
+    }
+  }
+  v19 = 0;
+  if ( *((_DWORD *)v6 + 206) )
+  {
+    v11 = (*(int (__stdcall **)(signed int, _DWORD, _DWORD, signed int, signed int, _DWORD))(**(_DWORD **)(a4 + 840) + 4))(
+            42,
+            *(_DWORD *)(*((_DWORD *)v6 + 210) + 10332),
+            *((_DWORD *)v6 + 188),
+            v7,
+            1,
+            0);
+LABEL_25:
+    v19 = v11;
+    return v19 > 0;
+  }
+  if ( a2 && (v12 = sub_1309200(&unk_178D3D0, a2, (int)"CMover::OnDamage", 1625)) != 0 && *(_DWORD *)(v12 + 444) == 7 )
+  {
+    v13 = *(_DWORD *)(v12 + 396);
+    v14 = _mm_cvtsi32_si128(v13);
+    v15 = v13 >> 31;
+    *(_QWORD *)&v16 = (unsigned __int128)_mm_cvtepi32_pd(v14);
+    if ( a4 )
+    {
+      nullsub_7(a6, v6, 1, a2, v16 + qword_15B1860[v15], 1065353216, 1065353216);
+    }
+    else
+    {
+      v17 = *((_DWORD *)v6 + 92);
+      nullsub_8(a5, a6, v6, 1, a2, v16 + qword_15B1860[v15]);
+    }
+  }
+  else if ( a4 )
+  {
+    v11 = (*(int (__stdcall **)(signed int, _DWORD, _DWORD, signed int, signed int, _DWORD))(**(_DWORD **)(a4 + 840) + 4))(
+            42,
+            *(_DWORD *)(*((_DWORD *)v6 + 210) + 10332),
+            *((_DWORD *)v6 + 188),
+            1,
+            1,
+            0);
+    goto LABEL_25;
+  }
+  return v19 > 0;
+}

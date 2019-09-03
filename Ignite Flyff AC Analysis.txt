@@ -1,0 +1,66 @@
+Stopping execution of the AC thread by hooking a function that is used inside of that thread.
+Example: CryptHashData { Sleep(1000 * 60 * 60 * 24) }
+
+Open packet editor and you'll notice that constant packets with size 37
+are sent.
+
+When blocking the AC thread, those packets stops being sent.
+Those packets are the heartbeat.
+
+Packet 1 (Timestamp: 11:50:56):
+23 C5 37 7E CF 18 00 00 00 74 57 4B 7C 13 13 13
+13 E7 EF EC EC 0F EA 64 EC AA EC EC EC ED EC EC
+EC DC 18 D3 3E
+
+Packet 2 (Timstamp: 12:50:58):
+23 C5 37 7E CF 18 00 00 00 74 57 4B 7C 13 13 13
+13 E7 EF EC EC 0D E6 64 EC AA EC EC EC ED EC EC
+EC 84 14 F2 D8
+
+Packet 3 (Timestamp: 12:50:59):
+23 C5 37 7E CF 18 00 00 00 74 57 4B 7C 13 13 13
+13 E7 EF EC EC 33 E2 64 EC AA EC EC EC ED EC EC 
+EC 1C 82 33 95
+
+Packet 4 (Timestamp: 12:51:00):
+23 C5 37 7E CF 18 00 00 00 74 57 4B 7C 13 13 13
+13 E7 EF EC EC 31 FE 64 EC AA EC EC EC ED EC EC
+EC 8F 4A E4 DD
+
+Packet 5 (Timestamp: 12:51:01):
+23 C5 37 7E CF 18 00 00 00 74 57 4B 7C 13 13 13
+13 E7 EF EC EC 37 FA 64 EC AA EC EC EC ED EC EC
+EC ED 9C 00 82
+
+Packet Header (always same):
+23 C5 37 7E CF 18 00 00 00 74 57 4B 7C 13 13 13
+13 E7 EF EC EC
+
+After stopping the heartbeat, the client will disconnect you 
+if it does not receive another heartbeat in 60 seconds.
+
+As long as we are sending a copy of a heartbeat that is 
+intact within a 60 second interval, then we will never 
+get disconnected.
+
+23 9B 34 9D CE 18 00 00 00 2A 54 A8 7D 13 13 13 
+13 E7 EF EC EC B3 E9 49 EC AA EC EC EC ED EC EC 
+EC D8 E2 76 6C
+
+After relog:
+23 3E 50 9A CE 18 00 00 00 8F 30 AF 7D 13 13 13 
+13 E7 EF EC EC 17 34 49 EC AA EC EC EC ED EC EC 
+EC 03 C8 4D D3
+
+The packet header seems to change after a re-log.
+Meaning that we cannot spoof with any packet.
+
+18 00 00 00 part of the packet seems to be the packet id
+
+Bypassing:
+* Hook WSASend(), look for packet of size 37 and id of 18 00 00 00
+* When the correct packet is found, save the socket handle and the packet.
+* Unhook WSASend() and start a thread that sends that packet each 30 seconds with the saved socket using WSASend().
+* Now the heartbeat is spoofed and you can hook any function that is used by the AC thread e.g. CryptHashData or Sleep.
+* Inside the hook check if the current thread ID is equals to the AC thread, if true, Sleep(INFINITE).
+* Boom, bypassed.

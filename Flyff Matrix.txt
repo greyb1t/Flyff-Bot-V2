@@ -1,0 +1,83 @@
+1. Open click in ida pro or similar software.
+2. Find the string [%s]. Multiple of them will pop up, find the correct one.
+3. Above it a function call with 6 parameters can be found.
+4. That's the call to D3DXVec3Project.
+5. Figure out the Projection Matrix address and View Matrix address.
+6. Boom.
+
+Also: DamageNum::Render : %s %d
+
+IDA Pro:
+(*(void (__stdcall **)(int, char *))(*(_DWORD *)a2 + 192))(a2, &vp);
+    unknown_libname_605(&v98);
+    unknown_libname_605(&v108);
+    sub_47DA30(&v108);
+    sub_82DA40((int)&v98, v105, v106, v107);
+    sub_82CFA3(&v108, &v108, (char *)v53 + 100);
+    sub_82CFA3(&v108, &v108, (char *)v53 + 164);
+    sub_82CFA3(&v108, &v108, &v98);
+    v91 = *(_DWORD *)v99;
+    v92 = *(_DWORD *)(v99 + 4);
+    v13 = *(_DWORD *)(v99 + 8);
+    v91 = 0;
+    v93 = 0;
+    sub_44C680(v53);
+    sub_44C680(v53);
+    sub_82C71B((int)&vOut, (int)&v91, (int)&vp, (int)&unk_2B33DA0, dword_2B08CF8 + 16, (int)&v108); // The call to D3DXVec3Project
+    unknown_libname_582(&v109);
+    v109 = (unsigned __int64)vOut;
+    v110 = (unsigned __int64)v102;
+    sub_810BE0(&v109);
+    v14 = (signed int *)sub_4879C0(&v64, &v104);
+    v109 -= *v14 / 2;
+    v110 -= 20;
+    v109 -= 3;
+    if ( *((_DWORD *)v53 + 476) >= 75u )
+    {
+      if ( sub_44C610(v53) != 203 && sub_44C610(v53) != 204 && sub_44C610(v53) != 205 )
+      {
+        if ( sub_44C610(v53) == 201 || sub_44C610(v53) == 202 )
+        {
+          a4 = -6250241;
+          v17 = sub_451A10(v53);
+          sprintf(&v87, "[%s]", v17 + 4);
+          v109 = (unsigned __int64)vOut;
+          v110 = (unsigned __int64)v102;
+          sub_810BE0(&v109);
+          v18 = (signed int *)sub_4879C0(&v62, &v87);
+          v109 -= *v18 / 2;
+          v110 -= 35;
+          v19 = (double)v110;
+          v20 = (double)v109;
+          sub_4AE760(LODWORD(v20), LODWORD(v19), -6250241, &v87, 0, 0);
+          v109 = (unsigned __int64)vOut;
+          v110 = (unsigned __int64)v102;
+          sub_810BE0(&v109);
+          v21 = (signed int *)sub_4879C0(&v61, &v104);
+          v109 -= *v21 / 2;
+          v110 -= 20;
+
+The Flyff Source:
+	pd3dDevice->GetViewport( &vp );
+
+	D3DXMATRIX matTrans;
+	D3DXMATRIX matWorld;
+	D3DXMatrixIdentity(&matWorld);
+	D3DXMatrixTranslation( &matTrans, vPos.x, vPos.y, vPos.z );
+	D3DXMatrixMultiply( &matWorld, &matWorld, &m_matScale );
+	D3DXMatrixMultiply( &matWorld, &matWorld, &m_matRotation );
+	D3DXMatrixMultiply( &matWorld, &matWorld, &matTrans );
+
+	vPosHeight = pBB->m_vPos[0];
+	vPosHeight.x = 0;
+	vPosHeight.z = 0;
+
+	D3DXVec3Project( &vOut, &vPosHeight, &vp, &GetWorld()->m_matProj, &GetWorld()->m_pCamera->m_matView, &matWorld);
+	
+	CPoint point;
+	point.x = (LONG)( vOut.x );
+	point.y = (LONG)( vOut.y );
+
+	MakeEven( point.x );
+	point.x -= pFont->GetTextExtent( szName ).cx / 2;
+	point.y -= 20;

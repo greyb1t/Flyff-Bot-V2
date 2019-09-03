@@ -1,0 +1,323 @@
+TODO: Add warning if users tries to start the bot while being outside the "Restricted Killing Area".
+	If no warning, the user might think the bot is not working bcuz it just keep looking but not finding.
+
+Find if monster is aggro:
+* It is located about 40 bytes below authorization.
+* When a monster that is not aggro, value is 0, if aggro, value is 1. (try change it yourself)
+
+TODO: (Security) Manualmap most system DLLs and use those dlls to avoid any anti-cheat from hooking a function that I am calling.
+	  Example: 
+TODO: Fix if a aggressive non-whitelisted monster starts attacking the player, then kill it. 
+TODO: Add an new bot mode in the bot, RM support. Then disable all other controls that are not needed and used. Use the normal Start Bot button.
+TODO: If char dies while botting, add option to exit the client. Otherwise lying dead afk looks fishy.
+TODO: Add stats, e.g. total monsters killed. Bot run time. Last bot run time.
+
+NOTE: Continuous calls of logging::Log causes the flyff window to freeze
+
+Suspend the protection thread:
+The protection thread is dependent to run on the main thread. In other words,
+the main thread keeps the protection thread alive. If we suspend the main thread,
+then we can suspend the protection thread as well.
+So can easily bypass this by finding the handle using processhacker to the protection thread
+and closing that handle. Boom bypassed.
+
+NOTE:
+After a while, when the protection thread is suspended, you'll get disconnected.
+After debugging the crash when terminating the thread and closing the handle,
+I'll get to a function and use the call stack to trace back towards a function in the 
+main loop where (TranslateMessage) is called, A (Sleep) is called there with another function that
+seems to be checking for bad boy stuff.
+
+NOTE:
+NtClose Anti debug has argument 0xBAAD
+
+FIX:
+The bot gets stuck when the log printed out "Looking for closer entities"
+Make a universal function that is called "CheckIfBlockedSafety" or something.
+*POTENTIALLY SOLVED*
+
+FEATURE:
+bot rebuff, has a timer with a key sequence.
+When the timer has run out, we wait for bot to go into and reach an idle state and rebuff
+
+FIX:
+bug: When a mammoth stands in the char, the bot is blocked 
+by that mammoth while it tries to select other monsters, 
+it gets stuck in unlimited loop.
+E.g When another monster that is not whitelisted stands in the character preventing
+the bot from selecting the other whitelisted monsters, it gets unlimited loop until
+the non-whitelisted monster inside of the char moves away.
+Solution: Temporarily remove the bound box and restore it later
+Solution 2: When the bot is about to select the monster, remove all other entities bound boxes temporarily.
+*SOLVED*
+
+FEATURE:
+Client sided Admin - Shows several commands on chat, and the main thing in my eyes: Instant logout anywhere, and see Invisible Players / GM's
+
+DO ABOVE AND TEST IT IN EVENT, BYPASS IT
+Instead of changing the GM value, change the locations that accesses that value. Change the instructions to think the 70 value is a gm.
+
+FEATURE:
+remove all obstacles and ojbects bound boxess
+(HIDE THEM IF BOUND BOX DON'T WORK)
+*DONE* I removed them by changing their position high up in the sky.
+
+FEATURE:
+add option to rotate camera QUICKLY (ultra safe mode)
+
+FEATURE:
+cheat engine, change the upgrade water effect time
+
+FEATURE:
+full support rm
+find target by name
+have a connection between the two client to find out position of the target to heal then rm bot clicks its way to the target to find
+
+FIX:
+Fix the logging to avoid starting a new thread each call
+*DONE*
+
+FIX?:
+Manual Mapping does not work with the bot due to using e.g. SetWindowsHookEx. I tried using the Nt class of that function
+but no luck, the hook proc does being called.
+
+NOTE:
+I may have found the range offset in the player struct by using my range old offset
+from insanity flyff (0x12b4) and the old speed offset (0x1178) and calculating
+the difference between them. Then get the speed offset and add the difference on
+Ignite Flyff to get the range offset.
+Calculating the range offset:
+Insanity Speed Offset = 0x1178
+Insanity Range Offset = 0x12b4
+Delta = 0x12b4 - 0x1178
+Delta = 0x13c
+Ignite Speed Offset = 0x1918
+Ignite Range Offset = 0x1918 + 0x13c
+Ignite Range Offset: 0x1a54
+
+IDEA:
+Write text when detect player and stops bot.
+*DONE*
+
+FIX:
+Jakob has the issue that the bot targets and tries to kill the monsters on the side of the map.
+The character gets stuck down there.
+*FIXED*
+
+FIX:
+Fix the issue that Alex had, where the bot tried killing a monster without a hitbox.
+
+FIX:
+When the camera is unable in any way possible to have the target entiy on screen.
+Solution is to make a total amount of tries, then it temporarily blacklists it selects another monster.
+
+FIX:
+Sometimes the bot had issues pressing the first key in the char rebuff sequence
+instead it hopped on to the board. Never changed slots to the buff slot.
+*POTENTIALLY SOLVED*
+
+FIX:
+sO THE SPEED IS ALAYWAS SET WHEN STARTTING BOT
+*SOLVED*
+
+NOTE:
+A potential crash fix was checking if the window class has already been 
+registered, otherwise it'll override the wncproc with same wndproc 
+and cause it to get corrupted.
+
+FEATURE:
+RM Full-Support
+Rebuff on several different key sequences
+Healing Target - Works like Attack Sequence and rebuffs when in a different states and such
+CAN REUSE EVERYTHING INCLUDING THE GUI - JUST ADD ANOTHER BOT MODE - RM FULL SUPPORT
+THE ONLY DIFFERENCE IS THAT WE DISABLE ALL OTHER CONTROLS THAT CAN NOT BE USED WITH IT
+
+FIX:
+Avoid the spamming of keys with the auto-healing features.
+
+FEATURE:
+No Charge - The bow shoots charged shots at all times
+
+Hook the function void CMover::CMD_SetRangeAttack( OBJID idTarget, int nPower )
+Modify the second parameter (nPower) to 4. Then continue by calling the original function.
+
+Find the CMD_SetRangeAttack function. It can be found by finding the GetGaugePower function.
+In some flyff's the GetGaugePower function is inlined. It can be found by looking for all calls to GetTickCount()
+
+Finding CMover::CMD_SetRangeAttack for Ignite Flyff is as simple as:
+Looking through all calls to GetTickCount() and finding code that is alike the IDA CODE below.
+Notice the GetTickCount() + 1800
+
+Can also be found by searching for the following strings: These strings lead to A BIG FUNCTION, THE CALL to CMD_SetRangeAttack is in the upper part.
+CItemElem::GetProperty
+%s %d
+CTexturePack::Render
+%s %.2d:%.2d:%.2d (this one works fine for Ignite)
+%2d
+CProject::GetText() %d not found
+%.2d/%.2d
+
+There is also a call to MulDiv in that function. The CMD_SetRangeAttack somewhere below that call.
+
+=====================================================================
+
+int CWndWorld::GetGaugePower( int* pnValue )
+{
+	int nTime = GetTickCount() - m_dwPowerTick;
+	if( nTime < 0 )
+	{
+		if( pnValue )
+			*pnValue = 0;
+		return -1;
+	}
+
+	nTime = min( nTime, MAX_POWER_GAUGE );
+	if( pnValue )
+		*pnValue = nTime;
+
+	return MulDiv( nTime, 4, MAX_POWER_GAUGE );		
+}
+
+=====================================================================
+
+if ( sub_1363950(v240) )
+  {
+    v237 = *(_DWORD *)(v240 + 752);
+    v11 = v8 - 6;
+    if ( !v11 )
+    {
+      v13 = yTop;
+      v217 = __PAIR__(yTop, v237);
+      *(_DWORD *)(v3 + 5496) = GetTickCount() + 1800;
+      sub_13743C0(v217, HIDWORD(v217));
+      goto LABEL_44;
+    }
+    v12 = v11 - 6;
+    if ( !v12 || v12 == 2 )
+    {
+      v13 = yTop;
+      v217 = __PAIR__(yTop, v237);
+      *(_DWORD *)(v3 + 5496) = GetTickCount() + 1800;
+      sub_1374590((_DWORD *)dword_1789318, v217, SHIDWORD(v217));
+      goto LABEL_44;
+    }
+  }
+
+=====================================================================
+
+The IDA CODE below is the CMD_SetRangeAttack
+
+int __thiscall sub_1374590(_DWORD *this, int a2, int a3)
+{
+  _DWORD *v3; // edi
+  int result; // eax
+  int v5; // esi
+  float v6; // ST04_4
+
+  v3 = this;
+  result = ~*(_DWORD *)(this[210] + 4);
+  if ( !(result & 0x8FF0000) )
+  {
+    if ( this[454] )
+    {
+      result = sub_13612B0(10);
+      v5 = result;
+      if ( result )
+      {
+        result = *(_DWORD *)(result + 116);
+        if ( result == 12 || result == 14 )
+        {
+          result = sub_14FF050(v5);
+          if ( result )
+          {
+            sub_136AE50(v3);
+            v6 = sub_1374EF0(*(_DWORD *)(v5 + 284));
+            sub_1375050(a2, LODWORD(v6), 1);
+            result = a3;
+            v3[1585] = 3;
+            v3[1586] = a2;
+            v3[1587] = a3;
+            v3[1588] = 0;
+          }
+        }
+      }
+    }
+  }
+  return result;
+}
+
+=====================================================================
+
+Projection Speed Hack is also blocked by their protection thread.
+
+Finding SendMeleeAttack on Ignite Flyff:
+Search for string CMover::DoAttackMelee or DoAttackMelee or %s %d
+That function contains a call to SendMeleeAttack().
+
+UPDATE:
+Ignite Flyff has inlined the SendMeleeAttack func call. Instead hook the function calls SendMeleeAttack.
+It is called int CMover::DoAttackMelee( CMover *pTarget, OBJMSG dwMsg, DWORD dwItemID )
+dwMsg is the argument to be changed to 33 e.g.
+
+IDA code below.
+
+signed int __thiscall sub_1380410(_DWORD *this, int a2, int a3, unsigned int a4)
+{
+  _DWORD *v4; // esi
+  int v5; // ecx
+  int v6; // edi
+  int *v7; // eax
+  signed int result; // eax
+  int v9; // ecx
+  int v10; // eax
+  __int32 v11; // xmm0_4
+  int v12; // [esp+48h] [ebp+8h]
+
+  v4 = this;
+  v5 = this[210];
+  if ( v5 )
+    (*(void (__stdcall **)(signed int, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD))(*(_DWORD *)v5 + 4))(6, 0, 0, 0, 0, 0);
+  v6 = a2;
+  if ( !a2 || *(_BYTE *)(a2 + 4) & 1 )
+    return 0;
+  if ( a4 != -1 && a4 )
+    v7 = sub_1309200(&unk_178D3D0, a4, (int)"CMover::DoAttackMelee", 4046);
+  else
+    v7 = (int *)sub_13612B0(10);
+  if ( v7 )
+  {
+    v9 = v4[210];
+    if ( v9 )
+    {
+      v12 = (*(int (__stdcall **)(int, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD))(*(_DWORD *)v9 + 4))(
+              a3,
+              *(_DWORD *)(a2 + 752),
+              0,
+              0,
+              0,
+              0);
+      if ( v12 > 0 )
+      {
+        sub_1374FF0(1, *(_DWORD *)(v6 + 752), a4, 0);
+        v10 = sub_13612B0(10);
+        if ( v10 )
+          v11 = *(_DWORD *)(v10 + 276);
+        else
+          v11 = 0;
+        // SendMeleeAttack
+        sub_155B4A0(&dword_1784188, a3, *(_DWORD *)(v6 + 752), 0, (unsigned __int16)v12 << 16, v11);
+        if ( (_DWORD *)dword_16E8B5C == v4 )
+          sub_1373030(v4);
+      }
+    }
+    result = 1;
+  }
+  else
+  {
+    sub_1404C50("%s %d", (unsigned int)"CMover::DoAttackMelee");
+    result = 0;
+  }
+  return result;
+}
+
+=============================================================================

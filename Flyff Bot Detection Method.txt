@@ -1,0 +1,16 @@
+- Crimson Flyff Bot Prevention -
+* Not doing any damage to the monster even though SendMeleeAttack is being sent to server.
+* When I select an entity normally, a packet is being sent to the server containing information about selected entity.
+* If the object id of the entity that was sent and the one currently selected doesn't match, they don't do any damage.
+* In order to fix this I need to call the SelectEntity function myself so it gets sent to the server before killing it.
+
+- Another Simple Explanation -
+* When you selected a monster by clicking it, a packet gets sent saying you selected it.
+* When you selected a monster through memory, without clicking it, no packet it being sent.
+* The server sees that you never selected any monster so they prevent you from doing any damage.
+
+// FOR FUTURE BOT
+- Bypass Generic Anti-Bot -
+* Hook the function ar.GetBuffer in the FlyFF source.
+* Get the decrypted data and parse get the packet type.
+* Edit the packet type to something else if it is the detection packet.

@@ -1,0 +1,2 @@
+When an address in Flyff randomly changes, it might be because it is a pointer chain.
+In other words, a pointer to a pointer to a pointer. What I have to do is reverse and get the first absolute pointer.

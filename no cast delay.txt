@@ -1,0 +1,53 @@
+Flyff Magic Skill no cast delay:
+1. Find void CMover::ProcessMoveArrival( CCtrl *pObj ) by seaching for string: CMD_SetUseSkill : %s skill(%d) not found
+2. Directly above that string in the location code you can find the code:
+	mov     ecx, [ebp+var_E0]
+	call    sub_7EF5C0
+	push    0
+	mov     ecx, [ebp+var_E0]
+	call    sub_7F04D0
+	mov     [ebp+var_F0], eax
+	push    1
+	mov     ecx, [ebp+var_E0]
+	call    sub_7F04D0
+	mov     [ebp+var_100], eax
+	push    2
+	mov     ecx, [ebp+var_E0]
+	call    sub_7F04D0
+	mov     [ebp+sutType], eax
+3. That part is this part of source:
+	int nSkillIdx = GetCmdParam(0);
+	OBJID idTarget = (OBJID)GetCmdParam(1);
+	SKILLUSETYPE sutType = (SKILLUSETYPE)GetCmdParam(2);
+4. Hook the GetCmdParam() and when argument is 2, return the value 2 (SUT_QUEUEING).
+5. That fools the server to think that we are already in the Action Bar (C) queue and lets us cast skills with no delay.
+6. Boom.
+7. Or, find the offset for the m_nCParam[3] in the player struct.
+Looks like this in dissect memory: 
+	1
+	1
+	P->0X0X0X0X
+	0
+	0
+	CDCDCDCD (THIS IS THE BEGINNING OF m_nCParam[3])
+	CDCDCDCD
+	CDCDCDCD
+	0
+	CDCDCDCD
+	CDCDCDCD
+	CDCDCDCD
+	CDCDCDCD
+	CDCDCDCD
+8. The only issue is that those values change INCREDIBLY quick and does not get set quick enough my CE.
+	We would need to be either hook a frame-by-frame function to set the value (not a custom thread).
+	Or, use a variable hook?
+	
+In worldserver it goes immediately to this on worldserver:
+else if( sutType == SUT_QUEUEING )	// 스킬큐 진행중 스킬
+{
+#ifdef __WORLDSERVER
+	nCastingTime = 0; // removes the delay for us :)
+#endif
+	nMotion += 2;
+	dwMsg = OBJMSG_MAGICSKILL;
+} 

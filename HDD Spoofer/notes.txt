@@ -1,0 +1,7 @@
+Manual computer bypass ban:
+Run spoof.bat in the folder HDD Spoofer in this project dir through CMD with
+admin rights. ONLY ONCE (otherwise BSOD), THEN RESTART THE COMPUTER WHEN YOU
+DONT WANT ANYMORE.
+
+Run the command wmic path win32_physicalmedia get SerialNumber
+to see if it has changed
