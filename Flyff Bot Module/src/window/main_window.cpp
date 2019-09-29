@@ -241,6 +241,18 @@ void MainWindow::Initialize( const HWND window_handle ) {
 
   const auto richedit_feature_desc_handle = GWH( RICHEDIT_FEATURE_DESCRIPTION );
   gwingui::richedit::SetTextItalic( richedit_feature_desc_handle, true );
+
+  // TODO: Replace SetTimer/KillTimer solution with another because the game
+  // crashes when you inject the dll the second time to the game
+  // NOTE: A better solution would be to just use GetTickCount in the Update()
+  // loop
+  /*
+  if ( !SetTimer( window_handle, kBadboyTimerId, 1000, NULL ) ) {
+    gwingui::messagebox::Error( TEXT( "Failed to initialize time." ) );
+  } else {
+    gwingui::messagebox::Error( std::to_wstring( ( uint32_t )window_handle ) );
+  }
+  */
 }
 
 void MainWindow::OnButtonClick( const HWND button_handle,
@@ -494,6 +506,17 @@ INT_PTR CALLBACK MainWindow::DialogProc( HWND window_handle,
     } break;
 
     case WM_CLOSE: {
+      // TODO: Replace SetTimer/KillTimer solution with another because the game
+      // crashes when you inject the dll the second time to the game
+      /*
+      if ( !KillTimer( window_handle, kBadboyTimerId ) ) {
+        gwingui::messagebox::Error( TEXT( "killing badboy timer error." ) );
+      } else {
+        gwingui::messagebox::Error(
+            std::to_wstring( ( uint32_t )window_handle ) );
+      }
+      */
+
       // WM_QUIT makes GetMessage return 0 and exit the message loop
       SendMessage( window_handle, WM_QUIT, 0, 0 );
 

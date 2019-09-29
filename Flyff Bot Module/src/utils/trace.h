@@ -2,9 +2,10 @@
 
 void __Trace2( const char* format, ... );
 
+#define ENABLE_DEBUGGING 0
 #define TO_CONSOLE 1
 
-#ifdef _DEBUG
+#if ENABLE_DEBUGGING
 #if TO_CONSOLE
 #define GWIN_TRACE printf
 #else

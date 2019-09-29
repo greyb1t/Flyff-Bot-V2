@@ -2,6 +2,10 @@
 
 #include "botcore.h"
 
+#define ENABLE_PROTECTION 0
+
+constexpr auto kBadboyTimerId = ( 0x65 );
+
 namespace bot {
 
 class BotInitializer {
@@ -10,11 +14,9 @@ class BotInitializer {
   ~BotInitializer() = default;
 
   int Load( HINSTANCE instance_handle, const uint32_t reserved_value );
-  bool Unload();
+  bool Unload( const HWND mainwindow_handle );
 
   void PostGuiCreation( const HWND loading_window_handle );
-
-  bool InitializeHooks( LPDIRECT3DDEVICE9 device );
 
   // Hooks CopyRect and inside the hook it checks if the current thread
   // id is the same as the main window thread, if it is, it unregisters

@@ -97,16 +97,18 @@ int BotInitializer::Load( HINSTANCE instance_handle,
   // when using static without /GL (Whole Program Optimization). It still
   // crashed. fuckin assshit.
 #if 0
-  const auto status = LOL( reinterpret_cast< uintptr_t >( instance_handle ) );
+  const auto status = LOL( reinterpret_cast<uintptr_t>( instance_handle ) );
 
   gwingui::messagebox::Error( std::to_wstring( status ) );
 
-  if ( NT_SUCCESS( status ) ) {
+  if ( status >= 0 ) {
     gwingui::messagebox::Error( TEXT( "success" ) );
   } else {
     gwingui::messagebox::Error( TEXT( "failed" ) );
   }
 #endif
+
+#if ENABLE_PROTECTION
 
   // Check if the value in the dll header is 1
   uint8_t* dll_header_data = reinterpret_cast<uint8_t*>( instance_handle );
@@ -140,6 +142,7 @@ int BotInitializer::Load( HINSTANCE instance_handle,
   if ( reserved_value != 1 ) {
     botcore_.bad_boy_present_ = true;
   }
+#endif
 
   // TODO: modify most of my code with std functions
 
@@ -177,7 +180,7 @@ int BotInitializer::Load( HINSTANCE instance_handle,
     return -1;
   }
 
-#ifdef _DEBUG
+#if ENABLE_DEBUGGING
   OpenConsole();
 #endif
 
@@ -226,6 +229,7 @@ int BotInitializer::Load( HINSTANCE instance_handle,
 
   prev_filter_ =
       SetUnhandledExceptionFilter( crash_handler::MainExceptionHandler );
+
   GWIN_TRACE( "Prev Filter: %d\n", reinterpret_cast<int>( prev_filter_ ) );
 
   // gwinmem::ProcessInternal().ManualMapFixStaticTls((uintptr_t)instance_handle);
@@ -245,22 +249,18 @@ int BotInitializer::Load( HINSTANCE instance_handle,
   const HWND mainwindow_handle =
       gui.AddWindow( DIALOG_MAIN, nullptr, new MainWindow );
 
-  if ( !SetTimer( mainwindow_handle, 0x65, 1000, NULL ) ) {
-    gwingui::messagebox::Error( TEXT( "Failed to initialize time." ) );
-    return -1;
-  }
-
   gui.AddWindow( DIALOG_WAITING, mainwindow_handle, new WaitingWindow );
 
   gui.AddWindow( DIALOG_ADDRESSES, nullptr, new AddressesOffsetsWindow );
 
   try {
     PostGuiCreation( loading_window_handle );
+
     // Begin the window message loop
     gui.Run();
 
     // Once the message loop has stopped, unload the bot
-    if ( !bot::Initializer().Unload() ) {
+    if ( !bot::Initializer().Unload( mainwindow_handle ) ) {
       gwingui::messagebox::Error(
           TEXT( "Error while attempting to unload the bot." ) );
       return -1;
@@ -275,7 +275,7 @@ int BotInitializer::Load( HINSTANCE instance_handle,
   return 0;
 }
 
-bool BotInitializer::Unload() {
+bool BotInitializer::Unload( const HWND mainwindow_handle ) {
   // Wait for all the hooked functions to not execute
   std::lock_guard<std::mutex> hooks_lock_guard( g_hooks_mutex );
 
@@ -446,13 +446,33 @@ BOOL WINAPI BotInitializer::CopyRectHooked( LPRECT destination,
 
     if ( crash_rpt_module ) {
       using tCrUninstall = int ( * )();
-      using tCrGetLastErrorMsgA = int ( * )( LPSTR pszBuffer, UINT uBuffSize );
+      using tCrGetLastErrorMsgW = int ( * )( LPWSTR pszBuffer, UINT uBuffSize );
 
-      tCrUninstall cr_uninstall = reinterpret_cast<tCrUninstall>(
+      const auto cr_uninstall = reinterpret_cast<tCrUninstall>(
           GetProcAddress( crash_rpt_module, "crUninstall" ) );
 
-      GWIN_TRACE( "Removed the crash handler with return code: %d\n",
-                  cr_uninstall() );
+      /*
+      const auto cr_get_last_error_msg_w =
+          reinterpret_cast<tCrGetLastErrorMsgW>(
+              GetProcAddress( crash_rpt_module, "crGetLastErrorMsgW" ) );
+      */
+
+      const auto result = cr_uninstall();
+
+      /*
+      if ( result != 0 ) {
+        wchar_t error_message[ 256 ];
+        cr_get_last_error_msg_w( error_message, sizeof( error_message ) );
+
+        gwingui::messagebox::Error(
+            TEXT( "Failed to remove crash handler.\ncrUninstall returned "
+                  "with " ) +
+            std::to_wstring( result ) + TEXT( "\nError message: " ) +
+            std::wstring( error_message ) );
+      }
+      */
+
+      GWIN_TRACE( "Removed the crash handler with return code: %d\n", result );
     } else {
       GWIN_TRACE( "Crash handler is not found.\n" );
     }
