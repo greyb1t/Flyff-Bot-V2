@@ -17,7 +17,7 @@ class EntityList {
       const ObjectType object_type );
 
  private:
-  void ReadEntityList( );
+  void ReadEntityList();
 
  private:
   FlyffClient* client_;

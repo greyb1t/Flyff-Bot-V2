@@ -59,6 +59,8 @@ class Entity {
     return address_ptr_ < rhs.address_ptr_;
   }
 
+  bool IsDeleted() const;
+  bool IsInvalidMemory() const;
   bool IsDeletedOrInvalidMemory() const;
 
   bool IsPlayer() const;

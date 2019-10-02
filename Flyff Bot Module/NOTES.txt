@@ -1,5 +1,3 @@
-TODO: Instead of manually writing what name to whitelist/blacklist, list all monsters/players in the vicinity and let use choose from them
-TODO: Use tabs to better categorize the GUI for beginner friendlyness.
 TODO: Add opportunity to only Render/Update once every 0.5 seconds to avoid fps issues
 
 TODO: Add warning if users tries to start the bot while being outside the "Restricted Killing Area".

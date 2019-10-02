@@ -17,7 +17,11 @@ Entity::Entity( FlyffClient* client, uint32_t address_ptr )
 
 Entity::~Entity() {}
 
-bool Entity::IsDeletedOrInvalidMemory() const {
+bool Entity::IsDeleted() const {
+  return GetFlags() & OBJ_FLAG_DELETE;
+}
+
+bool Entity::IsInvalidMemory() const {
   try {
     if ( !address_ptr_ )
       return true;
@@ -27,13 +31,14 @@ bool Entity::IsDeletedOrInvalidMemory() const {
     if ( ptr == 0 )
       return true;
 
-    if ( GetFlags() & OBJ_FLAG_DELETE )
-      return true;
-
     return false;
   } catch ( gwinmem::BadMemoryException ex ) {
     return true;
   }
+}
+
+bool Entity::IsDeletedOrInvalidMemory() const {
+  return IsDeleted() || IsInvalidMemory();
 }
 
 bool Entity::IsPlayer() const {

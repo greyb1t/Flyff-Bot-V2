@@ -68,7 +68,7 @@ void EntityList::ReadEntityList() {
     entity_list_address = entity_list_address + kEntityListPadding;
   } while ( entity_ptr_addr );
 
-  int counter = 0;
+  int value = 0;
 
   for ( int i = 0; i < entity_ptrs.size(); ++i ) {
     const auto& entity_ptr = entity_ptrs[ i ];
@@ -77,19 +77,19 @@ void EntityList::ReadEntityList() {
     // don't want it. I know...I'll fix it later, can't bother now.
     auto entity = client_->CreateEntity( entity_ptr.entity_ptr_addr );
 
+    // if the entity is marked as deleted by the game, we treat it as such by
+    // ignoring it
+    if ( entity->IsDeleted() ) {
+      continue;
+    }
+
     // Is the entity invalid?
     // Due to us searching the entities in a linear order (beginning -> end),
     // we can use break to avoid continuing in the entity array to invalid
     // entities.
-    if ( entity->IsDeletedOrInvalidMemory() ) {
-      // There seemed to be an issue on Ignite Flyff, that the first entity in
-      // the list would randomly be invalid, bypass that bullshit
-      if ( i != 0 ) {
-        break;
-      }
+    if ( entity->IsInvalidMemory() ) {
+      break;
     }
-
-    counter++;
 
     const ObjectType object_type = entity->GetObjectType();
 
