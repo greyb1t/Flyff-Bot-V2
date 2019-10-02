@@ -38,7 +38,11 @@ bool Entity::IsInvalidMemory() const {
 }
 
 bool Entity::IsDeletedOrInvalidMemory() const {
-  return IsDeleted() || IsInvalidMemory();
+  // check if the memory is valid before checking if deleted
+  if ( IsInvalidMemory() )
+    return true;
+
+  return IsDeleted();
 }
 
 bool Entity::IsPlayer() const {
