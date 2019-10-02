@@ -275,8 +275,7 @@ void TabWindow1::OnListBoxSelectionChanged( uint32_t control_identifier,
           rebuff_temp.SetStatus( true );
           rebuff_temp.RefreshControls();
         }
-      } else
-        assert( false && "should i disable the checkbox here?" );
+      }
 
       previous_listbox_sequence_index_ =
           gwingui::listbox::GetSelectedIndex( GWH( LISTBOX_REBUFF_SEQUENCES ) );

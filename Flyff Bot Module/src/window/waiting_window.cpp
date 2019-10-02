@@ -15,8 +15,8 @@ void bot::waiting_window::DisplayWaitingWindowAsync(
 
   auto wait = [=]() {
     // Display a child window saying fuck you, you have to wait
-    const auto edit_waiting_handle = GWH( EDIT_WAITING_TEXT );
-    gwingui::editcontrol::SetText( edit_waiting_handle, text );
+    const auto static_waiting_handle = GWH( STATIC_WAITING_TEXT );
+    gwingui::editcontrol::SetText( static_waiting_handle, text );
     ShowWindow( waiting_window_handle, SW_SHOW );
 
     func_to_wait_for();
@@ -35,10 +35,10 @@ void bot::waiting_window::DisplayWaitingWindowAsync(
 void bot::waiting_window::DisplayWaitingWindow(
     const std::wstring& text,
     std::function<void()> func_to_wait_for ) {
-  const auto waiting_edit_control = GWH( EDIT_WAITING_TEXT );
+  const auto static_waiting_handle = GWH( STATIC_WAITING_TEXT );
 
   // Display a child window saying fuck you, you have to wait
-  gwingui::editcontrol::SetText( waiting_edit_control, text );
+  gwingui::editcontrol::SetText( static_waiting_handle, text );
 
   const auto waiting_window_handle = GWH( DIALOG_WAITING );
 
