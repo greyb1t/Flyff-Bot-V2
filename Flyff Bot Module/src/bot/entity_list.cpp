@@ -3,6 +3,8 @@
 #include "botcore.h"
 #include "../utils/trace.h"
 
+#include "logging.h"
+
 #include "gwinmem/process_memory_internal.h"
 
 namespace bot {
@@ -49,6 +51,7 @@ void EntityList::ReadEntityList() {
     const EntityPointerData current_entity_ptr_data = { entity_list_address,
                                                         entity_ptr_addr };
 
+    // Check to see if the pointer to the entity already exists
     auto find_result =
         std::find_if( entity_ptrs.begin(), entity_ptrs.end(),
                       [&]( const EntityPointerData& entity_ptr_data ) -> bool {
@@ -65,7 +68,11 @@ void EntityList::ReadEntityList() {
     entity_list_address = entity_list_address + kEntityListPadding;
   } while ( entity_ptr_addr );
 
-  for ( auto& entity_ptr : entity_ptrs ) {
+  int counter = 0;
+
+  for ( int i = 0; i < entity_ptrs.size(); ++i ) {
+    const auto& entity_ptr = entity_ptrs[ i ];
+
     // It is inefficient allocating an entity, then destroying it later if we
     // don't want it. I know...I'll fix it later, can't bother now.
     auto entity = client_->CreateEntity( entity_ptr.entity_ptr_addr );
@@ -74,8 +81,15 @@ void EntityList::ReadEntityList() {
     // Due to us searching the entities in a linear order (beginning -> end),
     // we can use break to avoid continuing in the entity array to invalid
     // entities.
-    if ( entity->IsDeletedOrInvalidMemory() )
-      break;
+    if ( entity->IsDeletedOrInvalidMemory() ) {
+      // There seemed to be an issue on Ignite Flyff, that the first entity in
+      // the list would randomly be invalid, bypass that bullshit
+      if ( i != 0 ) {
+        break;
+      }
+    }
+
+    counter++;
 
     const ObjectType object_type = entity->GetObjectType();
 
@@ -84,9 +98,10 @@ void EntityList::ReadEntityList() {
     // sizes based on their types, if we do not filter, we'll risk reading /
     // writing bad memory and crashing the client or bot.
     if ( object_type >= ObjectType::kObjectTypeObject &&
-         object_type < ObjectType::kMaxObjectTypes )
+         object_type < ObjectType::kMaxObjectTypes ) {
       entitylist_list_[ static_cast<int>( object_type ) ].push_back(
           std::move( entity ) );
+    }
   }
 
   // std::array<std::vector<UniquePtrEntity>, ObjectType::kMaxObjectTypes - 1>

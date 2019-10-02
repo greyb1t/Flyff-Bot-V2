@@ -287,10 +287,10 @@ void TabWindow1::OnListBoxSelectionChanged( uint32_t control_identifier,
   }
 }
 
-void TabWindow1::OnListBoxItemDeleted( uint32_t control_identifier,
-                                       HWND control_handle,
-                                       uint32_t index ) {
-  switch ( control_identifier ) {
+void TabWindow1::OnListBoxItemDeleted( const uint32_t control_id,
+                                   const HWND control_handle,
+                                   const uint32_t index ) {
+  switch ( control_id ) {
     case LISTBOX_REBUFF_SEQUENCES: {
       CharacterRebuffOption rebuff_temp;
       rebuff_temp.EnableOrDisableControls( false );

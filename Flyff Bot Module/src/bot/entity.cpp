@@ -263,8 +263,13 @@ BOUND_BOX Entity::GetBoundBox() const {
 
   BOUND_BOX bound_box = BOUND_BOX::EMPTY;
 
-  bound_box = gwinmem::CurrentProcess().Read<BOUND_BOX>( model_ptr_address +
-                                                         bound_box_offset );
+  // Added the try catch because Render and DrawEntity failed because it seems
+  // to have tried to draw an object that has no bound box
+  try {
+    bound_box = gwinmem::CurrentProcess().Read<BOUND_BOX>( model_ptr_address +
+                                                           bound_box_offset );
+  } catch ( gwinmem::BadMemoryException ) {
+  }
 
   return bound_box;
 }

@@ -18,9 +18,9 @@ class TabWindow1 : public gwingui::Window {
                        uint32_t control_identifier ) override;
   void OnListBoxSelectionChanged( uint32_t control_identifier,
                                   HWND control_handle ) override;
-  void OnListBoxItemDeleted( uint32_t control_identifier,
-                             HWND control_handle,
-                             uint32_t index ) override;
+  virtual void OnListBoxItemDeleted( const uint32_t control_id,
+    const HWND control_handle,
+    const uint32_t index );
   void OnButtonClick( HWND hCtrl, UINT ctrlId ) override;
   void OnComboboxSelectionChanged( uint32_t control_id,
                                    HWND control_handle ) override;

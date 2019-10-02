@@ -11,6 +11,7 @@
 #include "options/average_y_pos_option.h"
 #include "options/level_area_option.h"
 #include "options/bot_mode_option.h"
+#include "options/whitelisted_names_option.h"
 #include "..\servers\flyff_client_mazey.h"
 #include "..\servers\flyff_client_ignite.h"
 #include "..\servers\flyff_client_dragon_crusade.h"
@@ -20,6 +21,7 @@
 #include "gwinmem/process_memory_internal.h"
 
 #include "gwinguiv2\controls\richedit.h"
+#include "gwinguiv2\controls\listbox.h"
 #include "gwinguiv2/message_box.h"
 
 std::mutex g_hooks_mutex;
@@ -543,22 +545,6 @@ void BotCore::Render( LPDIRECT3DDEVICE9 pDevice ) {
 
     if ( entity->GetPointerAddress() == local_player->GetPointerAddress() )
       continue;
-
-    // if (!entity->IsMonster() && !entity->IsItem() && !entity->IsNpc() &&
-    // !entity->IsPet() && !entity->IsPlayer()) {
-    //  if (GetStarted()) {
-    //    // is the option enabled?
-    //    if (bot_options_.GetRemoveAllObstaclesOption()->IsEnabled()) {
-    //      // Removes all the objects high high up in the sky!
-    //      auto pos = entity->GetPosition();
-    //      pos.y = 1000.f;
-    //      entity->SetPosition(pos);
-    //    }
-    //  }
-    //  continue;
-    //}
-    // if (!entity->IsMonster() || !entity->IsAlive())
-    //   continue;
 
     auto string_contains_any_of =
         []( const std::string& s,

@@ -47,8 +47,9 @@ bool Bot::FindNearestMonster(
 
   // Go through the entities in close- to far order and filter away non-monsters
   for ( auto& entity : entities ) {
-    if ( entity->IsDeletedOrInvalidMemory() )
+    if ( entity->IsDeletedOrInvalidMemory() ) {
       continue;
+    }
 
     if ( entity->DistanceTo( local_player ) != 0 ) {
       if ( entity->IsMonster() && entity->IsAlive() ) {

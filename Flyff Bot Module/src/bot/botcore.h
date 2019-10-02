@@ -150,7 +150,6 @@ class BotCore {
   uint32_t ms_elapsed_;
   uint32_t fps_frame_counter_;
 
-  Stopwatch fps_stopwatch_;
   bool is_stopwatch_started_;
 
   uint32_t fps_;

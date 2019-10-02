@@ -13,6 +13,7 @@
 #include <cmath>
 #include <map>
 #include <unordered_map>
+#include <unordered_set>
 #include <intrin.h>
 #include <detours.h>
 #include <Wincrypt.h>
