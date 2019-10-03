@@ -30,6 +30,8 @@ BotAIOneVsOne::BotAIOneVsOne( BotCore* botcore )
       has_selected_unintended_target_count_( 0 ),
       local_player_health_start_( 0 ),
       started_walking_backwards_( false ) {
+  botcore->GetBotDurcationStopwatch().Start();
+
   auto& bot_options = botcore->GetBotOptions();
   const auto& rebuff_sequence_list_option =
       bot_options.GetRebuffSequenceListOption();
@@ -64,6 +66,13 @@ BotAIOneVsOne::~BotAIOneVsOne() {
 
   RestoreSavedBoundBoxes();
   RestoreBlockedBoundBoxes();
+
+  auto& bot_duration_stopwatch = botcore_->GetBotDurcationStopwatch();
+
+  bot_duration_stopwatch.Stop();
+
+  logging::Log( TEXT( "Bot run duration (hh:mm:ss:ms): " ) +
+                bot_duration_stopwatch.GetElapsedString() );
 
   LogQueue().Notify();
 }
@@ -563,6 +572,7 @@ void BotAIOneVsOne::Update() {
           } );
 
           EntityList entity_list( client );
+
           auto& entities = entity_list.GetMoverEntities();
 
           UniquePtrEntity entity;

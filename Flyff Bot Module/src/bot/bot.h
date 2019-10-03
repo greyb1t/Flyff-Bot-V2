@@ -2,6 +2,7 @@
 
 #include "local_player.h"
 #include "state_machine.h"
+#include "../utils/stopwatch.h"
 
 #define DO_ONCE( lambda_to_execute )                     \
   {                                                      \
@@ -41,7 +42,7 @@ struct EntityPointerData {
 class Bot : public StateMachine {
  public:
   Bot( BotCore* botcore, int origin_state );
-  virtual ~Bot() {}
+  virtual ~Bot();
 
   virtual void Update() = 0;
 

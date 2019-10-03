@@ -581,49 +581,17 @@ void BotCore::Render( LPDIRECT3DDEVICE9 pDevice ) {
     for ( auto& entity : object_entities ) {
       // is the option enabled?
       if ( bot_options_.GetRemoveAllObstaclesOption()->IsEnabled() ) {
-        // Removes all the objects high high up in the sky!
-        uint32_t address_ptr = 0;
-        int ptr = 0;
-        bool ptr_read_ret = false;
-        bool th = false;
-
         if ( entity->IsDeletedOrInvalidMemory() ) {
-          address_ptr = entity->GetPointerAddress();
-          // ptr_read_ret =
-          ptr = gwinmem::CurrentProcess().Read<int>( address_ptr );
-          th = true;
-        }
-
-        // One time, the crash was caused by the __vfptr being the y pos value
-        // DOES IT HAVE THE POSISON????
-        auto pos = entity->GetPosition();
-
-        // If the position is invalid, then the entity is invalid...
-        if ( pos.x == 0.f && pos.y == 0.f && pos.z == 0.f )
           continue;
-
-        /*
-        if ( ( entity->GetFlags() & OBJ_FLAG_DELETE ) != OBJ_FLAG_DELETE ) {
-          entity->SetFlags(entity->GetFlags() | OBJ_FLAG_DELETE);
-        }
-        */
-
-        /*
-        // Has the object been moved previously?
-        if ( entity->GetWorldMatrix() != D3DMATRIX{} ) {
-          entity->SetWorldMatrix( {} );
-        }
-        */
-
-        // Has the object been moved previously?
-        if ( pos.y != 1000.f ) {
-          pos.y = 1000.f;
-          entity->SetPosition( pos );
         }
 
-        if ( ( entity->GetFlags() & OBJ_FLAG_DELETE ) != OBJ_FLAG_DELETE ) {
-          entity->SetFlags( entity->GetFlags() | OBJ_FLAG_DELETE );
-        }
+        // auto pos = entity->GetPosition();
+        //
+        // // If the position is invalid, then the entity is invalid...
+        // if ( pos.x == 0.f && pos.y == 0.f && pos.z == 0.f )
+        //   continue;
+
+        entity->SetFlags( entity->GetFlags() | OBJ_FLAG_DELETE );
       }
     }
   }
@@ -821,10 +789,11 @@ void BotCore::ToggleBot() {
 }
 
 void BotCore::OnBotStatusChange() {
-  if ( GetStarted() )
+  if ( GetStarted() ) {
     gwingui::control::SetText( GWH( BUTTON_TOGGLEBOT ), TEXT( "Stop bot" ) );
-  else
+  } else {
     gwingui::control::SetText( GWH( BUTTON_TOGGLEBOT ), TEXT( "Start bot" ) );
+  }
 }
 
 void BotCore::SkipUpdateForFrames( int64_t frames ) {
@@ -851,6 +820,10 @@ int64_t BotCore::GetFrameCount() const {
 
 BotOptions& BotCore::GetBotOptions() {
   return bot_options_;
+}
+
+Stopwatch& BotCore::GetBotDurcationStopwatch() {
+  return bot_duration_stopwatch_;
 }
 
 FlyffClient* BotCore::GetFlyffClient() {

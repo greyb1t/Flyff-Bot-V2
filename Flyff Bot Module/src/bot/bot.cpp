@@ -25,6 +25,8 @@ Bot::Bot( BotCore* botcore, int origin_state )
   local_player_ = botcore->GetFlyffClient()->CreateLocalPlayer();
 }
 
+Bot::~Bot() {}
+
 void Bot::SortEntitiesByDistanceToEntity(
     const Entity* entity,
     std::vector<UniquePtrEntity>& entities ) {

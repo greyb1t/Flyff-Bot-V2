@@ -123,6 +123,8 @@ class BotCore {
   int64_t GetFrameCount() const;
   BotOptions& GetBotOptions();
 
+  Stopwatch& GetBotDurcationStopwatch();
+
   // Setters
   void SetActiveBot( Bot* bot );
   void SetSimulatedCursorPos( POINT& pos );
@@ -169,6 +171,8 @@ class BotCore {
   BotOptions bot_options_;
 
   bool bad_boy_present_;
+
+  Stopwatch bot_duration_stopwatch_;
 
   friend class BotInitializer;
 };
