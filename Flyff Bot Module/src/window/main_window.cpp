@@ -405,6 +405,15 @@ void MainWindow::OnButtonClick( const HWND button_handle,
     } break;
 
     case BTN_TEST: {
+//       const auto botcore = Initializer().GetBotCore();
+//       const auto client = botcore->GetFlyffClient();
+//       const auto local_player = client->CreateLocalPlayer();
+// 
+//       const auto selected_entity = local_player->GetSelectedEntity();
+// 
+//       gwingui::messagebox::Warning(
+//           std::to_wstring( selected_entity->GetMotion() ) );
+
       static bool lol = []() -> bool {
         __try {
           *( int* )0 = 0;
@@ -450,12 +459,6 @@ void MainWindow::OnButtonClick( const HWND button_handle,
         gwingui::messagebox::Error(
             TEXT( "NOTHING WAS FOUND, GM NOT VISIBLE FUCK SHIT DAMN" ) );
 
-      //       auto botcore = Initializer().GetBotCore();
-      //       LocalPlayer local_player(botcore->GetFlyffClient());
-      //       local_player.SetCollision(!local_player.GetCollision());
-      //
-      //       local_player.SetSpeedMultiplier(1.f);
-      // gWin::Control::ShowWindow( DIALOG_ADDRESSES );
       const auto address_window_handle = GWH( DIALOG_ADDRESSES );
       ShowWindow( address_window_handle, SW_SHOW );
 
