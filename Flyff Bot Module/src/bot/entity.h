@@ -7,6 +7,9 @@ constexpr DWORD OBJ_FLAG_VISIBLE = 0x00000002;
 constexpr DWORD OBJ_FLAG_VIRTUAL = 0x00000004;
 constexpr DWORD OBJ_FLAG_UPDATEMATRIX = 0x00000008;
 constexpr DWORD OBJ_FLAG_POSCHANGED = 0x00000010;
+constexpr DWORD OBJ_FLAG_MAX = OBJ_FLAG_DELETE | OBJ_FLAG_VISIBLE |
+                               OBJ_FLAG_VIRTUAL | OBJ_FLAG_UPDATEMATRIX |
+                               OBJ_FLAG_POSCHANGED;
 
 enum class ObjectType : uint32_t {
   kObjectTypeObject,
@@ -90,7 +93,7 @@ class Entity {
   int GetFatigue() const;
   // int GetSpeed() const;
   int GetFlags() const;
-  void SetFlags(const uint32_t flags) const;
+  void SetFlags( const uint32_t flags ) const;
   int GetLevel() const;
   int GetMotion() const;
 

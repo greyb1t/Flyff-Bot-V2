@@ -195,8 +195,15 @@ int Entity::GetMotion() const {
       client_->GetClientVar( MemoryContants::kMovementOffset );
   const auto move_offset = client_->GetClientVar( MemoryContants::kMoveOffset );
 
-  int motion = gwinmem::CurrentProcess().Read<int>(
-      address_ptr_ + movement_base_address, { move_offset } );
+  int motion = 0;
+
+  // Use a try block because the pActionMover can be NULL
+  // try {
+    motion = gwinmem::CurrentProcess().Read<int>(
+        address_ptr_ + movement_base_address, { move_offset } );
+  // } catch ( gwinmem::BadMemoryException ) {
+  //   return 0;
+  // }
 
   return motion;
 }

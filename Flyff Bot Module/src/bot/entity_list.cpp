@@ -91,6 +91,13 @@ void EntityList::ReadEntityList() {
       break;
     }
 
+    const auto object_flags = entity->GetFlags();
+
+    // Check if the object flags are invalid, fixes possible crashes
+    if ( object_flags > OBJ_FLAG_MAX || object_flags == 0 ) {
+      continue;
+    }
+
     const ObjectType object_type = entity->GetObjectType();
 
     // Avoid reading all the different types of objects, the reason being that
