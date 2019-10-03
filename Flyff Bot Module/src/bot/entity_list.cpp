@@ -68,9 +68,7 @@ void EntityList::ReadEntityList() {
     entity_list_address = entity_list_address + kEntityListPadding;
   } while ( entity_ptr_addr );
 
-  int value = 0;
-
-  for ( int i = 0; i < entity_ptrs.size(); ++i ) {
+  for ( size_t i = 0; i < entity_ptrs.size(); ++i ) {
     const auto& entity_ptr = entity_ptrs[ i ];
 
     // It is inefficient allocating an entity, then destroying it later if we
