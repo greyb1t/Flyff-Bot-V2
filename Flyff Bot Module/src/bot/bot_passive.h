@@ -10,7 +10,9 @@ enum class PassiveBotStates { kCheckHealing };
 class BotPassive : public Bot {
  public:
   BotPassive( BotCore* botcore )
-      : Bot( botcore, static_cast<int>( PassiveBotStates::kCheckHealing ) ),
+      : Bot( botcore,
+             static_cast<int>( PassiveBotStates::kCheckHealing ),
+             TEXT( "Passive bot" ) ),
         simulation_machine1_( this ),
         simulation_machine2_( this ) {}
 

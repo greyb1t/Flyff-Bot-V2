@@ -14,18 +14,28 @@
 
 namespace bot {
 
-Bot::Bot( BotCore* botcore, int origin_state )
+Bot::Bot( BotCore* botcore, int origin_state, const std::wstring& bot_name )
     : StateMachine( origin_state ),
       botcore_( botcore ),
       is_state_stopped_( false ),
+      bot_name_( bot_name ),
       current_target_selection_state_(
           static_cast<int>( TargetSelectionStates::HoverCursor ) ),
       // average_y_pos_( 0.f ),
       entities_not_found_counter_( 0 ) {
   local_player_ = botcore->GetFlyffClient()->CreateLocalPlayer();
+
+  bot_duration_stopwatch_.Start();
 }
 
-Bot::~Bot() {}
+Bot::~Bot() {
+  bot_duration_stopwatch_.Stop();
+
+  logging::Log( bot_name_ + TEXT( " running duration (hh:mm:ss:ms): " ) +
+                bot_duration_stopwatch_.GetElapsedString() + TEXT( "\n" ) );
+
+  LogQueue().Notify();
+}
 
 void Bot::SortEntitiesByDistanceToEntity(
     const Entity* entity,

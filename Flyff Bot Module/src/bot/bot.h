@@ -41,7 +41,7 @@ struct EntityPointerData {
 
 class Bot : public StateMachine {
  public:
-  Bot( BotCore* botcore, int origin_state );
+  Bot( BotCore* botcore, int origin_state, const std::wstring& bot_name );
   virtual ~Bot();
 
   virtual void Update() = 0;
@@ -125,8 +125,12 @@ class Bot : public StateMachine {
 
   std::map<int, std::function<void()>> execute_once_map_;
 
+  std::wstring bot_name_;
+
  private:
   int current_target_selection_state_;
+
+  Stopwatch bot_duration_stopwatch_;
 };
 
 template <typename T>

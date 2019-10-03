@@ -14,7 +14,9 @@
 namespace bot {
 
 BotAIOneVsOne::BotAIOneVsOne( BotCore* botcore )
-    : Bot( botcore, static_cast<int>( OneVsOneStates::kFindingTarget ) ),
+    : Bot( botcore,
+           static_cast<int>( OneVsOneStates::kFindingTarget ),
+           TEXT( "1v1 mode" ) ),
       focus_target_machine_( this ),
       select_target_machine_( this ),
       simulation_machine_( this ),
@@ -30,8 +32,6 @@ BotAIOneVsOne::BotAIOneVsOne( BotCore* botcore )
       has_selected_unintended_target_count_( 0 ),
       local_player_health_start_( 0 ),
       started_walking_backwards_( false ) {
-  botcore->GetBotDurcationStopwatch().Start();
-
   auto& bot_options = botcore->GetBotOptions();
   const auto& rebuff_sequence_list_option =
       bot_options.GetRebuffSequenceListOption();
@@ -66,15 +66,6 @@ BotAIOneVsOne::~BotAIOneVsOne() {
 
   RestoreSavedBoundBoxes();
   RestoreBlockedBoundBoxes();
-
-  auto& bot_duration_stopwatch = botcore_->GetBotDurcationStopwatch();
-
-  bot_duration_stopwatch.Stop();
-
-  logging::Log( TEXT( "Bot run duration (hh:mm:ss:ms): " ) +
-                bot_duration_stopwatch.GetElapsedString() );
-
-  LogQueue().Notify();
 }
 
 void BotAIOneVsOne::Update() {

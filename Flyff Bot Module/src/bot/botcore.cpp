@@ -822,10 +822,6 @@ BotOptions& BotCore::GetBotOptions() {
   return bot_options_;
 }
 
-Stopwatch& BotCore::GetBotDurcationStopwatch() {
-  return bot_duration_stopwatch_;
-}
-
 FlyffClient* BotCore::GetFlyffClient() {
   return client_.get();
 }
