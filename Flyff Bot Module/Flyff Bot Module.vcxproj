@@ -124,6 +124,7 @@
     <ClCompile Include="src\bot\entity_list.cpp" />
     <ClCompile Include="src\bot\local_player.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\utils\stopwatch.cpp" />
     <ClCompile Include="src\utils\trace.cpp" />
     <ClCompile Include="src\window\loading_window.cpp" />
     <ClCompile Include="src\window\main_window.cpp" />
