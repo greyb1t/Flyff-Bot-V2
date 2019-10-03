@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "crash_handler.h"
 
+#include "logging.h"
+
 #include "bot_initializer.h"
 #include "options/option_utils.h"
 
@@ -82,6 +84,9 @@ DWORD WINAPI CrashDumpWriter( LPVOID param ) {
 bool has_allocated_console = false;
 
 LONG WINAPI crash_handler::MainExceptionHandler( EXCEPTION_POINTERS* ex ) {
+  // Update the bot log
+  LogQueue().Notify();
+
   // Add the manual mapped module (this one) as a dll to make it easier when
   // debugging the dump
   gwinmem::CurrentProcess().ManualMapAddLoaderDll(
@@ -122,7 +127,7 @@ LONG WINAPI crash_handler::MainExceptionHandler( EXCEPTION_POINTERS* ex ) {
 
   printf( "Successfully created and saved a crashdump\n" );
 
-  Sleep( 2000 );
+  Sleep( INFINITE );
 
   TerminateProcess( GetCurrentProcess(), 0 );
 
