@@ -1,5 +1,11 @@
 TODO: Add opportunity to only Render/Update once every 0.5 seconds to avoid fps issues
 
+TODO: When stopping the bot, print the stats in the log. botting time, entities killed
+
+TODO: Add feature to make the character jump if getting stuck on a high wall
+
+TODO: Add feature to teleport monster to player for bootleg range hack
+
 TODO: Add warning if users tries to start the bot while being outside the "Restricted Killing Area".
 	If no warning, the user might think the bot is not working bcuz it just keep looking but not finding.
 
