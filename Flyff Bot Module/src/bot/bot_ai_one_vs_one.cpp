@@ -81,6 +81,11 @@ void BotAIOneVsOne::Update() {
   if ( !botcore->GetStarted() )
     SetNextState( OneVsOneStates::kManualStop );
 
+  if ( local_player->IsDeletedOrInvalidMemory() ) {
+    logging::Log( TEXT( "The local player became invalid.\n" ) );
+    SetNextState( OneVsOneStates::kCharacterDied );
+  }
+
   if ( !local_player->IsAlive() ) {
     logging::Log( TEXT( "The character has died, stopping the bot.\n" ) );
     SetNextState( OneVsOneStates::kCharacterDied );
