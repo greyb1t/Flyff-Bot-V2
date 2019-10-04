@@ -31,6 +31,12 @@ bool Entity::IsInvalidMemory() const {
     if ( ptr == 0 )
       return true;
 
+    const auto object_flags = GetFlags();
+
+    // Check if the object flags are invalid, fixes possible crashes
+    if ( object_flags > OBJ_FLAG_MAX || object_flags == 0 )
+      return true;
+
     return false;
   } catch ( gwinmem::BadMemoryException ex ) {
     return true;
@@ -199,8 +205,8 @@ int Entity::GetMotion() const {
 
   // Use a try block because the pActionMover can be NULL
   // try {
-    motion = gwinmem::CurrentProcess().Read<int>(
-        address_ptr_ + movement_base_address, { move_offset } );
+  motion = gwinmem::CurrentProcess().Read<int>(
+      address_ptr_ + movement_base_address, { move_offset } );
   // } catch ( gwinmem::BadMemoryException ) {
   //   return 0;
   // }

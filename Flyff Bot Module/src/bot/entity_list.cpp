@@ -75,12 +75,6 @@ void EntityList::ReadEntityList() {
     // don't want it. I know...I'll fix it later, can't bother now.
     auto entity = client_->CreateEntity( entity_ptr.entity_ptr_addr );
 
-    // if the entity is marked as deleted by the game, we treat it as such by
-    // ignoring it
-    if ( entity->IsDeleted() ) {
-      continue;
-    }
-
     // Is the entity invalid?
     // Due to us searching the entities in a linear order (beginning -> end),
     // we can use break to avoid continuing in the entity array to invalid
@@ -89,10 +83,9 @@ void EntityList::ReadEntityList() {
       break;
     }
 
-    const auto object_flags = entity->GetFlags();
-
-    // Check if the object flags are invalid, fixes possible crashes
-    if ( object_flags > OBJ_FLAG_MAX || object_flags == 0 ) {
+    // if the entity is marked as deleted by the game, we treat it as such by
+    // ignoring it
+    if ( entity->IsDeleted() ) {
       continue;
     }
 
