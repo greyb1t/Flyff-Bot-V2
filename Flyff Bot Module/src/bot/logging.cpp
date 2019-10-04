@@ -33,6 +33,13 @@ void LoggerPump::LogPumpThread() {
       case LoggingType::kLoggingNormal: {
         const auto richedit_log_handle = GWH( RICHEDIT_LOG );
 
+        constexpr int kLogCharacterLimit = 15000;
+
+        if ( gwingui::richedit::GetTextLength( richedit_log_handle ) >
+             kLogCharacterLimit ) {
+          gwingui::richedit::SetText( richedit_log_handle, TEXT( "" ) );
+        }
+
         gwingui::richedit::AppendText(
             richedit_log_handle,
             TEXT( "[" ) + std::to_wstring( time_now.tm_hour ) + TEXT( ":" ) +
