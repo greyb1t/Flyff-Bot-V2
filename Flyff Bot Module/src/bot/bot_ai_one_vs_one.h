@@ -38,6 +38,7 @@ class BotAIOneVsOne : public Bot {
   virtual ~BotAIOneVsOne();
 
   void Update() override;
+  std::wstring BotStoppedLogMessage();
 
   void OnStateChanging() override;
 

@@ -22,7 +22,8 @@ Bot::Bot( BotCore* botcore, int origin_state, const std::wstring& bot_name )
       current_target_selection_state_(
           static_cast<int>( TargetSelectionStates::HoverCursor ) ),
       // average_y_pos_( 0.f ),
-      entities_not_found_counter_( 0 ) {
+      entities_not_found_counter_( 0 ),
+      monster_kill_count_( 0 ) {
   local_player_ = botcore->GetFlyffClient()->CreateLocalPlayer();
 
   bot_duration_stopwatch_.Start();
@@ -30,9 +31,6 @@ Bot::Bot( BotCore* botcore, int origin_state, const std::wstring& bot_name )
 
 Bot::~Bot() {
   bot_duration_stopwatch_.Stop();
-
-  logging::Log( bot_name_ + TEXT( " running duration (hh:mm:ss:ms): " ) +
-                bot_duration_stopwatch_.GetElapsedString() + TEXT( "\n" ) );
 
   LogQueue().Notify();
 }

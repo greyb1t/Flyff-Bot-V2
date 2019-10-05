@@ -6,49 +6,39 @@
 namespace bot {
 
 void BotPassive::Update() {
-  const auto current_state =
-    GetCurrentState<PassiveBotStates>();
+  const auto current_state = GetCurrentState<PassiveBotStates>();
 
   const auto botcore = GetBotCore();
-  auto &bot_options = botcore->GetBotOptions();
-  const auto &local_player = GetLocalPlayer();
+  auto& bot_options = botcore->GetBotOptions();
+  const auto& local_player = GetLocalPlayer();
 
   if ( local_player->IsDeletedOrInvalidMemory() )
     return;
 
   switch ( current_state ) {
     case PassiveBotStates::kCheckHealing: {
-      const auto auto_healing =
-        bot_options.GetAutoHealingFoodOption();
+      const auto auto_healing = bot_options.GetAutoHealingFoodOption();
 
       if ( auto_healing->IsEnabled() ) {
-        const auto current_health =
-          local_player->GetHealth();
+        const auto current_health = local_player->GetHealth();
 
-        if ( current_health <
-             auto_healing->GetHealthLimit() )
-          simulation_machine1_.KeyPress(
-            auto_healing->GetHealCode() );
+        if ( current_health < auto_healing->GetHealthLimit() )
+          simulation_machine1_.KeyPress( auto_healing->GetHealCode() );
       }
 
-      const auto auto_healing_pills =
-        bot_options.GetAutoHealingPillsOption();
+      const auto auto_healing_pills = bot_options.GetAutoHealingPillsOption();
 
       if ( auto_healing_pills->IsEnabled() ) {
-        const auto current_health =
-          local_player->GetHealth();
+        const auto current_health = local_player->GetHealth();
 
-        if ( current_health <
-             auto_healing_pills->GetHealthLimit() )
-          simulation_machine2_.KeyPress(
-            auto_healing_pills->GetHealCode() );
+        if ( current_health < auto_healing_pills->GetHealthLimit() )
+          simulation_machine2_.KeyPress( auto_healing_pills->GetHealCode() );
       }
-    }
-    break;
+    } break;
 
     default:
       break;
   }
 }
 
-}
+}  // namespace bot

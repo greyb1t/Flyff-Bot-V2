@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #include "local_player.h"
 #include "state_machine.h"
 #include "../utils/stopwatch.h"
@@ -126,11 +128,11 @@ class Bot : public StateMachine {
   std::map<int, std::function<void()>> execute_once_map_;
 
   std::wstring bot_name_;
+  uint32_t monster_kill_count_;
+  Stopwatch bot_duration_stopwatch_;
 
  private:
   int current_target_selection_state_;
-
-  Stopwatch bot_duration_stopwatch_;
 };
 
 template <typename T>

@@ -66,6 +66,8 @@ BotAIOneVsOne::~BotAIOneVsOne() {
 
   RestoreSavedBoundBoxes();
   RestoreBlockedBoundBoxes();
+
+  logging::Log( BotStoppedLogMessage() );
 }
 
 void BotAIOneVsOne::Update() {
@@ -476,7 +478,7 @@ void BotAIOneVsOne::Update() {
       // If the target is no longer selected, it has either disappeared or been
       // killed
       if ( !local_player->IsEntitySelected() ) {
-        logging::Log( TEXT( "The target has been killed.\n" ) );
+        logging::Log( TEXT( "The target has been killed by someone else?\n" ) );
 
         // Return to FindingTarget and redo the whole thing again
         SetNextState( OneVsOneStates::kFindingTarget );
@@ -505,7 +507,7 @@ void BotAIOneVsOne::Update() {
       // If the target is no longer selected, it has either disappeared or been
       // killed
       if ( !local_player->IsEntitySelected() ) {
-        logging::Log( TEXT( "The target has been killed.\n" ) );
+        logging::Log( TEXT( "The target has been killed by someone else?\n" ) );
 
         // Return to FindingTarget and redo the whole thing again
         SetNextState( OneVsOneStates::kFindingTarget );
@@ -550,7 +552,7 @@ void BotAIOneVsOne::Update() {
       // If the target is no longer selected, it has either disappeared or been
       // killed
       if ( !local_player->IsEntitySelected() ) {
-        logging::Log( TEXT( "The target has been killed.\n" ) );
+        logging::Log( TEXT( "The target became invalid?\n" ) );
 
         // Return to FindingTarget and redo the whole thing again
         SetNextState( OneVsOneStates::kFindingTarget );
@@ -819,8 +821,9 @@ void BotAIOneVsOne::Update() {
         //  }
         //}
 
-        DO_ONCE( []() {
-          logging::Log( TEXT( "The target has been killed 1.\n" ) );
+        DO_ONCE( [&]() {
+          logging::Log( TEXT( "The target has been killed.\n" ) );
+          monster_kill_count_++;
         } );
 
         if ( bot_options.GetUpdateCharPosOption()->IsEnabled() ) {
@@ -1050,6 +1053,24 @@ void BotAIOneVsOne::Update() {
     default:
       break;
   }
+}
+
+std::wstring BotAIOneVsOne::BotStoppedLogMessage() {
+  std::wstring s;
+
+  s += TEXT( "Total monsters killed: " ) +
+       std::to_wstring( monster_kill_count_ ) + TEXT( "\n" );
+
+  // logging::Log( TEXT( "Total monsters killed: " ) +
+  //               std::to_wstring( monster_kill_count_ ) + TEXT( "\n" ) );
+
+  s += bot_name_ + TEXT( " running duration (hh:mm:ss:ms): " ) +
+       bot_duration_stopwatch_.GetElapsedString() + TEXT( "\n" );
+
+  // logging::Log( bot_name_ + TEXT( " running duration (hh:mm:ss:ms): " ) +
+  //              bot_duration_stopwatch_.GetElapsedString() + TEXT( "\n" ) );
+
+  return s;
 }
 
 void BotAIOneVsOne::OnStateChanging() {
