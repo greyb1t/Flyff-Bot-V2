@@ -6,7 +6,7 @@
 namespace bot {
 
 StateStatusReturnValue WalkToPositionStateMachine::WalkToPosition(
-    const UniquePtrLocalPlayer& local_player,
+    const LocalPlayer& local_player,
     SimulationStateMachine& simulation,
     const D3DXVECTOR3& target_position ) {
   // TODO:
@@ -29,14 +29,14 @@ StateStatusReturnValue WalkToPositionStateMachine::WalkToPosition(
       // function and not the replicatebox version
       target_box_->SetPosition( target_position );
 
-      UniquePtrEntity boxx = std::make_unique<EntityReplicateBox>(
+      std::unique_ptr<Entity> boxx = std::make_unique<EntityReplicateBox>(
           botcore->GetFlyffClient(), local_player );
 
       boxx->SetPosition( target_position );
 
       botcore->AddEntityToDraw( boxx );
 
-      const auto focus_status = focus_target_machine_.Focus( target_box_ );
+      const auto focus_status = focus_target_machine_.Focus( *target_box_ );
 
       switch ( focus_status ) {
         case StateStatusReturnValue::kInProgress:
@@ -53,7 +53,7 @@ StateStatusReturnValue WalkToPositionStateMachine::WalkToPosition(
 
     case WalkToStateMachineStates::kClickTargetPosition: {
       const auto select_target_status =
-          select_target_machine_.Select( target_box_ );
+          select_target_machine_.Select( *target_box_ );
 
       switch ( select_target_status ) {
         case StateStatusReturnValue::kSucceeded: {
@@ -75,7 +75,7 @@ StateStatusReturnValue WalkToPositionStateMachine::WalkToPosition(
 
     case WalkToStateMachineStates::kWaitUntilPositionReached: {
       // TODO: Change the DistanceTo parameter to UniquePtrEntity
-      if ( local_player->DistanceTo( target_box_.get() ) <= 0.1f )
+      if ( local_player.DistanceTo( *target_box_ ) <= 0.1f )
         return StateStatusReturnValue::kSucceeded;
     } break;
 

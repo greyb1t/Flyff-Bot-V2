@@ -9,11 +9,11 @@ class EntityList {
  public:
   EntityList( FlyffClient* client );
 
-  std::vector<UniquePtrEntity>& GetMoverEntities();
-  std::vector<UniquePtrEntity>& GetCommonCtrlEntities();
-  std::vector<UniquePtrEntity>& GetObjectEntities();
+  std::vector<std::unique_ptr<Entity>>& GetMoverEntities();
+  std::vector<std::unique_ptr<Entity>>& GetCommonCtrlEntities();
+  std::vector<std::unique_ptr<Entity>>& GetObjectEntities();
 
-  std::vector<UniquePtrEntity>& GetEntitiesOfType(
+  std::vector<std::unique_ptr<Entity>>& GetEntitiesOfType(
       const ObjectType object_type );
 
  private:
@@ -21,7 +21,7 @@ class EntityList {
 
  private:
   FlyffClient* client_;
-  std::array<std::vector<UniquePtrEntity>,
+  std::array<std::vector<std::unique_ptr<Entity>>,
              static_cast<int>( ObjectType::kMaxObjectTypes )>
       entitylist_list_;
 };

@@ -13,19 +13,19 @@ EntityList::EntityList( FlyffClient* client ) : client_( client ) {
   ReadEntityList();
 }
 
-std::vector<UniquePtrEntity>& EntityList::GetMoverEntities() {
+std::vector<std::unique_ptr<Entity>>& EntityList::GetMoverEntities() {
   return GetEntitiesOfType( ObjectType::kObjectTypeMover );
 }
 
-std::vector<UniquePtrEntity>& EntityList::GetCommonCtrlEntities() {
+std::vector<std::unique_ptr<Entity>>& EntityList::GetCommonCtrlEntities() {
   return GetEntitiesOfType( ObjectType::kObjectTypeCommonCtrl );
 }
 
-std::vector<UniquePtrEntity>& EntityList::GetObjectEntities() {
+std::vector<std::unique_ptr<Entity>>& EntityList::GetObjectEntities() {
   return GetEntitiesOfType( ObjectType::kObjectTypeObject );
 }
 
-std::vector<UniquePtrEntity>& EntityList::GetEntitiesOfType(
+std::vector<std::unique_ptr<Entity>>& EntityList::GetEntitiesOfType(
     const ObjectType object_type ) {
   return entitylist_list_[ static_cast<int>( object_type ) ];
 }

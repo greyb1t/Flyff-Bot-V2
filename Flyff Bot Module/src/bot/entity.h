@@ -1,6 +1,6 @@
 #pragma once
 
-#include "..\utils\d3d_drawing.h"
+#include "bound_box.h"
 
 constexpr DWORD OBJ_FLAG_DELETE = 0x00000001;
 constexpr DWORD OBJ_FLAG_VISIBLE = 0x00000002;
@@ -14,11 +14,17 @@ constexpr DWORD OBJ_FLAG_MAX = OBJ_FLAG_DELETE | OBJ_FLAG_VISIBLE |
 enum class ObjectType : uint32_t {
   kObjectTypeObject,
   kObjectTypeAni,
-  kObjectTypeCommonCtrl,  // Ignite Flyff: Profession Gathering (Tree's, Mining
-                          // Stuff...)
+
+  // Ignite Flyff: Profession Gathering (Tree's, Mining
+  // Stuff...)
+  kObjectTypeCommonCtrl,
+
   kObjectTypeSfx,
   kObjectTypeItem,
-  kObjectTypeMover,  // Players, Monsters, Moving Objects...
+
+  // Players, Monsters, Moving Objects...
+  kObjectTypeMover,
+
   kObjectTypeRegion,
   kObjectTypeShip,
   kObjectTypePath,
@@ -26,37 +32,18 @@ enum class ObjectType : uint32_t {
   kMaxObjectTypes
 };
 
-/*
-#define ENTITY_SANITY_CHECK             \
-  {                                     \
-    if ( IsDeletedOrInvalidMemory() ) { \
-      throw;                            \
-    }                                   \
-  }
-*/
-
 namespace bot {
 
-class BotCore;
 class FlyffClient;
-class LocalPlayer;
-class Entity;
-class EntityReplicateBox;
-
-using UniquePtrEntity = std::unique_ptr<Entity>;
-using SharedPtrEntity = std::shared_ptr<Entity>;
-using UniquePtrLocalPlayer = std::unique_ptr<LocalPlayer>;
-using UniquePtrEntityReplicateBox = std::unique_ptr<EntityReplicateBox>;
-using SharedPtrEntityReplicateBox = std::shared_ptr<EntityReplicateBox>;
 
 class Entity {
- public:
-  Entity() {}
+public:
+  Entity() = default;
 
   Entity( const Entity& entity );
 
   Entity( FlyffClient* client, uint32_t addrptr );
-  virtual ~Entity();
+  virtual ~Entity() {}
 
   bool operator<( const Entity& rhs ) const {
     return address_ptr_ < rhs.address_ptr_;
@@ -85,7 +72,7 @@ class Entity {
   // based on the fact that their motion is always 0 I think
   bool IsUnknownEntity() const;
 
-  float DistanceTo( const Entity* entity ) const;
+  float DistanceTo( const Entity& entity ) const;
 
   virtual D3DXVECTOR3 GetPosition() const;
   int32_t GetHealth() const;

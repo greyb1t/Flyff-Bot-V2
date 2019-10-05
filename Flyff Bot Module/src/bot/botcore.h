@@ -5,6 +5,7 @@
 #include "../utils/stopwatch.h"
 #include "bot.h"
 #include "bot_options.h"
+#include "../utils/d3d_drawing.h"
 
 #pragma comment( lib, "Winmm.lib" )
 
@@ -91,8 +92,8 @@ class BotCore {
 
   void ShowBotHasStoppedWindow();
 
-  void DrawEntity( const UniquePtrEntity& local_player,
-                   const UniquePtrEntity& entity,
+  void DrawEntity( const Entity& local_player,
+                   const Entity& entity,
                    const D3DCOLOR box_color );
 
   void Render( LPDIRECT3DDEVICE9 device );
@@ -106,7 +107,7 @@ class BotCore {
   // Skips calling Update for specified amount of frames
   void SkipUpdateForFrames( int64_t frames );
 
-  void AddEntityToDraw( UniquePtrEntity& entity );
+  void AddEntityToDraw( std::unique_ptr<Entity>& entity );
 
   Bot* GetBot();
   Bot* GetPassiveBot();
@@ -162,7 +163,7 @@ class BotCore {
   std::unique_ptr<Bot> passive_bot_;
 
   std::unique_ptr<FlyffClient> client_;
-  std::vector<UniquePtrEntity> extra_entities_;
+  std::vector<std::unique_ptr<Entity>> extra_entities_;
 
   POINT simulated_cursor_pos_;
 

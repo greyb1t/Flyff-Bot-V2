@@ -18,7 +18,7 @@ class AverageYPosOption : public Option {
     return average_y_pos_;
   }
 
-  virtual bool IsEntityAllowed( const bot::UniquePtrEntity& entity ) const {
+  virtual bool IsEntityAllowed( const std::unique_ptr<Entity>& entity ) const {
     if ( IsEnabled() )
       return entity->GetPosition().y >= average_y_pos_;
     else

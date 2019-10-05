@@ -338,12 +338,12 @@ std::wstring FlyffClient::MemoryConstantToString( MemoryContants constant ) {
   }
 }
 
-UniquePtrLocalPlayer FlyffClient::CreateLocalPlayer() {
-  return UniquePtrLocalPlayer( new LocalPlayer( this ) );
+std::unique_ptr<LocalPlayer> FlyffClient::CreateLocalPlayer() {
+  return std::unique_ptr<LocalPlayer>( new LocalPlayer( this ) );
 }
 
-UniquePtrEntity FlyffClient::CreateEntity( uint32_t address_ptr ) {
-  return UniquePtrEntity( new Entity( this, address_ptr ) );
+std::unique_ptr<Entity> FlyffClient::CreateEntity( uint32_t address_ptr ) {
+  return std::unique_ptr<Entity>( new Entity( this, address_ptr ) );
 }
 
 void FlyffClient::SetServerVar( MemoryContants type, uint32_t value ) {

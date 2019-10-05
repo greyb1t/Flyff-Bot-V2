@@ -83,10 +83,10 @@ class FlyffClient {
   std::wstring MemoryConstantToString( MemoryContants constant );
 
   // Create the local player for the specified server
-  virtual UniquePtrLocalPlayer CreateLocalPlayer();
+  virtual std::unique_ptr<LocalPlayer> CreateLocalPlayer();
 
   // Create the entity for the specified server
-  virtual UniquePtrEntity CreateEntity( uint32_t address_ptr );
+  virtual std::unique_ptr<Entity> CreateEntity( uint32_t address_ptr );
 
   void SetServerVar( MemoryContants type, uint32_t value );
 

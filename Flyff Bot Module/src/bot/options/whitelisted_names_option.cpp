@@ -57,7 +57,7 @@ void WhitelistedNamesOption::EnableOrDisableControls( bool enable ) {
 }
 
 bool WhitelistedNamesOption::IsEntityAllowed(
-    const UniquePtrEntity& entity ) const {
+    const std::unique_ptr<Entity>& entity ) const {
   if ( IsEnabled() ) {
     if ( ValueExists( entity->GetName() ) )
       return true;

@@ -185,7 +185,7 @@ bool LevelAreaOption::IsInsideArea( const D3DXVECTOR3& start_position,
 }
 
 bool LevelAreaOption::IsEntityAllowed(
-    const bot::UniquePtrEntity& entity ) const {
+    const std::unique_ptr<Entity>& entity ) const {
   if ( IsEnabled() ) {
     if ( !IsInsideArea( GetOriginPosition(), entity->GetPosition() ) )
       return false;

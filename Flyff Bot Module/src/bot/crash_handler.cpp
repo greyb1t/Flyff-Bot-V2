@@ -83,7 +83,7 @@ DWORD WINAPI CrashDumpWriter( LPVOID param ) {
 
 bool has_allocated_console = false;
 
-LONG WINAPI crash_handler::MainExceptionHandler( EXCEPTION_POINTERS* ex ) {
+LONG HandleException( EXCEPTION_POINTERS* ex ) {
   // Update the bot log
   LogQueue().Notify();
 
@@ -132,4 +132,23 @@ LONG WINAPI crash_handler::MainExceptionHandler( EXCEPTION_POINTERS* ex ) {
   TerminateProcess( GetCurrentProcess(), 0 );
 
   return EXCEPTION_CONTINUE_EXECUTION;
+}
+
+LONG WINAPI crash_handler::MainExceptionHandler( EXCEPTION_POINTERS* ex ) {
+  __try {
+    return HandleException( ex );
+  } __except ( 1 ) {
+    if ( !has_allocated_console ) {
+      AllocConsole();
+      freopen( "CONOUT$", "w", stdout );
+
+      has_allocated_console = true;
+    }
+
+    Sleep( INFINITE );
+
+    printf( "An exception occured in the exception handler\n" );
+  }
+
+  return 0;
 }

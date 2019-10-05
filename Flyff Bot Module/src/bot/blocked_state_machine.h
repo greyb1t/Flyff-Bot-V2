@@ -11,6 +11,7 @@ enum class BlockedStates { kWalkBackwards, kWalkLeft };
 class SimulationStateMachine;
 class WalkToPositionStateMachine;
 class Bot;
+class LocalPlayer;
 
 class BlockedStateMachine : public StateMachine {
  public:
@@ -19,7 +20,7 @@ class BlockedStateMachine : public StateMachine {
         bot_( bot ) {}
 
   StateStatusReturnValue Update(
-      const UniquePtrLocalPlayer& local_player,
+      const LocalPlayer& local_player,
       SimulationStateMachine& simulation,
       WalkToPositionStateMachine& walk_to_pos_machine );
 

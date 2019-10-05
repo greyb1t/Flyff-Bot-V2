@@ -17,7 +17,7 @@ LocalPlayer::LocalPlayer( FlyffClient* client ) : Entity( client, 0 ) {
 
 LocalPlayer::~LocalPlayer() {}
 
-UniquePtrEntity LocalPlayer::GetSelectedEntity() {
+std::unique_ptr<Entity> LocalPlayer::GetSelectedEntity() {
   const auto selected_entity_address =
       client_->GetClientVar( MemoryContants::kSelectedEntityAddress );
   const auto selected_entity_offset =

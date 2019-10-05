@@ -42,7 +42,7 @@ class BotAIOneVsOne : public Bot {
   void OnStateChanging() override;
 
  private:
-  UniquePtrEntity current_target_entity_;
+   std::unique_ptr<Entity> current_target_entity_;
   int32_t nearest_entity_hp_when_selected_;
   int32_t selected_entity_hp_when_started_hitting_;
 

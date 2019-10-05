@@ -6,7 +6,7 @@
 namespace bot {
 
 StateStatusReturnValue BlockedStateMachine::Update(
-    const UniquePtrLocalPlayer& local_player,
+    const LocalPlayer& local_player,
     SimulationStateMachine& simulation,
     WalkToPositionStateMachine& walk_to_pos_machine ) {
   const auto current_state = GetCurrentState<BlockedStates>();
@@ -16,7 +16,7 @@ StateStatusReturnValue BlockedStateMachine::Update(
       // instead of Getposition, calculate the position backwards from the
       // character with math
       const auto walk_pos_status = walk_to_pos_machine.WalkToPosition(
-          local_player, simulation, local_player->GetPosition() );
+          local_player, simulation, local_player.GetPosition() );
 
       switch ( walk_pos_status ) {
         case StateStatusReturnValue::kSucceeded: {
@@ -31,7 +31,7 @@ StateStatusReturnValue BlockedStateMachine::Update(
       // instead of Getposition, calculate the position backwards from the
       // character with math
       const auto walk_pos_status = walk_to_pos_machine.WalkToPosition(
-          local_player, simulation, local_player->GetPosition() );
+          local_player, simulation, local_player.GetPosition() );
 
       switch ( walk_pos_status ) {
         case StateStatusReturnValue::kSucceeded: {

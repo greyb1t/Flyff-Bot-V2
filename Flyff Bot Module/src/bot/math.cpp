@@ -41,12 +41,12 @@ bool FlyffW2SObsolete( BotCore& botcore,
 }
 
 bool FlyffWorldToScreen( const BotCore* botcore,
-                         const UniquePtrEntity& entity,
+                         const Entity& entity,
                          const D3DXVECTOR3& src_position,
                          D3DXVECTOR3* screen_out ) {
-  FlyffClient* client = entity->GetFlyffClient();
+  FlyffClient* client = entity.GetFlyffClient();
 
-  D3DXMATRIX mat_world = entity->GetWorldMatrix();
+  D3DXMATRIX mat_world = entity.GetWorldMatrix();
 
   const auto projection_matrix_addr =
       client->GetClientVar( MemoryContants::kProjectionMatrixAddress );

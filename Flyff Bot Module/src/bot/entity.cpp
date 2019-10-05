@@ -15,8 +15,6 @@ Entity::Entity( const Entity& entity )
 Entity::Entity( FlyffClient* client, uint32_t address_ptr )
     : client_( client ), address_ptr_( address_ptr ) {}
 
-Entity::~Entity() {}
-
 bool Entity::IsDeleted() const {
   return GetFlags() & OBJ_FLAG_DELETE;
 }
@@ -110,8 +108,8 @@ bool Entity::IsUnknownEntity() const {
   // return GetSpeed() < 0 || GetMotion() == 0;
 }
 
-float Entity::DistanceTo( const Entity* entity ) const {
-  return math::CalcDistance( GetPosition(), entity->GetPosition() );
+float Entity::DistanceTo( const Entity& entity ) const {
+  return math::CalcDistance( GetPosition(), entity.GetPosition() );
 }
 
 D3DXVECTOR3 Entity::GetPosition() const {

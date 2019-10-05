@@ -10,7 +10,7 @@ class LocalPlayer : public Entity {
   LocalPlayer( FlyffClient* client );
   virtual ~LocalPlayer();
 
-  virtual UniquePtrEntity GetSelectedEntity();
+  virtual std::unique_ptr<Entity> GetSelectedEntity();
 
   BackCamera GetCamera() const;
 

@@ -19,9 +19,11 @@
     <ClInclude Include="src\bot\bot_ai_one_vs_one.h" />
     <ClInclude Include="src\bot\bot_options.h" />
     <ClInclude Include="src\bot\bot_passive.h" />
+    <ClInclude Include="src\bot\bound_box.h" />
     <ClInclude Include="src\bot\crash_handler.h" />
     <ClInclude Include="src\bot\entity_filter.h" />
     <ClInclude Include="src\bot\flyff_client_factory.h" />
+    <ClInclude Include="src\bot\game_object.h" />
     <ClInclude Include="src\bot\hook_manager.h" />
     <ClInclude Include="src\bot\idle_state_machine.h" />
     <ClInclude Include="src\bot\options\attack_sequence_option.h" />
@@ -90,6 +92,7 @@
     <ClCompile Include="src\bot\flyff_client_factory.cpp" />
     <ClCompile Include="src\bot\focus_target_state_machine.cpp" />
     <ClCompile Include="src\bot\frame_timer.cpp" />
+    <ClCompile Include="src\bot\game_object.cpp" />
     <ClCompile Include="src\bot\hook_manager.cpp" />
     <ClCompile Include="src\bot\idle_state_machine.cpp" />
     <ClCompile Include="src\bot\key_sequence.cpp" />

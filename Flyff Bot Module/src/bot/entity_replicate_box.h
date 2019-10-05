@@ -8,10 +8,10 @@ namespace bot {
 class EntityReplicateBox : public Entity {
  public:
   EntityReplicateBox( FlyffClient* client,
-                      const UniquePtrLocalPlayer& local_player )
+                      const Entity& local_player )
       : Entity( client, 1337 ),
-        pos_( local_player->GetPosition() ),
-        world_matrix_( local_player->GetWorldMatrix() ) {
+        pos_( local_player.GetPosition() ),
+        world_matrix_( local_player.GetWorldMatrix() ) {
     bound_box_.pos[ 0 ] = { -0.25f, 0.25f, -0.25f };
     bound_box_.pos[ 1 ] = { 0.25f, 0.25f, -0.25f };
     bound_box_.pos[ 2 ] = { 0.25f, 0.25f, 0.25f };

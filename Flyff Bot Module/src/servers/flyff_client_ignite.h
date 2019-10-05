@@ -139,7 +139,7 @@ class FlyffClientIgniteFlyff : public FlyffClient {
 
   void OnExit() override;
 
-  virtual UniquePtrLocalPlayer CreateLocalPlayer();
+  virtual std::unique_ptr<LocalPlayer> CreateLocalPlayer();
 
   void PostAddressSearch() override;
 

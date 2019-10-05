@@ -107,12 +107,12 @@ void BotAIOneVsOne::Update() {
       EntityList entity_list( client );
       auto& entities = entity_list.GetMoverEntities();
 
-      UniquePtrEntity entity_found;
-
       // Check for non whitelisted players
       if ( bot_options.GetWhitelistedPlayerNamesOption()->IsEnabled() ) {
-        if ( IsNonWhitelistedPlayerFound( entities, local_player,
-                                          &entity_found ) ) {
+        const auto entity_found =
+            IsNonWhitelistedPlayerFound( entities, *local_player );
+
+        if ( entity_found ) {
           logging::LogImportant(
               TEXT( "A non-whitelisted player was found, Name: " ) +
               stringutils::AnsiToWide( entity_found->GetName() ) +
@@ -219,9 +219,11 @@ void BotAIOneVsOne::Update() {
       avg_y_pos->SetYPos( avg_y_pos->GetYPos() - 3.f );
       // average_y_pos_ -= 3.f;
 
+      current_target_entity_ =
+          FindNearestMonster( entities, *local_player, default_filter_ );
+
       // No near entity was found
-      if ( !FindNearestMonster( entities, local_player.get(),
-                                current_target_entity_, default_filter_ ) ) {
+      if ( !current_target_entity_ ) {
         logging::Log( TEXT( "No near entity was found, trying again.\n" ) );
 
         ++entities_not_found_counter_;
@@ -273,7 +275,7 @@ void BotAIOneVsOne::Update() {
           std::to_wstring( current_target_entity_->GetFlags() ) +
           TEXT( "\nEntity Distance: " ) +
           std::to_wstring(
-              current_target_entity_->DistanceTo( local_player.get() ) ) +
+              current_target_entity_->DistanceTo( *local_player ) ) +
           TEXT( "\nEntity PAddr: " ) +
           std::to_wstring( current_target_entity_->GetPointerAddress() ) +
           TEXT( "\n" );
@@ -286,7 +288,7 @@ void BotAIOneVsOne::Update() {
     } break;
 
     case OneVsOneStates::kFocusOnTarget: {
-      if ( !IsEntityValid( current_target_entity_ ) ) {
+      if ( !IsEntityValid( *current_target_entity_ ) ) {
         logging::Log(
             TEXT( "The bot is trying to focus on an invalid entity, back to "
                   "beginning.\n" ) );
@@ -297,7 +299,7 @@ void BotAIOneVsOne::Update() {
       }
 
       const auto focus_target_status =
-          focus_target_machine_.Focus( current_target_entity_ );
+          focus_target_machine_.Focus( *current_target_entity_ );
 
       switch ( focus_target_status ) {
         case StateStatusReturnValue::kInProgress:
@@ -318,7 +320,7 @@ void BotAIOneVsOne::Update() {
       // Added this code here because a crash has occured two times in this
       // state because of an invalid entity, this ensures that the entity is
       // valid before trying to select it
-      if ( !IsEntityValid( current_target_entity_ ) ) {
+      if ( !IsEntityValid( *current_target_entity_ ) ) {
         logging::Log(
             TEXT( "The bot is trying to select an invalid entity, back to "
                   "beginning.\n" ) );
@@ -329,7 +331,7 @@ void BotAIOneVsOne::Update() {
       }
 
       const auto select_target_status =
-          select_target_machine_.Select( current_target_entity_ );
+          select_target_machine_.Select( *current_target_entity_ );
 
       switch ( select_target_status ) {
         case StateStatusReturnValue::kSucceeded:
@@ -384,7 +386,8 @@ void BotAIOneVsOne::Update() {
         break;
       }
 
-      UniquePtrEntity selected_entity = local_player->GetSelectedEntity();
+      std::unique_ptr<Entity> selected_entity =
+          local_player->GetSelectedEntity();
 
       if ( selected_entity->GetPointerAddress() == -1 ) {
         logging::Log( TEXT(
@@ -571,18 +574,18 @@ void BotAIOneVsOne::Update() {
 
           auto& entities = entity_list.GetMoverEntities();
 
-          UniquePtrEntity entity;
+          auto entity =
+              FindNearestMonster( entities, *local_player, default_filter_ );
 
-          if ( FindNearestMonster( entities, local_player.get(), entity,
-                                   default_filter_ ) ) {
+          if ( entity ) {
             // If the entity that was found is not the same one that is
             // currently selected
             if ( current_target_entity_->GetPointerAddress() !=
                  entity->GetPointerAddress() ) {
               const auto old_target_distance_to_player =
-                  local_player->DistanceTo( current_target_entity_.get() );
+                  local_player->DistanceTo( *current_target_entity_ );
               const auto new_target_distance_to_player =
-                  local_player->DistanceTo( entity.get() );
+                  local_player->DistanceTo( *entity );
 
               if ( old_target_distance_to_player >
                    new_target_distance_to_player ) {
@@ -924,14 +927,14 @@ void BotAIOneVsOne::Update() {
               EntityList entity_list( client );
               auto& entities = entity_list.GetMoverEntities();
 
-              UniquePtrEntity entity;
-
               std::vector<const EntityFilter*> empty_filters;
+
+              std::unique_ptr<Entity> entity =
+                  FindNearestMonster( entities, *local_player, empty_filters );
 
               // Find any monster with no filter, meaning that we find a monster
               // even though e.g. it is not whitelisted.
-              if ( FindNearestMonster( entities, local_player.get(), entity,
-                                       empty_filters ) ) {
+              if ( entity ) {
                 logging::Log(
                     TEXT( "An aggressive monster has been found attacking the "
                           "player.\n" ) );
@@ -971,10 +974,10 @@ void BotAIOneVsOne::Update() {
       // TODO: Should not require this option-check in here, consider removing
       // it Check for non whitelisted players
       if ( bot_options.GetWhitelistedPlayerNamesOption()->IsEnabled() ) {
-        UniquePtrEntity entity_found;
+        const auto entity_found =
+            IsNonWhitelistedPlayerFound( entities, *local_player );
 
-        if ( IsNonWhitelistedPlayerFound( entities, local_player,
-                                          &entity_found ) ) {
+        if ( entity_found ) {
           logging::LogImportant(
               TEXT( "A non-whitelisted player was found, Name: " ) +
               stringutils::AnsiToWide( entity_found->GetName() ) +

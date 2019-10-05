@@ -213,6 +213,12 @@
     <ClInclude Include="src\bot\hook_manager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\bot\bound_box.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\bot\game_object.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -372,6 +378,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\utils\stopwatch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bot\game_object.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

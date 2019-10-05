@@ -19,7 +19,7 @@ bool FlyffW2SObsolete( BotCore& botcore,
 
 // Returns true if visible, false otherwise
 bool FlyffWorldToScreen( const BotCore* botcore,
-                         const UniquePtrEntity& entity,
+                         const Entity& entity,
                          const D3DXVECTOR3& src_position,
                          D3DXVECTOR3* screen_out );
 

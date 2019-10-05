@@ -6,7 +6,7 @@
 namespace bot {
 
 StateStatusReturnValue SelectTargetStateMachine::Select(
-    const UniquePtrEntity& entity ) {
+    const Entity& entity ) {
   const auto target_selection_state = GetCurrentState<TargetSelectionStates>();
 
   const auto botcore = bot_->GetBotCore();
@@ -14,7 +14,7 @@ StateStatusReturnValue SelectTargetStateMachine::Select(
   switch ( target_selection_state ) {
     case TargetSelectionStates::HoverCursor: {
       logging::Log( TEXT( "Hovering the cursor over the entity: " ) +
-                    std::to_wstring( entity->GetPointerAddress() ) +
+                    std::to_wstring( entity.GetPointerAddress() ) +
                     TEXT( ".\n" ) );
 
       POINT entity_screen_pos;

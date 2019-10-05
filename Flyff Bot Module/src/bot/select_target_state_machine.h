@@ -18,7 +18,7 @@ class SelectTargetStateMachine : public StateMachine {
         simulation_machine_( bot ),
         bot_( bot ) {}
 
-  StateStatusReturnValue Select( const UniquePtrEntity& entity );
+  StateStatusReturnValue Select( const Entity& entity );
 
  private:
   Bot* bot_;

@@ -15,7 +15,7 @@ bool LocalPlayerIgnite::IsRunning() const {
   return GetMotion() == -5;
 }
 
-UniquePtrEntity LocalPlayerIgnite::GetSelectedEntity() {
+std::unique_ptr<Entity> LocalPlayerIgnite::GetSelectedEntity() {
   // Read the id from the entity class
   const auto entity_id_offset =
       client_->GetClientVar( MemoryContants::kIgniteEntityIdOffset );

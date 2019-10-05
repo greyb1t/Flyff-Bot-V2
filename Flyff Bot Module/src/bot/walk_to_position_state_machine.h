@@ -8,6 +8,7 @@
 namespace bot {
 
 class SimulationStateMachine;
+class LocalPlayer;
 
 enum class WalkToStateMachineStates {
   kFocusTargetPosition,
@@ -27,13 +28,13 @@ class WalkToPositionStateMachine : public StateMachine {
         bot_( bot ) {}
 
   StateStatusReturnValue WalkToPosition(
-      const UniquePtrLocalPlayer& local_player,
+      const LocalPlayer& local_player,
       SimulationStateMachine& simulation,
       const D3DXVECTOR3& target_position );
 
  private:
   Bot* bot_;
-  UniquePtrEntity target_box_;
+  std::unique_ptr<Entity> target_box_;
 
   FocusTargetStateMachine focus_target_machine_;
   SelectTargetStateMachine select_target_machine_;

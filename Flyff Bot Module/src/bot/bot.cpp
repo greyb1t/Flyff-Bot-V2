@@ -38,11 +38,12 @@ Bot::~Bot() {
 }
 
 void Bot::SortEntitiesByDistanceToEntity(
-    const Entity* entity,
-    std::vector<UniquePtrEntity>& entities ) {
+    const Entity& entity,
+    std::vector<std::unique_ptr<Entity>>& entities ) {
   std::sort(
       entities.begin(), entities.end(),
-      [=]( const UniquePtrEntity& e1, const UniquePtrEntity& e2 ) -> bool {
+      [=]( const std::unique_ptr<Entity>& e1,
+           const std::unique_ptr<Entity>& e2 ) -> bool {
         if ( e1->IsDeletedOrInvalidMemory() || e2->IsDeletedOrInvalidMemory() )
           return false;
 
@@ -50,10 +51,9 @@ void Bot::SortEntitiesByDistanceToEntity(
       } );
 }
 
-bool Bot::FindNearestMonster(
-    std::vector<UniquePtrEntity>& entities,
-    const LocalPlayer* local_player,
-    UniquePtrEntity& entity_out,
+std::unique_ptr<Entity> Bot::FindNearestMonster(
+    std::vector<std::unique_ptr<Entity>>& entities,
+    const LocalPlayer& local_player,
     std::vector<const EntityFilter*>& entity_filters ) {
   SortEntitiesByDistanceToEntity( local_player, entities );
 
@@ -65,7 +65,7 @@ bool Bot::FindNearestMonster(
 
     if ( entity->DistanceTo( local_player ) != 0 ) {
       if ( entity->IsMonster() && entity->IsAlive() ) {
-        if ( !IsEntityBlacklisted( entity ) ) {
+        if ( !IsEntityBlacklisted( *entity ) ) {
           bool let_through = true;
 
           for ( const auto filter : entity_filters ) {
@@ -81,21 +81,19 @@ bool Bot::FindNearestMonster(
           // TODO: Add feature to prioritize the aggro monster above ALL other
           // monsters, meaning write the code to bypass the filters
 
-          entity_out = botcore_->GetFlyffClient()->CreateEntity(
+          return botcore_->GetFlyffClient()->CreateEntity(
               entity->GetPointerAddress() );
-
-          return true;
         }
       }
     }
   }
 
-  return false;
+  return nullptr;
 }
 
 void Bot::AdjustCameraTowardsEntity( const LocalPlayer* local_player,
-                                     const UniquePtrEntity& entity ) {
-  const D3DXVECTOR3 entity_pos = entity->GetPosition();
+                                     const Entity& entity ) {
+  const D3DXVECTOR3 entity_pos = entity.GetPosition();
   const D3DXVECTOR3 local_player_pos = local_player->GetPosition();
   const D3DXVECTOR3 player_entity_delta = local_player_pos - entity_pos;
 
@@ -121,11 +119,11 @@ void Bot::AdjustCameraTowardsEntity( const LocalPlayer* local_player,
                                scroll_distance_degree_offset );
 }
 
-bool Bot::IsEntityBlacklisted( const UniquePtrEntity& entity ) {
+bool Bot::IsEntityBlacklisted( const Entity& entity ) {
   for ( auto& blacklisted_entity : blacklisted_entities_temporary_ ) {
     // Check if their pointer addresses are the same (the address created when
     // they called new Entity)
-    if ( blacklisted_entity.GetPointerAddress() == entity->GetPointerAddress() )
+    if ( blacklisted_entity.GetPointerAddress() == entity.GetPointerAddress() )
       return true;
   }
 
@@ -144,9 +142,9 @@ void Bot::DeSelectEntity() {
   simulation::SendVirtualKeypress( botcore_->GetTargetWindow(), VK_ESCAPE, 50 );
 }
 
-bool Bot::IsEntityValid( const UniquePtrEntity& entity ) {
-  return !entity->IsDeletedOrInvalidMemory() && entity->IsMonster() &&
-         entity->IsAlive();
+bool Bot::IsEntityValid( const Entity& entity ) {
+  return !entity.IsDeletedOrInvalidMemory() && entity.IsMonster() &&
+         entity.IsAlive();
 }
 
 void Bot::LogOnce( DoOnce& do_once, const std::wstring& text ) {
@@ -163,10 +161,9 @@ void Bot::LogOnce( DoOnce& do_once, const std::wstring& text ) {
 //  return false;
 //}
 
-bool Bot::IsNonWhitelistedPlayerFound(
-    const std::vector<UniquePtrEntity>& entities,
-    const UniquePtrLocalPlayer& local_player,
-    UniquePtrEntity* entity_found ) {
+std::unique_ptr<Entity> Bot::IsNonWhitelistedPlayerFound(
+    const std::vector<std::unique_ptr<Entity>>& entities,
+    const LocalPlayer& local_player ) {
   auto& bot_options = botcore_->GetBotOptions();
   const auto whitelisted_player_names =
       bot_options.GetWhitelistedPlayerNamesOption();
@@ -177,16 +174,15 @@ bool Bot::IsNonWhitelistedPlayerFound(
 
     // If a player is found and it is not me
     if ( entity->IsPlayer() &&
-         entity->GetPointerAddress() != local_player->GetPointerAddress() ) {
+         entity->GetPointerAddress() != local_player.GetPointerAddress() ) {
       if ( !whitelisted_player_names->ValueExists( entity->GetName() ) ) {
-        *entity_found = entity->GetFlyffClient()->CreateEntity(
+        return entity->GetFlyffClient()->CreateEntity(
             entity->GetPointerAddress() );
-        return true;
       }
     }
   }
 
-  return false;
+  return nullptr;
 }
 
 // bool Bot::IsEntityAboveAverageYPosition( const UniquePtrEntity& entity ) {
@@ -233,7 +229,7 @@ void Bot::RestoreSavedBoundBoxes() {
   saved_bound_box_changed_entities_.clear();
 }
 
-bool Bot::ClickEntity( const UniquePtrEntity& entity ) {
+bool Bot::ClickEntity( const Entity& entity ) {
   POINT entity_screen_pos;
 
   if ( GetEntityScreenPosition( entity, entity_screen_pos ) ) {
@@ -246,9 +242,9 @@ bool Bot::ClickEntity( const UniquePtrEntity& entity ) {
   return true;
 }
 
-bool Bot::GetEntityScreenPosition( const UniquePtrEntity& entity,
+bool Bot::GetEntityScreenPosition( const Entity& entity,
                                    POINT& entity_screen_pos ) {
-  BOUND_BOX bound_box = entity->GetBoundBox();
+  BOUND_BOX bound_box = entity.GetBoundBox();
 
   D3DXVECTOR3 bound_box_center_pos = math::CalculateBoxCenter( &bound_box );
 
@@ -296,7 +292,7 @@ BotCore* Bot::GetBotCore() {
   return botcore_;
 }
 
-UniquePtrLocalPlayer& Bot::GetLocalPlayer() {
+std::unique_ptr<LocalPlayer>& Bot::GetLocalPlayer() {
   return local_player_;
 }
 

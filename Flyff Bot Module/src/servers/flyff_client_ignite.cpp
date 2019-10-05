@@ -491,8 +491,8 @@ void FlyffClientIgniteFlyff::OnExit() {
   UnhookWindowsHookEx( wnd_proc_hook_handle_ );
 }
 
-UniquePtrLocalPlayer FlyffClientIgniteFlyff::CreateLocalPlayer() {
-  return UniquePtrLocalPlayer( new LocalPlayerIgnite( this ) );
+std::unique_ptr<LocalPlayer> FlyffClientIgniteFlyff::CreateLocalPlayer() {
+  return std::unique_ptr<LocalPlayer>( new LocalPlayerIgnite( this ) );
 }
 
 void FlyffClientIgniteFlyff::PostAddressSearch() {

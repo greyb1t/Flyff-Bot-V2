@@ -399,17 +399,18 @@ void BotCore::ShowBotHasStoppedWindow() {
   }
 }
 
-void BotCore::DrawEntity( const UniquePtrEntity& local_player,
-                          const UniquePtrEntity& entity,
+void BotCore::DrawEntity( const Entity& local_player,
+                          const Entity& entity,
                           const D3DCOLOR box_color ) {
-  BOUND_BOX local_player_bound_box = local_player->GetBoundBox();
-  D3DXMATRIX local_player_mat_world = local_player->GetWorldMatrix();
+  BOUND_BOX local_player_bound_box = local_player.GetBoundBox();
+  D3DXMATRIX local_player_mat_world = local_player.GetWorldMatrix();
   D3DXVECTOR3 local_player_bound_box_center =
       math::CalculateBoxCenter( &local_player_bound_box );
   D3DXVECTOR3 local_player_sceen_pos;
+
   math::FlyffWorldToScreen( this, local_player, local_player_bound_box_center,
                             &local_player_sceen_pos );
-  BOUND_BOX bound_box = entity->GetBoundBox();
+  BOUND_BOX bound_box = entity.GetBoundBox();
   bool inside_view = true;
   BOUND_BOX bound_box_screen;
 
@@ -464,7 +465,7 @@ void BotCore::DrawEntity( const UniquePtrEntity& local_player,
   //    D3DCOLOR_RGBA( 255, 255, 255, 255 ), NORMAL_TEXT );
 
   drawing_.DrawTextC(
-      TEXT( "Name: " ) + stringutils::AnsiToWide( entity->GetName() ),
+      TEXT( "Name: " ) + stringutils::AnsiToWide( entity.GetName() ),
       static_cast<int>( bound_box_screen.pos[ 0 ].x ),
       static_cast<int>( bound_box_screen.pos[ 0 ].y ),
       D3DCOLOR_RGBA( 255, 255, 255, 255 ), NORMAL_TEXT );
@@ -477,7 +478,7 @@ void BotCore::DrawEntity( const UniquePtrEntity& local_player,
   };
   D3DCOLOR box_color_copy = box_color;
 
-  if ( entity->GetName() == "Mocomochi" ) {
+  if ( entity.GetName() == "Mocomochi" ) {
     drawing_.DrawBoundBoxOutline( &bound_box_screen,
                                   D3DCOLOR_RGBA( 255, 0, 0, 255 ) );
     drawing_.DrawBoundBoxFilled( &bound_box_screen,
@@ -494,7 +495,7 @@ void BotCore::DrawEntity( const UniquePtrEntity& local_player,
   if ( math::FlyffWorldToScreen( this, entity, bound_box_center_pos,
                                  &bound_box_center_pos_screen ) ) {
     // Draw a line from the character to the entity
-    if ( entity->GetName() == "Mocomochi" ) {
+    if ( entity.GetName() == "Mocomochi" ) {
       drawing_.DrawLine( local_player_sceen_pos.x, local_player_sceen_pos.y,
                          bound_box_center_pos_screen.x,
                          bound_box_center_pos_screen.y,
@@ -522,10 +523,10 @@ void BotCore::DrawEntity( const UniquePtrEntity& local_player,
 void BotCore::Render( LPDIRECT3DDEVICE9 pDevice ) {
   Stopwatch stopwatch;
   stopwatch.Start();
-  const auto local_player = client_->CreateLocalPlayer();
-  const UniquePtrEntity local_player_entity = client_->CreateLocalPlayer();
+  // const auto local_player = client_->CreateLocalPlayer();
+  const std::unique_ptr<Entity> local_player_entity = client_->CreateLocalPlayer();
 
-  if ( local_player->IsDeletedOrInvalidMemory() ||
+  if ( /*local_player->IsDeletedOrInvalidMemory() ||*/
        local_player_entity->IsDeletedOrInvalidMemory() )
     return;
 
@@ -536,14 +537,15 @@ void BotCore::Render( LPDIRECT3DDEVICE9 pDevice ) {
 
   // add to the entities
   for ( const auto& entity : extra_entities_ )
-    DrawEntity( local_player_entity, entity,
+    DrawEntity( *local_player_entity, *entity,
                 D3DCOLOR_RGBA( 255, 255, 255, 255 ) );
 
   for ( auto& entity : mover_entities ) {
     if ( entity->IsDeletedOrInvalidMemory() )
       continue;
 
-    if ( entity->GetPointerAddress() == local_player->GetPointerAddress() )
+    if ( entity->GetPointerAddress() ==
+         local_player_entity->GetPointerAddress() )
       continue;
 
     auto string_contains_any_of =
@@ -560,10 +562,10 @@ void BotCore::Render( LPDIRECT3DDEVICE9 pDevice ) {
     };
 
     if ( entity->IsPlayer() ) {
-      DrawEntity( local_player_entity, entity,
+      DrawEntity( *local_player_entity, *entity,
                   D3DCOLOR_RGBA( 0, 162, 232, 255 ) );
     } else {
-      DrawEntity( local_player_entity, entity,
+      DrawEntity( *local_player_entity, *entity,
                   D3DCOLOR_RGBA( 255, 255, 255, 255 ) );
     }
   }
@@ -605,8 +607,8 @@ void BotCore::Render( LPDIRECT3DDEVICE9 pDevice ) {
     if ( avg_y_pos->IsEnabled() ) {
       // TODO: Consider only creating it once, then just changing the position.
       // This is a waste. But fuck it, can't bother.
-      const UniquePtrEntity plane_entity =
-          std::make_unique<EntityReplicateBox>( client_.get(), local_player );
+      const std::unique_ptr<Entity> plane_entity = std::make_unique<EntityReplicateBox>(
+          client_.get(), *local_player_entity );
       const float size = 3.f;
       float plane_y = avg_y_pos->GetYPos();
       auto plane_position = plane_entity->GetPosition();
@@ -623,7 +625,7 @@ void BotCore::Render( LPDIRECT3DDEVICE9 pDevice ) {
       plane_bound_box.pos[ 7 ] = { -size, -0.01f, size };
       plane_entity->SetBoundBox( plane_bound_box );
       // Draw the flat plane
-      DrawEntity( local_player_entity, plane_entity,
+      DrawEntity( *local_player_entity, *plane_entity,
                   D3DCOLOR_RGBA( 255, 255, 255, 255 ) );
     }
   }
@@ -637,14 +639,15 @@ void BotCore::Render( LPDIRECT3DDEVICE9 pDevice ) {
     const auto length2 = level_area->GetLength2();
 
     for ( int i = 0; i < 4; ++i ) {
-      const UniquePtrEntity corner_entity =
-          std::make_unique<EntityReplicateBox>( client_.get(), local_player );
+      const std::unique_ptr<Entity> corner_entity =
+          std::make_unique<EntityReplicateBox>( client_.get(),
+                                                *local_player_entity );
 
-      corner_entity->SetWorldMatrix( local_player->GetWorldMatrix() );
+      corner_entity->SetWorldMatrix( local_player_entity->GetWorldMatrix() );
 
       // Spread the corners out from the origin point (local player position)
       auto corner_pos = level_area->GetCornerPosition( bot_start_position, i );
-      corner_pos.y = local_player->GetPosition().y;
+      corner_pos.y = local_player_entity->GetPosition().y;
 
       corner_entity->SetPosition( corner_pos );
 
@@ -671,7 +674,7 @@ void BotCore::Render( LPDIRECT3DDEVICE9 pDevice ) {
       // TODO: Remove the opacity on the corners
 
       // Draw the flat plane
-      DrawEntity( local_player_entity, corner_entity,
+      DrawEntity( *local_player_entity, *corner_entity,
                   D3DCOLOR_RGBA( 255, 242, 0, 255 ) );
     }
   }
@@ -834,7 +837,7 @@ void BotCore::SetViewport( D3DVIEWPORT9 viewport ) {
   viewport_ = viewport;
 }
 
-void BotCore::AddEntityToDraw( UniquePtrEntity& entity ) {
+void BotCore::AddEntityToDraw( std::unique_ptr<Entity>& entity ) {
   extra_entities_.push_back( std::move( entity ) );
 }
 

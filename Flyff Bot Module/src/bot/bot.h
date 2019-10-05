@@ -46,31 +46,33 @@ class Bot : public StateMachine {
 
   virtual void Update() = 0;
 
-  void SortEntitiesByDistanceToEntity( const Entity* entity,
-                                       std::vector<UniquePtrEntity>& entities );
+  void SortEntitiesByDistanceToEntity(
+      const Entity& entity,
+      std::vector<std::unique_ptr<Entity>>& entities );
 
   // Returns true or false based on whether an entity was found
-  bool FindNearestMonster( std::vector<UniquePtrEntity>& entities,
-                           const LocalPlayer* local_player,
-                           UniquePtrEntity& entity,
-                           std::vector<const EntityFilter*>& entity_filters );
+  std::unique_ptr<Entity> FindNearestMonster(
+      std::vector<std::unique_ptr<Entity>>& entities,
+      const LocalPlayer& local_player,
+      std::vector<const EntityFilter*>& entity_filters );
 
   void AdjustCameraTowardsEntity( const LocalPlayer* local_player,
-                                  const UniquePtrEntity& entity );
+                                  const Entity& entity );
 
-  bool IsEntityBlacklisted( const UniquePtrEntity& entity );
+  bool IsEntityBlacklisted( const Entity& entity );
 
   void DeSelectEntity();
 
-  bool IsEntityValid( const UniquePtrEntity& entity );
+  bool IsEntityValid( const Entity& entity );
 
   void LogOnce( DoOnce& do_once, const std::wstring& text );
   // bool IsEntityWhitelisted( const UniquePtrEntity& entity );
 
-  bool IsNonWhitelistedPlayerFound(
-      const std::vector<UniquePtrEntity>& entities,
-      const UniquePtrLocalPlayer& local_player,
-      UniquePtrEntity* entity_found );
+  // Returns the entity if found, nullptr otherwise
+  std::unique_ptr<Entity> IsNonWhitelistedPlayerFound(
+      const std::vector<std::unique_ptr<Entity>>& entities,
+      const LocalPlayer& local_player );
+
   // bool IsEntityAboveAverageYPosition( const UniquePtrEntity& entity );
 
   void RestoreBlockedBoundBoxes();
@@ -78,20 +80,18 @@ class Bot : public StateMachine {
 
   // NOTE: Deprecated
   // Returns false if the entity is outside of the view (outside window)
-  bool ClickEntity( const UniquePtrEntity& entity );
+  bool ClickEntity( const Entity& entity );
 
   // Returns true if the entity is visible and false if not.
-  bool GetEntityScreenPosition( const UniquePtrEntity& entity,
+  bool GetEntityScreenPosition( const Entity& entity,
                                 POINT& entity_screen_pos );
 
   void OnStateChanging() override;
 
   // Getters
   BotCore* GetBotCore();
-  UniquePtrLocalPlayer& GetLocalPlayer();
+  std::unique_ptr<LocalPlayer>& GetLocalPlayer();
   bool IsStateStopped();
-
-  // float GetAverageY();
 
   template <typename T>
   T GetCurrentTargetSelectionState() {
@@ -109,7 +109,7 @@ class Bot : public StateMachine {
 
   // TODO: See if I can remove the unique_ptr from local_player_, just like
   // WhitelistedNames is...
-  UniquePtrLocalPlayer local_player_;
+  std::unique_ptr<LocalPlayer> local_player_;
   bool is_state_stopped_;
 
   std::vector<Entity> blacklisted_entities_temporary_;
@@ -120,8 +120,8 @@ class Bot : public StateMachine {
 
   int entities_not_found_counter_;
 
-  std::vector<UniquePtrEntity> saved_selection_blocked_entities_;
-  std::vector<UniquePtrEntity> saved_bound_box_changed_entities_;
+  std::vector<std::unique_ptr<Entity>> saved_selection_blocked_entities_;
+  std::vector<std::unique_ptr<Entity>> saved_bound_box_changed_entities_;
 
   std::map<int, std::function<void()>> execute_once_map_;
 

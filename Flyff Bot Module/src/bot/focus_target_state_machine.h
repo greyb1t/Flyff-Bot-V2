@@ -23,7 +23,7 @@ class FocusTargetStateMachine : public
         bot_( bot ) { }
 
     StateStatusReturnValue Focus( const
-                                  UniquePtrEntity &entity );
+                                  Entity &entity );
 
   private:
     Bot *bot_;
