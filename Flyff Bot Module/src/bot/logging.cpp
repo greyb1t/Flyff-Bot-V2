@@ -33,7 +33,7 @@ void LoggerPump::LogPumpThread() {
       case LoggingType::kLoggingNormal: {
         const auto richedit_log_handle = GWH( RICHEDIT_LOG );
 
-        constexpr int kLogCharacterLimit = 15000;
+        constexpr int kLogCharacterLimit = 50000;
 
         if ( gwingui::richedit::GetTextLength( richedit_log_handle ) >
              kLogCharacterLimit ) {
