@@ -6,6 +6,8 @@ TODO: Add feature to make the character jump if getting stuck on a high wall
 
 TODO: Add feature to teleport monster to player for bootleg range hack
 
+TODO: Add feature to take screenshot when player dies to identify what might have caused the death
+
 TODO: Add warning if users tries to start the bot while being outside the "Restricted Killing Area".
 	If no warning, the user might think the bot is not working bcuz it just keep looking but not finding.
 
