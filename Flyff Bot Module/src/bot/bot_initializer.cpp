@@ -294,28 +294,6 @@ bool BotInitializer::Unload( const HWND mainwindow_handle ) {
 
   botcore_.GetFlyffClient()->RemoveDefaultHooks();
 
-  /*
-  DetourTransactionBegin();
-
-  DetourUpdateThread( GetCurrentThread() );
-
-  // TODO: consider making a hook_manager class to keep all hooks in one list
-  // that a FlyffClient can add onto
-
-  DetourDetach( reinterpret_cast<PVOID*>( &botcore_.endscene_original_ ),
-                BotCore::EndSceneHooked );
-  DetourDetach( reinterpret_cast<PVOID*>( &botcore_.get_cursor_pos_original_ ),
-                BotCore::GetCursorPosHooked );
-  DetourDetach( reinterpret_cast<PVOID*>( &botcore_.get_key_state_original_ ),
-                BotCore::GetKeyStateHooked );
-
-  if ( DetourTransactionCommit() != NO_ERROR ) {
-    gwingui::messagebox::Error(
-        TEXT( "Error while trying to detach all hooks." ) );
-    return false;
-  }
-  */
-
   botcore_.GetFlyffClient()->PostHookDeinitialization();
 
   // Call this in the thread that we called ManualMapFixExceptionHandling() in
@@ -328,29 +306,6 @@ bool BotInitializer::Unload( const HWND mainwindow_handle ) {
 
   return true;
 }
-
-// LPDIRECT3DDEVICE9 CreateD3DDevice() {
-//  D3DPRESENT_PARAMETERS present_params = { 0 };
-//
-//  present_params.BackBufferWidth = 1;
-//  present_params.BackBufferHeight = 1;
-//  present_params.BackBufferFormat = D3DFMT_UNKNOWN;
-//
-//  present_params.Windowed = TRUE;
-//  present_params.SwapEffect = D3DSWAPEFFECT_DISCARD;
-//
-//  present_params.EnableAutoDepthStencil = TRUE;
-//  present_params.AutoDepthStencilFormat = D3DFMT_D16;
-//
-//  LPDIRECT3DDEVICE9 device_temp = NULL;
-//
-//  Direct3DCreate9( D3D_SDK_VERSION )
-//      ->CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, 0,
-//                      D3DCREATE_HARDWARE_VERTEXPROCESSING, &present_params,
-//                      &device_temp );
-//
-//  return device_temp;
-//}
 
 void BotInitializer::PostGuiCreation( const HWND loading_window_handle ) {
   const auto& flyff_client = botcore_.client_;

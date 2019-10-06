@@ -65,7 +65,6 @@ bool FlyffClient::Search( HWND loading_window_handle ) {
       return ss.str();
     };
 
-    // FAILS
     const auto richedit_addresses_offsets = GWH( RICHEDIT_ADDRESSES_OFFSETS );
 
     gwingui::richedit::AppendText(
@@ -166,36 +165,6 @@ void FlyffClient::InitializeDefaultHooks() {
   hook_manager_.AddHook( HookType::GetKeyState, getkeystate_hook );
 
   hook_manager_.End();
-
-  // botcore_.get_cursor_pos_original_ = GetCursorPos;
-  // botcore_.get_key_state_original_ = GetKeyState;
-
-  // DetourTransactionBegin();
-  //
-  // DetourUpdateThread( GetCurrentThread() );
-
-  // DetourAttach( reinterpret_cast<PVOID*>( &botcore_.d3dxvec3proj_original_ ),
-  //               BotCore::D3DXVec3ProjectHooked );
-
-  // DetourAttach( reinterpret_cast<PVOID*>( &botcore_.get_cursor_pos_original_
-  // ),
-  //               BotCore::GetCursorPosHooked );
-
-  // DetourAttach( reinterpret_cast<PVOID*>( &botcore_.get_key_state_original_
-  // ),
-  //              BotCore::GetKeyStateHooked );
-
-  // DetourAttach( reinterpret_cast<PVOID*>( &botcore_.endscene_original_ ),
-  //               BotCore::EndSceneHooked );
-
-  // auto ret = DetourTransactionCommit();
-  //
-  // if ( ret != NO_ERROR ) {
-  //   gwingui::messagebox::Error(
-  //       TEXT( "Not all hooks were successfully applied. Code: " ) +
-  //       std::to_wstring( ret ) );
-  //   return false;
-  // }
 }
 
 void FlyffClient::RemoveDefaultHooks() {

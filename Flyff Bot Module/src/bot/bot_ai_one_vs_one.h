@@ -1,6 +1,6 @@
 #pragma once
 
-#include "bot.h"
+#include "killing_bot.h"
 #include "key_sequence.h"
 #include "blocked_state_machine.h"
 #include "walk_to_position_state_machine.h"
@@ -29,16 +29,17 @@ enum class OneVsOneStates {
   kUpdateCharacterPosition,
   kIdle,
   kCharacterDied,
-  kManualStop
 };
 
-class BotAIOneVsOne : public Bot {
+class BotAIOneVsOne : public KillingBot {
  public:
   BotAIOneVsOne( BotCore* botcore );
   virtual ~BotAIOneVsOne();
 
-  void Update() override;
+  void UpdateInternal() override;
   std::wstring BotStoppedLogMessage();
+
+  virtual void OnStop() override;
 
   void OnStateChanging() override;
 

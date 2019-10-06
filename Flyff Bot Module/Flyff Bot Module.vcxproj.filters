@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\utils\thread_pool.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\utils\simulation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -85,9 +82,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\bot\frame_timer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\bot\do_once.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\bot\state_machine.h">
@@ -219,12 +213,18 @@
     <ClInclude Include="src\bot\game_object.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\bot\killing_bot.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\bot\options\remove_all_obstacles_option.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\bot\options\update_char_pos_option.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\utils\thread_pool.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\utils\simulation.cpp">
@@ -381,6 +381,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\bot\game_object.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bot\killing_bot.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bot\options\average_y_pos_option.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bot\options\remove_all_obstacles_option.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -1,9 +1,14 @@
 #include "pch.h"
 #include "character_rebuff_list.h"
+#include "character_rebuff.h"
 #include "../../res/resource.h"
+
+#include "option_utils.h"
 
 #include "gwinguiv2/controls/control.h"
 #include "gwinguiv2/controls/listbox.h"
+#include "gwinguiv2/controls/listview.h"
+#include "gwinguiv2/controls/editcontrol.h"
 
 namespace bot {
 
@@ -104,6 +109,68 @@ void CharacterRebuffListOption::EnableOrDisableControls( bool enable ) {
                                      enable );
   gwingui::control::EnableOrDisable( GWH( BUTTON_REMOVE_REBUFF_SEQUENCE ),
                                      enable );
+}
+
+CharacterRebuffOption CharacterRebuffListOption::ReadCharacterRebuffOptions(
+    uint32_t index ) {
+  CharacterRebuffOption rebuff_sequence_option(
+      CharacterRebuffOption::kJSON_NAME + std::to_string( index ), 0 );
+
+  rebuff_sequence_option.Clear();
+
+  rebuff_sequence_option.SetStatus( true );
+
+  const auto editcontrol_rebuff_sequence_interval =
+      GWH( EDIT_REBUFF_SEQUENCE_INTERVAL );
+
+  int sequence_interval =
+      gwingui::editcontrol::GetInt( editcontrol_rebuff_sequence_interval );
+
+  rebuff_sequence_option.SetRebuffInterval( sequence_interval );
+
+  const auto listview_rebuff_key_sequence = GWH( LISTVIEW_REBUFF_KEY_SEQUENCE );
+
+  for ( int i = 0, count = gwingui::listview::GetItemCount(
+                       listview_rebuff_key_sequence );
+        i < count; ++i ) {
+    const auto row =
+        gwingui::listview::GetItemRowText( listview_rebuff_key_sequence, i );
+
+    Key key;
+
+    key.key_code = optionutils::AsciiKeyToVirtualKeyCode( row[ 0 ] );
+    key.time_ms_after_last_attack = std::stoi( row[ 1 ] );
+
+    rebuff_sequence_option.AddValue( key );
+  }
+
+  return rebuff_sequence_option;
+}
+
+bool CharacterRebuffListOption::TryApplyOption() {
+  // Save the currently selected sequence in case it has not been saved
+  // the reason is because the user might have changed something without
+  // selecting another sequence in the list that is the way it is saved
+  const auto listbox_rebuff_sequence = GWH( LISTBOX_REBUFF_SEQUENCES );
+
+  const auto selected_index =
+      gwingui::listbox::GetSelectedIndex( listbox_rebuff_sequence );
+
+  if ( selected_index != -1 ) {
+    const auto charcter_rebuff_of_options =
+        ReadCharacterRebuffOptions( selected_index );
+
+    ReplaceRebuffSequence( selected_index, charcter_rebuff_of_options );
+  }
+
+  const auto checkbox_rebuff_sequence = GWH( CHECK_REBUFF_SEQUENCES );
+
+  if ( gwingui::checkbox::IsChecked( checkbox_rebuff_sequence ) )
+    SetStatus( true );
+  else
+    SetStatus( false );
+
+  return true;
 }
 
 }  // namespace bot

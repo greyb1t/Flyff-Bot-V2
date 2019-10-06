@@ -8,15 +8,16 @@
 #include "options/whitelisted_player_names_option.h"
 #include "options/attack_sequence_option.h"
 #include "options/lure_target_key_option.h"
+#include "options/update_char_pos_option.h"
 
 #include "../utils/string_utls.h"
 
 namespace bot {
 
 BotAIOneVsOne::BotAIOneVsOne( BotCore* botcore )
-    : Bot( botcore,
-           static_cast<int>( OneVsOneStates::kFindingTarget ),
-           TEXT( "1v1 mode" ) ),
+    : KillingBot( botcore,
+                  static_cast<int>( OneVsOneStates::kFindingTarget ),
+                  TEXT( "1v1 mode" ) ),
       focus_target_machine_( this ),
       select_target_machine_( this ),
       simulation_machine_( this ),
@@ -33,19 +34,20 @@ BotAIOneVsOne::BotAIOneVsOne( BotCore* botcore )
       local_player_health_start_( 0 ),
       started_walking_backwards_( false ) {
   auto& bot_options = botcore->GetBotOptions();
-  const auto& rebuff_sequence_list_option =
-      bot_options.GetRebuffSequenceListOption();
-  rebuff_list_ = rebuff_sequence_list_option->GetRebuffList();
+  auto& rebuff_sequence_list_option =
+      bot_options.GetOption<CharacterRebuffListOption>();
+  // bot_options.GetRebuffSequenceListOption();
+  rebuff_list_ = rebuff_sequence_list_option.GetRebuffList();
 
   //////////////////////////////////////////////////////////////////////////
-  const auto whitelisted_names = bot_options.GetWhitelistedNamesOption();
-  const auto average_y_position =
-      bot_options.GetAverageYPositionTargetSelectionOption();
-  const auto level_area = bot_options.GetLevelAreaOption();
+  const auto& whitelisted_names =
+      bot_options.GetOption<WhitelistedNamesOption>();
+  const auto& average_y_position = bot_options.GetOption<AverageYPosOption>();
+  const auto& level_area = bot_options.GetOption<LevelAreaOption>();
 
-  default_filter_.push_back( whitelisted_names.get() );
-  default_filter_.push_back( average_y_position.get() );
-  default_filter_.push_back( level_area.get() );
+  default_filter_.push_back( &whitelisted_names );
+  default_filter_.push_back( &average_y_position );
+  default_filter_.push_back( &level_area );
 
   //////////////////////////////////////////////////////////////////////////
 
@@ -66,22 +68,17 @@ BotAIOneVsOne::~BotAIOneVsOne() {
 
   RestoreSavedBoundBoxes();
   RestoreBlockedBoundBoxes();
-
-  logging::Log( BotStoppedLogMessage() );
 }
 
-void BotAIOneVsOne::Update() {
+void BotAIOneVsOne::UpdateInternal() {
   const auto botcore = GetBotCore();
   const auto client = botcore->GetFlyffClient();
   auto& bot_options = botcore->GetBotOptions();
   const auto& local_player = GetLocalPlayer();
   const auto& rebuff_sequence_list_option =
-      bot_options.GetRebuffSequenceListOption();
-  const auto& whitelisted_names_options =
-      bot_options.GetWhitelistedNamesOption();
-
-  if ( !botcore->GetStarted() )
-    SetNextState( OneVsOneStates::kManualStop );
+      bot_options.GetOption<CharacterRebuffListOption>();
+  // const auto& whitelisted_names_options =
+  //    bot_options.GetWhitelistedNamesOption();
 
   if ( local_player->IsDeletedOrInvalidMemory() ) {
     logging::Log( TEXT( "The local player became invalid.\n" ) );
@@ -109,10 +106,13 @@ void BotAIOneVsOne::Update() {
       EntityList entity_list( client );
       auto& entities = entity_list.GetMoverEntities();
 
+      const auto& whitelisted_player_names_option =
+          bot_options.GetOption<WhitelistedPlayerNamesOption>();
+
       // Check for non whitelisted players
-      if ( bot_options.GetWhitelistedPlayerNamesOption()->IsEnabled() ) {
-        const auto entity_found =
-            IsNonWhitelistedPlayerFound( entities, *local_player );
+      if ( whitelisted_player_names_option.IsEnabled() ) {
+        const auto entity_found = IsNonWhitelistedPlayerFound(
+            whitelisted_player_names_option, entities, *local_player );
 
         if ( entity_found ) {
           logging::LogImportant(
@@ -154,7 +154,7 @@ void BotAIOneVsOne::Update() {
         }
       }
 
-      if ( rebuff_sequence_list_option->IsEnabled() ) {
+      if ( rebuff_sequence_list_option.IsEnabled() ) {
         if ( local_player->IsStandingStill() ) {
           for ( auto& rebuff_sequence : rebuff_list_ ) {
             const auto rebuff_status = rebuff_sequence.Update();
@@ -208,17 +208,16 @@ void BotAIOneVsOne::Update() {
       for ( auto y_pos : last_entity_y_positions_ )
         total_y += y_pos;
 
-      const auto avg_y_pos =
-          bot_options.GetAverageYPositionTargetSelectionOption();
+      auto& avg_y_pos = bot_options.GetOption<AverageYPosOption>();
 
-      avg_y_pos->SetYPos(
+      avg_y_pos.SetYPos(
           total_y / static_cast<float>( last_entity_y_positions_.size() ) );
 
       // average_y_pos_ =
       //     total_y / static_cast<float>( last_entity_y_positions_.size() );
 
       // offseting the average y pos
-      avg_y_pos->SetYPos( avg_y_pos->GetYPos() - 3.f );
+      avg_y_pos.SetYPos( avg_y_pos.GetYPos() - 3.f );
       // average_y_pos_ -= 3.f;
 
       current_target_entity_ =
@@ -371,9 +370,6 @@ void BotAIOneVsOne::Update() {
               logging::Log( TEXT(
                   "Sucessfully walked backwards and stopped character.\n" ) );
 
-              blacklisted_entities_permanent_.push_back(
-                  *current_target_entity_ );
-
               RestoreBlockedBoundBoxes();
 
               SetNextState( OneVsOneStates::kFindingTarget );
@@ -487,7 +483,7 @@ void BotAIOneVsOne::Update() {
 
       const StateStatusReturnValue simulation_status =
           simulation_machine_.KeyPress(
-              bot_options.GetLureKeyCodeOption()->GetLureKeyCode() );
+              bot_options.GetOption<LureTargetKeyOption>().GetLureKeyCode() );
 
       switch ( simulation_status ) {
         case StateStatusReturnValue::kInProgress:
@@ -826,7 +822,7 @@ void BotAIOneVsOne::Update() {
           monster_kill_count_++;
         } );
 
-        if ( bot_options.GetUpdateCharPosOption()->IsEnabled() ) {
+        if ( bot_options.GetOption<UpdateCharPosOption>().IsEnabled() ) {
           // Walk backwards to update the characters position
           const auto simulation_status =
               simulation_machine_.KeyPress( 'S', 50 );
@@ -903,9 +899,12 @@ void BotAIOneVsOne::Update() {
       // TODO: The bot is stuck in here when the char is blocked and the monster
       // has already been hit once. Fix..
 
-      if ( bot_options.GetAttackSequenceOption()->IsEnabled() )
-        attack_sequence_.ExecuteSequence(
-            *bot_options.GetAttackSequenceOption(), simulation_machine_ );
+      const auto& attack_sequence_option =
+          bot_options.GetOption<AttackSequenceOption>();
+
+      if ( attack_sequence_option.IsEnabled() )
+        attack_sequence_.ExecuteSequence( attack_sequence_option,
+                                          simulation_machine_ );
     } break;
 
     case OneVsOneStates::kWaitUntilPlayerLeaves: {
@@ -974,11 +973,14 @@ void BotAIOneVsOne::Update() {
       EntityList entity_list( client );
       const auto& entities = entity_list.GetMoverEntities();
 
+      const auto& whitelisted_player_names_option =
+          bot_options.GetOption<WhitelistedPlayerNamesOption>();
+
       // TODO: Should not require this option-check in here, consider removing
       // it Check for non whitelisted players
-      if ( bot_options.GetWhitelistedPlayerNamesOption()->IsEnabled() ) {
-        const auto entity_found =
-            IsNonWhitelistedPlayerFound( entities, *local_player );
+      if ( whitelisted_player_names_option.IsEnabled() ) {
+        const auto entity_found = IsNonWhitelistedPlayerFound(
+            whitelisted_player_names_option, entities, *local_player );
 
         if ( entity_found ) {
           logging::LogImportant(
@@ -1037,17 +1039,9 @@ void BotAIOneVsOne::Update() {
         logging::Log( TEXT( "The bot is currently in a stopped state.\n" ) );
       } );
 
-      SetIsStopped( true );
+      SetInternalState( BaseBotStates::Stopped );
       botcore->SetStarted( false );
       botcore->ShowBotHasStoppedWindow();
-    } break;
-
-    case OneVsOneStates::kManualStop: {
-      DO_ONCE( []() {
-        logging::Log( TEXT( "The bot is currently in a stopped state.\n" ) );
-      } );
-
-      SetIsStopped( true );
     } break;
 
     default:
@@ -1071,6 +1065,10 @@ std::wstring BotAIOneVsOne::BotStoppedLogMessage() {
   //              bot_duration_stopwatch_.GetElapsedString() + TEXT( "\n" ) );
 
   return s;
+}
+
+void BotAIOneVsOne::OnStop() {
+  logging::Log( BotStoppedLogMessage() );
 }
 
 void BotAIOneVsOne::OnStateChanging() {

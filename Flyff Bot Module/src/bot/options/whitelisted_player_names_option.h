@@ -13,6 +13,8 @@ class WhitelistedPlayerNamesOption : public WhitelistedNamesOption {
   void RefreshControls() override;
 
   void EnableOrDisableControls( bool enable ) override;
+
+  bool TryApplyOption() override;
 };
 
 }  // namespace bot

@@ -5,7 +5,7 @@
 
 namespace bot {
 
-void BotPassive::Update() {
+void BotPassive::UpdateInternal() {
   const auto current_state = GetCurrentState<PassiveBotStates>();
 
   const auto botcore = GetBotCore();
@@ -17,28 +17,33 @@ void BotPassive::Update() {
 
   switch ( current_state ) {
     case PassiveBotStates::kCheckHealing: {
-      const auto auto_healing = bot_options.GetAutoHealingFoodOption();
+      const auto& auto_healing = bot_options.GetOption<AutoHealingOption>();
 
-      if ( auto_healing->IsEnabled() ) {
+      if ( auto_healing.IsEnabled() ) {
         const auto current_health = local_player->GetHealth();
 
-        if ( current_health < auto_healing->GetHealthLimit() )
-          simulation_machine1_.KeyPress( auto_healing->GetHealCode() );
+        if ( current_health < auto_healing.GetHealthLimit() )
+          simulation_machine1_.KeyPress( auto_healing.GetHealCode() );
       }
 
-      const auto auto_healing_pills = bot_options.GetAutoHealingPillsOption();
+      const auto& auto_healing_pills =
+          bot_options.GetOption<AutoHealingPillsOption>();
 
-      if ( auto_healing_pills->IsEnabled() ) {
+      if ( auto_healing_pills.IsEnabled() ) {
         const auto current_health = local_player->GetHealth();
 
-        if ( current_health < auto_healing_pills->GetHealthLimit() )
-          simulation_machine2_.KeyPress( auto_healing_pills->GetHealCode() );
+        if ( current_health < auto_healing_pills.GetHealthLimit() )
+          simulation_machine2_.KeyPress( auto_healing_pills.GetHealCode() );
       }
     } break;
 
     default:
       break;
   }
+}
+
+void BotPassive::OnStop() {
+  // SetIsStopped( true );
 }
 
 }  // namespace bot

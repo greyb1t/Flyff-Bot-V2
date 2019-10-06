@@ -16,7 +16,9 @@ class BotPassive : public Bot {
         simulation_machine1_( this ),
         simulation_machine2_( this ) {}
 
-  void Update() override;
+  void UpdateInternal() override;
+
+  virtual void OnStop() override;
 
  private:
   SimulationStateMachine simulation_machine1_;

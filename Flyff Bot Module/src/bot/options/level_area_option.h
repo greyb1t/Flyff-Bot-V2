@@ -36,6 +36,8 @@ class LevelAreaOption : public Option {
 
   virtual bool IsEntityAllowed( const std::unique_ptr<Entity>& entity ) const;
 
+  bool TryApplyOption() override;
+
  protected:
   uint32_t level_area_length1;
   uint32_t level_area_length2;

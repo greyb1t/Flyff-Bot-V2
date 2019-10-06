@@ -35,4 +35,32 @@ void AttackSequenceOption::EnableOrDisableControls( bool enable ) {
   gwingui::control::EnableOrDisable( GWH( BUTTON_REMOVE_ATTACK ), enable );
 }
 
+bool AttackSequenceOption::TryApplyOption() {
+  Clear();
+
+  const auto checkbox_attack_sequence = GWH( CHECK_ATTACK_SEQUENCE );
+
+  if ( gwingui::checkbox::IsChecked( checkbox_attack_sequence ) ) {
+    SetStatus( true );
+
+    const auto listview_attacks = GWH( LISTVIEW_ATTACKS );
+
+    for ( int i = 0,
+              count = gwingui::listview::GetItemCount( listview_attacks );
+          i < count; ++i ) {
+      const auto row = gwingui::listview::GetItemRowText( listview_attacks, i );
+
+      Key key;
+
+      key.key_code = optionutils::AsciiKeyToVirtualKeyCode( row[ 0 ] );
+      key.time_ms_after_last_attack = std::stoi( row[ 1 ] );
+
+      AddValue( key );
+    }
+  } else
+    SetStatus( false );
+
+  return true;
+}
+
 }  // namespace bot

@@ -109,8 +109,7 @@ class BotCore {
 
   void AddEntityToDraw( std::unique_ptr<Entity>& entity );
 
-  Bot* GetBot();
-  Bot* GetPassiveBot();
+  std::vector<std::unique_ptr<Bot>>& GetActiveBots();
 
   LPDIRECT3DDEVICE9 GetDevice();
 
@@ -124,8 +123,8 @@ class BotCore {
   int64_t GetFrameCount() const;
   BotOptions& GetBotOptions();
 
-  // Setters
-  void SetActiveBot( Bot* bot );
+  void SetActiveBots( std::vector<std::unique_ptr<Bot>>&& bots );
+
   void SetSimulatedCursorPos( POINT& pos );
   void SetViewport( D3DVIEWPORT9 viewport );
   void SetStarted( bool started );
@@ -159,8 +158,7 @@ class BotCore {
 
   HHOOK kb_hook_handle_;
 
-  std::unique_ptr<Bot> bot_;
-  std::unique_ptr<Bot> passive_bot_;
+  std::vector<std::unique_ptr<Bot>> active_bots_;
 
   std::unique_ptr<FlyffClient> client_;
   std::vector<std::unique_ptr<Entity>> extra_entities_;

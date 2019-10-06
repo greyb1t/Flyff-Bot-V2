@@ -10,20 +10,13 @@ class AverageYPosOption : public Option {
                      const uint32_t control_identifier )
       : Option( name, control_identifier ) {}
 
-  void SetYPos( float y ) {
-    average_y_pos_ = y;
-  }
+  void SetYPos( float y );
 
-  float GetYPos() const {
-    return average_y_pos_;
-  }
+  float GetYPos() const;
 
-  virtual bool IsEntityAllowed( const std::unique_ptr<Entity>& entity ) const {
-    if ( IsEnabled() )
-      return entity->GetPosition().y >= average_y_pos_;
-    else
-      return true;
-  }
+  virtual bool IsEntityAllowed( const std::unique_ptr<Entity>& entity ) const;
+
+  bool TryApplyOption() override;
 
  private:
   float average_y_pos_;

@@ -83,4 +83,44 @@ void AutoHealingOption::EnableOrDisableControls( bool enable ) {
   gwingui::control::EnableOrDisable( GWH( EDIT_AUTO_FOOD_HP_LIMIT ), enable );
 }
 
+bool AutoHealingOption::TryApplyOption() {
+  const auto checkbox_auto_health_food = GWH( CHECK_AUTO_HEALTH_FOOD );
+
+  if ( gwingui::checkbox::IsChecked( checkbox_auto_health_food ) ) {
+    SetStatus( true );
+
+    const auto combobox_auto_health_food_key =
+        GWH( COMBO_AUTO_HEALTH_FOOD_KEY );
+
+    const auto heal_key_index =
+        gwingui::combobox::GetSelectedIndex( combobox_auto_health_food_key );
+
+    if ( heal_key_index == -1 ) {
+      gwingui::messagebox::Error(
+          TEXT( "You have to choose a key to use the food." ) );
+      return false;
+    }
+
+    const auto heal_key_str = gwingui::combobox::GetString(
+        combobox_auto_health_food_key, heal_key_index );
+    const auto heal_key = optionutils::AsciiKeyToVirtualKeyCode( heal_key_str );
+
+    SetHealKeyCode( heal_key );
+
+    const auto editcontrol_auto_food_hp_limit = GWH( EDIT_AUTO_FOOD_HP_LIMIT );
+    auto health_limit =
+        gwingui::editcontrol::GetInt( editcontrol_auto_food_hp_limit );
+
+    if ( !health_limit ) {
+      gwingui::messagebox::Error( TEXT( "You enter the health limit." ) );
+      return false;
+    }
+
+    SetHealthLimit( health_limit );
+  } else
+    SetStatus( false );
+
+  return true;
+}
+
 }  // namespace bot

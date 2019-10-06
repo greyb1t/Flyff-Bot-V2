@@ -194,4 +194,63 @@ bool LevelAreaOption::IsEntityAllowed(
   return true;
 }
 
+bool LevelAreaOption::TryApplyOption() {
+  const auto checkbox_level_area = GWH( CHECK_LEVEL_AREA );
+
+  if ( gwingui::checkbox::IsChecked( checkbox_level_area ) ) {
+    SetStatus( true );
+
+    const auto editcontrol_level_area_length1 = GWH( EDIT_LEVEL_AREA_LENGTH1 );
+    auto area_length1 =
+        gwingui::editcontrol::GetInt( editcontrol_level_area_length1 );
+
+    if ( !area_length1 ) {
+      gwingui::messagebox::Error(
+          TEXT( "You enter the level area length 1." ) );
+      return false;
+    }
+
+    SetLength1( area_length1 );
+
+    const auto editcontrol_level_area_length2 = GWH( EDIT_LEVEL_AREA_LENGTH2 );
+    auto area_length2 =
+        gwingui::editcontrol::GetInt( editcontrol_level_area_length2 );
+
+    if ( !area_length2 ) {
+      gwingui::messagebox::Error(
+          TEXT( "You enter the level area length 2." ) );
+      return false;
+    }
+
+    SetLength2( area_length2 );
+
+    const auto editcontrol_level_area_origin_pos_x =
+        GWH( EDIT_LEVEL_AREA_ORIGIN_POS_X );
+    auto origin_pos_x =
+        gwingui::editcontrol::GetInt( editcontrol_level_area_origin_pos_x );
+
+    if ( !origin_pos_x ) {
+      gwingui::messagebox::Error( TEXT( "Please enter a origin x position" ) );
+      return false;
+    }
+
+    const auto editcontrol_level_area_origin_pos_z =
+        GWH( EDIT_LEVEL_AREA_ORIGIN_POS_Z );
+    auto origin_pos_z =
+        gwingui::editcontrol::GetInt( editcontrol_level_area_origin_pos_z );
+
+    if ( !origin_pos_z ) {
+      gwingui::messagebox::Error( TEXT( "Please enter a origin z position" ) );
+      return false;
+    }
+
+    SetOriginPosition( D3DXVECTOR3( static_cast<float>( origin_pos_x ), 0.0f,
+                                    static_cast<float>( origin_pos_z ) ) );
+  } else {
+    SetStatus( false );
+  }
+
+  return true;
+}
+
 }  // namespace bot

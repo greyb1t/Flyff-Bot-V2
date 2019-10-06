@@ -3,7 +3,6 @@
 #include "botcore.h"
 #include "math.h"
 #include "bot_ai_one_vs_one.h"
-#include "do_once.h"
 #include "../utils/simulation.h"
 
 #include "gwinguiv2/drawing.h"
@@ -17,13 +16,9 @@ namespace bot {
 Bot::Bot( BotCore* botcore, int origin_state, const std::wstring& bot_name )
     : StateMachine( origin_state ),
       botcore_( botcore ),
-      is_state_stopped_( false ),
       bot_name_( bot_name ),
-      current_target_selection_state_(
-          static_cast<int>( TargetSelectionStates::HoverCursor ) ),
-      // average_y_pos_( 0.f ),
-      entities_not_found_counter_( 0 ),
-      monster_kill_count_( 0 ) {
+      internal_bot_state_machine_(
+          static_cast<int>( BaseBotStates::Running ) ) {
   local_player_ = botcore->GetFlyffClient()->CreateLocalPlayer();
 
   bot_duration_stopwatch_.Start();
@@ -33,6 +28,25 @@ Bot::~Bot() {
   bot_duration_stopwatch_.Stop();
 
   LogQueue().Notify();
+}
+
+void Bot::Update() {
+  if ( !botcore_->GetStarted() )
+    internal_bot_state_machine_.SetNextState( BaseBotStates::Stopped );
+
+  const auto current_state =
+      internal_bot_state_machine_.GetCurrentState<BaseBotStates>();
+
+  switch ( current_state ) {
+    case BaseBotStates::Running: {
+      UpdateInternal();
+    } break;
+    case BaseBotStates::Stopped: {
+      OnStop();
+    } break;
+    default:
+      break;
+  }
 }
 
 void Bot::SortEntitiesByDistanceToEntity(
@@ -47,46 +61,6 @@ void Bot::SortEntitiesByDistanceToEntity(
 
         return e1->DistanceTo( entity ) < e2->DistanceTo( entity );
       } );
-}
-
-std::unique_ptr<Entity> Bot::FindNearestMonster(
-    std::vector<std::unique_ptr<Entity>>& entities,
-    const LocalPlayer& local_player,
-    std::vector<const EntityFilter*>& entity_filters ) {
-  SortEntitiesByDistanceToEntity( local_player, entities );
-
-  // Go through the entities in close- to far order and filter away non-monsters
-  for ( auto& entity : entities ) {
-    if ( entity->IsDeletedOrInvalidMemory() ) {
-      continue;
-    }
-
-    if ( entity->DistanceTo( local_player ) != 0 ) {
-      if ( entity->IsMonster() && entity->IsAlive() ) {
-        if ( !IsEntityBlacklisted( *entity ) ) {
-          bool let_through = true;
-
-          for ( const auto filter : entity_filters ) {
-            if ( !filter->IsEntityAllowed( entity ) ) {
-              let_through = false;
-              break;
-            }
-          }
-
-          if ( !let_through )
-            continue;
-
-          // TODO: Add feature to prioritize the aggro monster above ALL other
-          // monsters, meaning write the code to bypass the filters
-
-          return botcore_->GetFlyffClient()->CreateEntity(
-              entity->GetPointerAddress() );
-        }
-      }
-    }
-  }
-
-  return nullptr;
 }
 
 void Bot::AdjustCameraTowardsEntity( const LocalPlayer* local_player,
@@ -117,25 +91,6 @@ void Bot::AdjustCameraTowardsEntity( const LocalPlayer* local_player,
                                scroll_distance_degree_offset );
 }
 
-bool Bot::IsEntityBlacklisted( const Entity& entity ) {
-  for ( auto& blacklisted_entity : blacklisted_entities_temporary_ ) {
-    // Check if their pointer addresses are the same (the address created when
-    // they called new Entity)
-    if ( blacklisted_entity.GetPointerAddress() == entity.GetPointerAddress() )
-      return true;
-  }
-
-  /*
-    for (auto &blacklisted_entity : blacklisted_entities_permanent_) {
-    if (blacklisted_entity.GetPointerAddress() == entity->GetPointerAddress()) {
-      return true;
-    }
-    }
-  */
-
-  return false;
-}
-
 void Bot::DeSelectEntity() {
   simulation::SendVirtualKeypress( botcore_->GetTargetWindow(), VK_ESCAPE, 50 );
 }
@@ -145,26 +100,13 @@ bool Bot::IsEntityValid( const Entity& entity ) {
          entity.IsAlive();
 }
 
-void Bot::LogOnce( DoOnce& do_once, const std::wstring& text ) {
-  do_once.Do( [&]() { logging::Log( text ); } );
-}
-
-// bool Bot::IsEntityWhitelisted( const UniquePtrEntity& entity ) {
-//  auto& bot_options = botcore_->GetBotOptions();
-//  const auto whitelisted_names = bot_options.GetWhitelistedNamesOption();
-//
-//  if ( whitelisted_names->ValueExists( entity->GetName() ) )
-//    return true;
-//
-//  return false;
-//}
-
 std::unique_ptr<Entity> Bot::IsNonWhitelistedPlayerFound(
+    const WhitelistedPlayerNamesOption& whitelisted_names_option,
     const std::vector<std::unique_ptr<Entity>>& entities,
     const LocalPlayer& local_player ) {
-  auto& bot_options = botcore_->GetBotOptions();
-  const auto whitelisted_player_names =
-      bot_options.GetWhitelistedPlayerNamesOption();
+  // auto& bot_options = botcore_->GetBotOptions();
+  // const auto whitelisted_player_names =
+  //     bot_options.GetWhitelistedPlayerNamesOption();
 
   for ( const auto& entity : entities ) {
     if ( entity->IsDeletedOrInvalidMemory() )
@@ -173,7 +115,7 @@ std::unique_ptr<Entity> Bot::IsNonWhitelistedPlayerFound(
     // If a player is found and it is not me
     if ( entity->IsPlayer() &&
          entity->GetPointerAddress() != local_player.GetPointerAddress() ) {
-      if ( !whitelisted_player_names->ValueExists( entity->GetName() ) ) {
+      if ( !whitelisted_names_option.ValueExists( entity->GetName() ) ) {
         return entity->GetFlyffClient()->CreateEntity(
             entity->GetPointerAddress() );
       }
@@ -183,69 +125,11 @@ std::unique_ptr<Entity> Bot::IsNonWhitelistedPlayerFound(
   return nullptr;
 }
 
-// bool Bot::IsEntityAboveAverageYPosition( const UniquePtrEntity& entity ) {
-//   return entity->GetPosition().y >= average_y_pos_;
-// }
-
-void Bot::RestoreBlockedBoundBoxes() {
-  logging::Log( TEXT( "BB Count: " ) +
-                std::to_wstring( saved_selection_blocked_entities_.size() ) +
-                TEXT( "\n" ) );
-
-  // Restore the bound boxes of the entities that previously blocked the bot
-  for ( auto& e : saved_selection_blocked_entities_ ) {
-    if ( !e->IsDeletedOrInvalidMemory() ) {
-      logging::Log( TEXT( "Restored BB: " ) +
-                    std::to_wstring( e->GetPointerAddress() ) +
-                    TEXT( ", Name: " ) +
-                    stringutils::AnsiToWide( e->GetName() ) + TEXT( "\n" ) );
-      e->RestoreBoundBox();
-    } else
-      logging::Log( TEXT( "COULD NOT RESTORE BOUND BOX, DELETED\n" ) );
-  }
-
-  saved_selection_blocked_entities_.clear();
-}
-
-void Bot::RestoreSavedBoundBoxes() {
-  logging::Log( TEXT( "Saved BB Count: " ) +
-                std::to_wstring( saved_bound_box_changed_entities_.size() ) +
-                TEXT( "\n" ) );
-
-  // Restore the bound boxes of the entities that previously blocked the bot
-  for ( auto& e : saved_bound_box_changed_entities_ ) {
-    if ( !e->IsDeletedOrInvalidMemory() ) {
-      logging::Log( TEXT( "Restored Saved BB: " ) +
-                    std::to_wstring( e->GetPointerAddress() ) +
-                    TEXT( ", Name: " ) +
-                    stringutils::AnsiToWide( e->GetName() ) + TEXT( "\n" ) );
-      e->RestoreBoundBox();
-    } else
-      logging::Log( TEXT( "COULD NOT RESTORE SAVED BOUND BOX, DELETED\n" ) );
-  }
-
-  saved_bound_box_changed_entities_.clear();
-}
-
-bool Bot::ClickEntity( const Entity& entity ) {
-  POINT entity_screen_pos;
-
-  if ( GetEntityScreenPosition( entity, entity_screen_pos ) ) {
-    SetCursorPos( entity_screen_pos.x, entity_screen_pos.y );
-
-    mouse_event( MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0 );
-    mouse_event( MOUSEEVENTF_LEFTUP, 0, 0, 0, 0 );
-  }
-
-  return true;
-}
-
 bool Bot::GetEntityScreenPosition( const Entity& entity,
                                    POINT& entity_screen_pos ) {
-  BOUND_BOX bound_box = entity.GetBoundBox();
-
-  D3DXVECTOR3 bound_box_center_pos = math::CalculateBoxCenter( &bound_box );
-
+  const BOUND_BOX bound_box = entity.GetBoundBox();
+  const D3DXVECTOR3 bound_box_center_pos =
+      math::CalculateBoxCenter( &bound_box );
   D3DXVECTOR3 pos_screen;
 
   if ( !math::FlyffWorldToScreen( botcore_, entity, bound_box_center_pos,
@@ -273,7 +157,6 @@ bool Bot::GetEntityScreenPosition( const Entity& entity,
 
   // Shrink the rect to avoid clicking the edges of something that is a window
   // in the window
-  // RECT_SHRINK( neuz_window_rect, 100 );
   neuz_window_rect = gwingui::drawing::GrowRect( neuz_window_rect, -100, -100 );
 
   if ( PtInRect( &neuz_window_rect, entity_screen_pos ) )
@@ -294,16 +177,12 @@ std::unique_ptr<LocalPlayer>& Bot::GetLocalPlayer() {
   return local_player_;
 }
 
-bool Bot::IsStateStopped() {
-  return is_state_stopped_;
+void Bot::SetInternalState( BaseBotStates state ) {
+  internal_bot_state_machine_.SetNextState( state );
 }
 
-// float Bot::GetAverageY() {
-//   return average_y_pos_;
-// }
-
-void Bot::SetIsStopped( bool value ) {
-  is_state_stopped_ = value;
+BaseBotStates Bot::GetInternalState() const {
+  return internal_bot_state_machine_.GetCurrentState<BaseBotStates>();
 }
 
 }  // namespace bot

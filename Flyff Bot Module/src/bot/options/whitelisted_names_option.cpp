@@ -68,4 +68,27 @@ bool WhitelistedNamesOption::IsEntityAllowed(
   return true;
 }
 
+bool WhitelistedNamesOption::TryApplyOption() {
+  Clear();
+
+  const auto checkbox_whitelist_names = GWH( CHECK_WHITELIST_NAMES );
+
+  if ( gwingui::checkbox::IsChecked( checkbox_whitelist_names ) ) {
+    SetStatus( true );
+
+    const auto listbox_whitelist_names = GWH( LISTBOX_WHITELIST_NAMES );
+
+    for ( int i = 0,
+              count = gwingui::listbox::GetCount( listbox_whitelist_names );
+          i < count; ++i ) {
+      const std::wstring name =
+          gwingui::listbox::GetText( listbox_whitelist_names, i );
+      AddValue( stringutils::WideToAnsi( name ) );
+    }
+  } else
+    SetStatus( false );
+
+  return true;
+}
+
 }  // namespace bot

@@ -30,4 +30,34 @@ void BotModeOption::RefreshControls() {
                                        static_cast<int>( bot_mode_ ) );
 }
 
+BotMode BotModeOption::GetBotMode() const {
+  return bot_mode_;
+}
+
+void BotModeOption::SetBotMode( BotMode bot_mode ) {
+  bot_mode_ = bot_mode;
+}
+
+bool BotModeOption::TryApplyOption() {
+  const auto combo_bot_mode = GWH( COMBO_BOT_MODE );
+
+  const auto bot_mode_index =
+      gwingui::combobox::GetSelectedIndex( combo_bot_mode );
+
+  if ( bot_mode_index == -1 ) {
+    gwingui::messagebox::Error( TEXT( "You have to choose the bot mode." ) );
+    return false;
+  }
+
+  const auto bot_mode_str =
+      gwingui::combobox::GetString( combo_bot_mode, bot_mode_index );
+
+  if ( bot_mode_str == TEXT( "OneVsOne" ) )
+    SetBotMode( BotMode::kBotModeOneVsOne );
+  else
+    SetBotMode( BotMode::kBotModeNone );
+
+  return true;
+}
+
 }  // namespace bot

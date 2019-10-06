@@ -26,12 +26,12 @@
     <ClInclude Include="src\bot\game_object.h" />
     <ClInclude Include="src\bot\hook_manager.h" />
     <ClInclude Include="src\bot\idle_state_machine.h" />
+    <ClInclude Include="src\bot\killing_bot.h" />
     <ClInclude Include="src\bot\options\attack_sequence_option.h" />
     <ClInclude Include="src\bot\options\auto_healing_pills_option.h" />
     <ClInclude Include="src\bot\options\average_y_pos_option.h" />
     <ClInclude Include="src\bot\options\bot_mode_option.h" />
     <ClInclude Include="src\bot\options\character_rebuff.h" />
-    <ClInclude Include="src\bot\do_once.h" />
     <ClInclude Include="src\bot\entity_replicate_box.h" />
     <ClInclude Include="src\bot\focus_target_state_machine.h" />
     <ClInclude Include="src\bot\frame_timer.h" />
@@ -43,6 +43,8 @@
     <ClInclude Include="src\bot\options\key_sequence_option.h" />
     <ClInclude Include="src\bot\options\level_area_option.h" />
     <ClInclude Include="src\bot\options\lure_target_key_option.h" />
+    <ClInclude Include="src\bot\options\remove_all_obstacles_option.h" />
+    <ClInclude Include="src\bot\options\update_char_pos_option.h" />
     <ClInclude Include="src\bot\options\whitelisted_names_option.h" />
     <ClInclude Include="src\bot\options\whitelisted_player_names_option.h" />
     <ClInclude Include="src\bot\select_target_state_machine.h" />
@@ -74,7 +76,6 @@
     <ClInclude Include="src\bot\math.h" />
     <ClInclude Include="src\res\resource.h" />
     <ClInclude Include="src\utils\simulation.h" />
-    <ClInclude Include="src\utils\thread_pool.h" />
     <ClInclude Include="src\window\tab_window_1.h" />
     <ClInclude Include="src\window\tab_window_2.h" />
     <ClInclude Include="src\window\tab_window_3.h" />
@@ -96,10 +97,12 @@
     <ClCompile Include="src\bot\hook_manager.cpp" />
     <ClCompile Include="src\bot\idle_state_machine.cpp" />
     <ClCompile Include="src\bot\key_sequence.cpp" />
+    <ClCompile Include="src\bot\killing_bot.cpp" />
     <ClCompile Include="src\bot\logging.cpp" />
     <ClCompile Include="src\bot\logic_specialization\local_player_ignite.cpp" />
     <ClCompile Include="src\bot\options\attack_sequence_option.cpp" />
     <ClCompile Include="src\bot\options\auto_healing_pills_option.cpp" />
+    <ClCompile Include="src\bot\options\average_y_pos_option.cpp" />
     <ClCompile Include="src\bot\options\bot_mode_option.cpp" />
     <ClCompile Include="src\bot\options\character_rebuff.cpp" />
     <ClCompile Include="src\bot\options\character_rebuff_list.cpp" />
@@ -107,6 +110,7 @@
     <ClCompile Include="src\bot\options\level_area_option.cpp" />
     <ClCompile Include="src\bot\options\lure_target_key_option.cpp" />
     <ClCompile Include="src\bot\options\option.cpp" />
+    <ClCompile Include="src\bot\options\remove_all_obstacles_option.cpp" />
     <ClCompile Include="src\bot\options\whitelisted_names_option.cpp" />
     <ClCompile Include="src\bot\options\whitelisted_player_names_option.cpp" />
     <ClCompile Include="src\bot\select_target_state_machine.cpp" />
@@ -133,7 +137,6 @@
     <ClCompile Include="src\window\main_window.cpp" />
     <ClCompile Include="src\bot\math.cpp" />
     <ClCompile Include="src\utils\simulation.cpp" />
-    <ClCompile Include="src\utils\thread_pool.cpp" />
     <ClCompile Include="src\window\tab_window_1.cpp" />
     <ClCompile Include="src\window\tab_window_2.cpp" />
     <ClCompile Include="src\window\tab_window_3.cpp" />

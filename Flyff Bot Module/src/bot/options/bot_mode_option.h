@@ -28,13 +28,11 @@ class BotModeOption : public Option {
 
   void EnableOrDisableControls( bool enable ) override {}
 
-  BotMode GetBotMode() const {
-    return bot_mode_;
-  }
+  BotMode GetBotMode() const;
 
-  void SetBotMode( BotMode bot_mode ) {
-    bot_mode_ = bot_mode;
-  }
+  void SetBotMode( BotMode bot_mode );
+
+  virtual bool TryApplyOption() override;
 
  private:
   BotMode bot_mode_;

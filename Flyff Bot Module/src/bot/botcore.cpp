@@ -12,6 +12,7 @@
 #include "options/level_area_option.h"
 #include "options/bot_mode_option.h"
 #include "options/whitelisted_names_option.h"
+#include "options/remove_all_obstacles_option.h"
 #include "..\servers\flyff_client_mazey.h"
 #include "..\servers\flyff_client_ignite.h"
 #include "..\servers\flyff_client_dragon_crusade.h"
@@ -172,31 +173,7 @@ D3DXVECTOR3* BotCore::D3DXVec3ProjectHooked( D3DXVECTOR3* pOut,
                 client->GetClientVar( MemoryContants::kViewMatrixAddress ) );
 
     botcore->has_initialized_matrix_addresses_ = true;
-
-    /*
-    // Unhook itself to avoid being detected by the integrity checks
-    // This function being hooked lays inside the ignite flyff module
-    // TODO: Avoid being detected by integrity checks by not using detours
-    // anymore. Start using VEH hooking...
-    DetourTransactionBegin();
-
-    DetourUpdateThread( GetCurrentThread() );
-
-    DetourDetach( reinterpret_cast<PVOID*>(
-                      &Initializer().GetBotCore()->d3dxvec3proj_original_ ),
-                  BotCore::D3DXVec3ProjectHooked );
-
-    if ( DetourTransactionCommit() != NO_ERROR ) {
-      gwingui::messagebox::Error(
-          TEXT( "Error while trying to detach all hooks." ) );
-    }
-    */
   }
-
-  // LeaveCriticalSection( &g_d3dvec3project_critical_section_ );
-
-  // return botcore->d3dxvec3proj_original_( pOut, pV, pViewport, pProjection,
-  //                                         pView, pWorld );
 
   return d3dvec3project_hook_original_function( pOut, pV, pViewport,
                                                 pProjection, pView, pWorld );
@@ -213,14 +190,12 @@ BOOL BotCore::GetCursorPosHooked( LPPOINT lpPoint ) {
       reinterpret_cast<tGetCursorPos>( getcursorpos_hook.original_function );
 
   if ( !g_hooks_mutex.try_lock() ) {
-    // return botcore->get_cursor_pos_original_( lpPoint );
     return getcursorpos_hook_original_function( lpPoint );
   }
 
   std::lock_guard<std::mutex>( g_hooks_mutex, std::adopt_lock );
 
-  // BOOL ret = botcore->get_cursor_pos_original_( lpPoint );
-  BOOL ret = getcursorpos_hook_original_function( lpPoint );
+  const BOOL ret = getcursorpos_hook_original_function( lpPoint );
 
   if ( botcore->GetStarted() && botcore->simulated_cursor_pos_.x != -1 &&
        botcore->simulated_cursor_pos_.y != -1 ) {
@@ -228,22 +203,7 @@ BOOL BotCore::GetCursorPosHooked( LPPOINT lpPoint ) {
     lpPoint->y = botcore->simulated_cursor_pos_.y;
   }
 
-  // LeaveCriticalSection( &g_getcursorpos_critical_section_ );
-
   return ret;
-}
-
-std::wstring GetRandomString( uint32_t length ) {
-  std::wstring s = TEXT( "" );
-
-  std::wstring ascii = TEXT( "abcdef1234567890" );
-
-  for ( uint32_t i = 0; i < length; ++i ) {
-    uint32_t random_value = rand() % ( ascii.size() - 1 );
-    s += ascii[ random_value ];
-  }
-
-  return s;
 }
 
 SHORT BotCore::GetKeyStateHooked( int nVirtKey ) {
@@ -257,17 +217,10 @@ SHORT BotCore::GetKeyStateHooked( int nVirtKey ) {
       reinterpret_cast<tGetKeyState>( getkeystate_hook.original_function );
 
   if ( !g_hooks_mutex.try_lock() ) {
-    // return botcore->get_key_state_original_( nVirtKey );
     return getkeystate_hook_original_function( nVirtKey );
   }
 
   std::lock_guard<std::mutex>( g_hooks_mutex, std::adopt_lock );
-
-  // Always return the status that the key is down,
-  // this bypasses Ignite Flyff's protection against mouse click simulator with
-  // window messages
-  // auto get_key_state_original =
-  //     Initializer().GetBotCore()->get_key_state_original_;
 
   const auto module_name =
       Initializer().GetBotCore()->GetFlyffClient()->GetModuleName();
@@ -278,12 +231,15 @@ SHORT BotCore::GetKeyStateHooked( int nVirtKey ) {
 
   // Is the GetKeyState called from inside the Ignite.exe module
   if ( ret_addr >= module.base && ret_addr <= ( module.base + module.size ) ) {
+    // Always return the status that the key is down,
+    // this bypasses Ignite Flyff's protection against mouse click simulator
+    // with window messages
+
     // Spoof the value to bypass the check
     return MAKEWORD( 0, 1 );
   } else {
     // Call the original for functionality to stay the same for other stuff e.g.
     // ScrollBar in my GUI
-    // return get_key_state_original( nVirtKey );
     return getkeystate_hook_original_function( nVirtKey );
   }
 
@@ -386,14 +342,16 @@ LRESULT CALLBACK BotCore::KeyboardCallback( int code,
 
 void BotCore::ShowBotHasStoppedWindow() {
   if ( !GetStarted() ) {
-    if ( GetBot() ) {
+    if ( GetActiveBots().size() ) {
       waiting_window::DisplayWaitingWindowAsync(
           TEXT( "Waiting for the bot to finish its tasks..." ), [=]() {
             // Wait until the state is set to stopped
-            while ( !GetBot()->IsStateStopped() )
-              Sleep( 5 );
+            for ( const auto& bot : GetActiveBots() ) {
+              while ( bot->GetInternalState() != BaseBotStates::Stopped )
+                Sleep( 5 );
+            }
 
-            SetActiveBot( nullptr );
+            SetActiveBots( {} );
           } );
     }
   }
@@ -518,16 +476,12 @@ void BotCore::DrawEntity( const Entity& local_player,
   }
 }
 
-// #pragma optimize( "", off )
-
 void BotCore::Render( LPDIRECT3DDEVICE9 pDevice ) {
   Stopwatch stopwatch;
   stopwatch.Start();
-  // const auto local_player = client_->CreateLocalPlayer();
-  const std::unique_ptr<Entity> local_player_entity = client_->CreateLocalPlayer();
+  const auto local_player_entity = client_->CreateLocalPlayer();
 
-  if ( /*local_player->IsDeletedOrInvalidMemory() ||*/
-       local_player_entity->IsDeletedOrInvalidMemory() )
+  if ( local_player_entity->IsDeletedOrInvalidMemory() )
     return;
 
   drawing_.SetRenderStates( true );
@@ -582,35 +536,27 @@ void BotCore::Render( LPDIRECT3DDEVICE9 pDevice ) {
 
     for ( auto& entity : object_entities ) {
       // is the option enabled?
-      if ( bot_options_.GetRemoveAllObstaclesOption()->IsEnabled() ) {
+      if ( bot_options_.GetOption<RemoveAllObstacleOption>().IsEnabled() ) {
         if ( entity->IsDeletedOrInvalidMemory() ) {
           continue;
         }
-
-        // auto pos = entity->GetPosition();
-        //
-        // // If the position is invalid, then the entity is invalid...
-        // if ( pos.x == 0.f && pos.y == 0.f && pos.z == 0.f )
-        //   continue;
 
         entity->SetFlags( entity->GetFlags() | OBJ_FLAG_DELETE );
       }
     }
   }
 
-  const auto current_active_bot = GetBot();
+  const auto& avg_y_pos = bot_options_.GetOption<AverageYPosOption>();
 
-  const auto avg_y_pos =
-      bot_options_.GetAverageYPositionTargetSelectionOption();
-
-  if ( current_active_bot ) {
-    if ( avg_y_pos->IsEnabled() ) {
+  if ( GetStarted() ) {
+    if ( avg_y_pos.IsEnabled() ) {
       // TODO: Consider only creating it once, then just changing the position.
       // This is a waste. But fuck it, can't bother.
-      const std::unique_ptr<Entity> plane_entity = std::make_unique<EntityReplicateBox>(
-          client_.get(), *local_player_entity );
+      const std::unique_ptr<Entity> plane_entity =
+          std::make_unique<EntityReplicateBox>( client_.get(),
+                                                *local_player_entity );
       const float size = 3.f;
-      float plane_y = avg_y_pos->GetYPos();
+      float plane_y = avg_y_pos.GetYPos();
       auto plane_position = plane_entity->GetPosition();
       plane_position.y = plane_y;
       plane_entity->SetPosition( plane_position );
@@ -630,13 +576,13 @@ void BotCore::Render( LPDIRECT3DDEVICE9 pDevice ) {
     }
   }
 
-  const auto level_area = bot_options_.GetLevelAreaOption();
+  const auto& level_area = bot_options_.GetOption<LevelAreaOption>();
 
-  if ( level_area->IsEnabled() ) {
-    const auto bot_start_position = level_area->GetOriginPosition();
+  if ( level_area.IsEnabled() ) {
+    const auto bot_start_position = level_area.GetOriginPosition();
 
-    const auto length1 = level_area->GetLength1();
-    const auto length2 = level_area->GetLength2();
+    const auto length1 = level_area.GetLength1();
+    const auto length2 = level_area.GetLength2();
 
     for ( int i = 0; i < 4; ++i ) {
       const std::unique_ptr<Entity> corner_entity =
@@ -646,7 +592,7 @@ void BotCore::Render( LPDIRECT3DDEVICE9 pDevice ) {
       corner_entity->SetWorldMatrix( local_player_entity->GetWorldMatrix() );
 
       // Spread the corners out from the origin point (local player position)
-      auto corner_pos = level_area->GetCornerPosition( bot_start_position, i );
+      auto corner_pos = level_area.GetCornerPosition( bot_start_position, i );
       corner_pos.y = local_player_entity->GetPosition().y;
 
       corner_entity->SetPosition( corner_pos );
@@ -668,11 +614,6 @@ void BotCore::Render( LPDIRECT3DDEVICE9 pDevice ) {
 
       corner_entity->SetBoundBox( corner_bound_box );
 
-      // TODO: Make DrawEntity() take a pointer to a Entity instead of a
-      // unique ptr, same with FlyffWorldToScreen()
-
-      // TODO: Remove the opacity on the corners
-
       // Draw the flat plane
       DrawEntity( *local_player_entity, *corner_entity,
                   D3DCOLOR_RGBA( 255, 242, 0, 255 ) );
@@ -681,20 +622,6 @@ void BotCore::Render( LPDIRECT3DDEVICE9 pDevice ) {
 
   int total_entities = mover_entities.size();
   stopwatch.Stop();
-  /*
-    if (GetStarted()) {
-    const auto viewport = GetViewport();
-    const int x = viewport.Width / 2;
-    const int y = viewport.Height - 50;
-
-    drawing_.DrawTextC(
-      TEXT("PRESS END TO STOP THE BOT!"),
-      x,
-      y,
-      D3DCOLOR_RGBA(255, 255, 255, 255),
-      BIG_TEXT);
-    }
-  */
 
   const auto viewport = GetViewport();
   const int x = viewport.Width / 2;
@@ -724,14 +651,10 @@ void BotCore::Render( LPDIRECT3DDEVICE9 pDevice ) {
                       y - 45, D3DCOLOR_RGBA( 0, 0, 0, 255 ), NORMAL_TEXT );
 }
 
-// #pragma optimize( "", on )
-
 void BotCore::Update() {
-  if ( bot_.get() )
-    bot_->Update();
-
-  if ( passive_bot_.get() )
-    passive_bot_->Update();
+  for ( const auto& bot : active_bots_ ) {
+    bot->Update();
+  }
 
   const auto diff =
       static_cast<int64_t>( GetTickCount64() - last_cheats_update_ms_ );
@@ -767,7 +690,7 @@ void BotCore::ToggleBot() {
   if ( bot_options_.HasOptionsBeenChanged() ) {
     // If the previous bot status was off, then we are trying to turn it on.
     if ( !GetStarted() ) {
-      if ( !bot_options_.ApplyOptions( local_player->GetName() ) ) {
+      if ( !bot_options_.TryApplyOptions( local_player->GetName() ) ) {
         gwingui::messagebox::Error( TEXT(
             "Unable to start the bot, the options could not be applied." ) );
         return;
@@ -778,9 +701,14 @@ void BotCore::ToggleBot() {
   SetStarted( !GetStarted() );
 
   if ( GetStarted() ) {
-    switch ( bot_options_.GetBotModeOption()->GetBotMode() ) {
+    switch ( bot_options_.GetOption<BotModeOption>().GetBotMode() ) {
       case BotMode::kBotModeOneVsOne: {
-        SetActiveBot( new BotAIOneVsOne( this ) );
+        std::vector<std::unique_ptr<Bot>> bots;
+
+        bots.push_back( std::make_unique<BotAIOneVsOne>( this ) );
+        bots.push_back( std::make_unique<BotPassive>( this ) );
+
+        SetActiveBots( std::move( bots ) );
       } break;
 
       default:
@@ -841,12 +769,8 @@ void BotCore::AddEntityToDraw( std::unique_ptr<Entity>& entity ) {
   extra_entities_.push_back( std::move( entity ) );
 }
 
-Bot* BotCore::GetBot() {
-  return bot_.get();
-}
-
-Bot* BotCore::GetPassiveBot() {
-  return passive_bot_.get();
+std::vector<std::unique_ptr<Bot>>& BotCore::GetActiveBots() {
+  return active_bots_;
 }
 
 LPDIRECT3DDEVICE9 BotCore::GetDevice() {
@@ -857,13 +781,8 @@ HWND BotCore::GetTargetWindow() {
   return target_window_handle_;
 }
 
-void BotCore::SetActiveBot( Bot* bot ) {
-  bot_.reset( bot );
-
-  if ( bot )
-    passive_bot_.reset( new BotPassive( this ) );
-  else
-    passive_bot_.reset( 0 );
+void BotCore::SetActiveBots( std::vector<std::unique_ptr<Bot>>&& bots ) {
+  active_bots_ = std::move( bots );
 }
 
 void BotCore::SetSimulatedCursorPos( POINT& pos ) {

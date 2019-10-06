@@ -270,7 +270,7 @@ void MainWindow::OnButtonClick( const HWND button_handle,
         return;
       }
 
-      bot_options.ApplyOptions( local_player->GetName() );
+      bot_options.TryApplyOptions( local_player->GetName() );
     } break;
 
     case BUTTON_HIDE_WINDOW: {
@@ -405,14 +405,14 @@ void MainWindow::OnButtonClick( const HWND button_handle,
     } break;
 
     case BTN_TEST: {
-//       const auto botcore = Initializer().GetBotCore();
-//       const auto client = botcore->GetFlyffClient();
-//       const auto local_player = client->CreateLocalPlayer();
-// 
-//       const auto selected_entity = local_player->GetSelectedEntity();
-// 
-//       gwingui::messagebox::Warning(
-//           std::to_wstring( selected_entity->GetMotion() ) );
+      //       const auto botcore = Initializer().GetBotCore();
+      //       const auto client = botcore->GetFlyffClient();
+      //       const auto local_player = client->CreateLocalPlayer();
+      //
+      //       const auto selected_entity = local_player->GetSelectedEntity();
+      //
+      //       gwingui::messagebox::Warning(
+      //           std::to_wstring( selected_entity->GetMotion() ) );
 
       static bool lol = []() -> bool {
         __try {

@@ -30,6 +30,10 @@ class CharacterRebuffListOption : public Option {
 
   void EnableOrDisableControls( bool enable ) override;
 
+  CharacterRebuffOption ReadCharacterRebuffOptions( uint32_t index );
+
+  bool TryApplyOption() override;
+
  private:
   std::vector<CharacterRebuffOption> rebuff_list_;
 

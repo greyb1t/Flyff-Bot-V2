@@ -13,6 +13,8 @@ class AutoHealingPillsOption : public AutoHealingOption {
   void RefreshControls() override;
 
   void EnableOrDisableControls( bool enable ) override;
+
+  virtual bool TryApplyOption() override;
 };
 
 }  // namespace bot

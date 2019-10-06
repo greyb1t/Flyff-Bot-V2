@@ -26,6 +26,8 @@ class AutoHealingOption : public Option {
 
   void EnableOrDisableControls( bool enable ) override;
 
+  virtual bool TryApplyOption() override;
+
  protected:
   uint16_t heal_key_code_;
   uint32_t health_limit_;

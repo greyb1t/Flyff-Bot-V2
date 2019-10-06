@@ -9,6 +9,19 @@
 
 namespace bot {
 
+struct EntityPointerData {
+  uint32_t entity_addr;
+  uint32_t entity_ptr_addr;
+
+  bool operator==( const EntityPointerData& rhs ) const {
+    return entity_ptr_addr == rhs.entity_ptr_addr;
+  }
+
+  bool operator<( const EntityPointerData& rhs ) const {
+    return entity_ptr_addr < rhs.entity_ptr_addr;
+  }
+};
+
 EntityList::EntityList( FlyffClient* client ) : client_( client ) {
   ReadEntityList();
 }

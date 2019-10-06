@@ -20,6 +20,8 @@ class WhitelistedNamesOption : public ValueListOption<std::string> {
 
   virtual bool IsEntityAllowed( const std::unique_ptr<Entity>& entity ) const;
 
+  bool TryApplyOption() override;
+
  private:
   const static std::string kWhitelistedNamesJsonName;
 };

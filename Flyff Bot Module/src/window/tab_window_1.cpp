@@ -251,7 +251,8 @@ void TabWindow1::OnListBoxSelectionChanged( uint32_t control_identifier,
     case LISTBOX_REBUFF_SEQUENCES: {
       const auto botcore = Initializer().GetBotCore();
       auto& bot_options = botcore->GetBotOptions();
-      auto character_rebuff_list = bot_options.GetRebuffSequenceListOption();
+      auto& character_rebuff_list =
+          bot_options.GetOption<CharacterRebuffListOption>();
 
       // Refresh the controls with the new values for the specific rebuff
       // sequence
@@ -261,9 +262,9 @@ void TabWindow1::OnListBoxSelectionChanged( uint32_t control_identifier,
       // Is a sequence selected in the listbox?
       if ( selected_sequence_index != -1 ) {
         // Does the selected index of sequence exists?
-        if ( character_rebuff_list->RebuffExists( selected_sequence_index ) ) {
+        if ( character_rebuff_list.RebuffExists( selected_sequence_index ) ) {
           auto& selected_char_rebuff_sequence =
-              character_rebuff_list->GetCharacterRebuff(
+              character_rebuff_list.GetCharacterRebuff(
                   selected_sequence_index );
 
           // selected_char_rebuff_sequence.EnableOrDisableControls(true);
@@ -287,8 +288,8 @@ void TabWindow1::OnListBoxSelectionChanged( uint32_t control_identifier,
 }
 
 void TabWindow1::OnListBoxItemDeleted( const uint32_t control_id,
-                                   const HWND control_handle,
-                                   const uint32_t index ) {
+                                       const HWND control_handle,
+                                       const uint32_t index ) {
   switch ( control_id ) {
     case LISTBOX_REBUFF_SEQUENCES: {
       CharacterRebuffOption rebuff_temp;
@@ -308,7 +309,8 @@ void TabWindow1::OnButtonClick( HWND hCtrl, UINT ctrlId ) {
   switch ( ctrlId ) {
     case CHECK_WHITELIST_NAMES: {
       bool value = gwingui::checkbox::IsChecked( GWH( CHECK_WHITELIST_NAMES ) );
-      bot_options.GetWhitelistedNamesOption()->EnableOrDisableControls( value );
+      bot_options.GetOption<WhitelistedNamesOption>().EnableOrDisableControls(
+          value );
     } break;
 
     case BUTTON_ADD_WHITELISTED_NAME: {
@@ -371,7 +373,8 @@ void TabWindow1::OnButtonClick( HWND hCtrl, UINT ctrlId ) {
 
     case CHECK_ATTACK_SEQUENCE: {
       bool value = gwingui::checkbox::IsChecked( GWH( CHECK_ATTACK_SEQUENCE ) );
-      bot_options.GetAttackSequenceOption()->EnableOrDisableControls( value );
+      bot_options.GetOption<AttackSequenceOption>().EnableOrDisableControls(
+          value );
     } break;
 
     case BUTTON_ADD_ATTACK: {
@@ -433,25 +436,27 @@ void TabWindow1::OnButtonClick( HWND hCtrl, UINT ctrlId ) {
     case CHECK_AUTO_HEALTH_FOOD: {
       bool value =
           gwingui::checkbox::IsChecked( GWH( CHECK_AUTO_HEALTH_FOOD ) );
-      bot_options.GetAutoHealingFoodOption()->EnableOrDisableControls( value );
+      bot_options.GetOption<AutoHealingOption>().EnableOrDisableControls(
+          value );
     } break;
 
     case CHECK_AUTO_HEALTH_PILLS: {
       bool value =
           gwingui::checkbox::IsChecked( GWH( CHECK_AUTO_HEALTH_PILLS ) );
-      bot_options.GetAutoHealingPillsOption()->EnableOrDisableControls( value );
+      bot_options.GetOption<AutoHealingPillsOption>().EnableOrDisableControls(
+          value );
     } break;
 
     case CHECK_WHITELIST_PLAYER_NAMES: {
       bool value =
           gwingui::checkbox::IsChecked( GWH( CHECK_WHITELIST_PLAYER_NAMES ) );
-      bot_options.GetWhitelistedPlayerNamesOption()->EnableOrDisableControls(
-          value );
+      bot_options.GetOption<WhitelistedPlayerNamesOption>()
+          .EnableOrDisableControls( value );
     } break;
 
     case CHECK_LEVEL_AREA: {
       bool value = gwingui::checkbox::IsChecked( GWH( CHECK_LEVEL_AREA ) );
-      bot_options.GetLevelAreaOption()->EnableOrDisableControls( value );
+      bot_options.GetOption<LevelAreaOption>().EnableOrDisableControls( value );
     } break;
 
     case BUTTON_LEVEL_AREA_GET_CURRENT_POS: {
@@ -535,8 +540,8 @@ void TabWindow1::OnButtonClick( HWND hCtrl, UINT ctrlId ) {
       bool value =
           gwingui::checkbox::IsChecked( GWH( CHECK_REBUFF_SEQUENCES ) );
 
-      bot_options.GetRebuffSequenceListOption()->EnableOrDisableControls(
-          value );
+      bot_options.GetOption<CharacterRebuffListOption>()
+          .EnableOrDisableControls( value );
 
       if ( !value ) {
         CharacterRebuffOption rebuff_temp;
@@ -552,8 +557,9 @@ void TabWindow1::OnButtonClick( HWND hCtrl, UINT ctrlId ) {
       CharacterRebuffOption rebuff_temp;
       rebuff_temp.SetStatus( true );
 
-      auto character_rebuff_list = bot_options.GetRebuffSequenceListOption();
-      character_rebuff_list->AddRebuffSequence( rebuff_temp );
+      auto& character_rebuff_list =
+          bot_options.GetOption<CharacterRebuffListOption>();
+      character_rebuff_list.AddRebuffSequence( rebuff_temp );
 
       gwingui::listbox::AddString(
           listbox_rebuff_sequences,
@@ -567,9 +573,10 @@ void TabWindow1::OnButtonClick( HWND hCtrl, UINT ctrlId ) {
       int selected_index =
           gwingui::listbox::GetSelectedIndex( listbox_rebuff_sequences );
 
-      auto rebuff_sequence_list = bot_options.GetRebuffSequenceListOption();
+      auto& rebuff_sequence_list =
+          bot_options.GetOption<CharacterRebuffListOption>();
 
-      rebuff_sequence_list->RemoveRebuffSequence( selected_index );
+      rebuff_sequence_list.RemoveRebuffSequence( selected_index );
 
       gwingui::listbox::DeleteItem( listbox_rebuff_sequences, selected_index );
     } break;
@@ -578,13 +585,14 @@ void TabWindow1::OnButtonClick( HWND hCtrl, UINT ctrlId ) {
       int selected_index =
           gwingui::listbox::GetSelectedIndex( GWH( LISTBOX_REBUFF_SEQUENCES ) );
 
-      auto rebuff_sequence_list = bot_options.GetRebuffSequenceListOption();
+      auto& rebuff_sequence_list =
+          bot_options.GetOption<CharacterRebuffListOption>();
 
       const auto charcter_rebuff_of_options =
-          bot_options.ReadCharacterRebuffOptions( selected_index );
+          rebuff_sequence_list.ReadCharacterRebuffOptions( selected_index );
 
-      rebuff_sequence_list->ReplaceRebuffSequence( selected_index,
-                                                   charcter_rebuff_of_options );
+      rebuff_sequence_list.ReplaceRebuffSequence( selected_index,
+                                                  charcter_rebuff_of_options );
     } break;
 
     case BUTTON_REBUFF_KEY_ADD: {

@@ -6,6 +6,7 @@
 
 #include "gwinguiv2/controls/checkbox.h"
 #include "gwinguiv2/controls/control.h"
+#include "gwinguiv2/message_box.h"
 
 using namespace nlohmann;
 
@@ -16,13 +17,15 @@ class Option : public bot::EntityFilter {
         name_( option_name ),
         control_identifier_( control_identifier ) {}
 
-  void SetStatus( bool enabled ) {
-    enabled_ = enabled;
+  // Option( const Option& option ) = delete;
+
+  virtual bool TryApplyOption() {
+    return true;
   }
 
-  bool IsEnabled() const {
-    return enabled_;
-  }
+  void SetStatus( bool enabled );
+
+  bool IsEnabled() const;
 
   virtual json GetJson();
 
@@ -30,25 +33,14 @@ class Option : public bot::EntityFilter {
 
   bool JsonExists( const json& j, const std::string& key );
 
-  virtual void RefreshControls() {
-    if ( control_identifier_ ) {
-      const auto checkbox_handle = GWH( control_identifier_ );
-      gwingui::checkbox::SetCheck( checkbox_handle, enabled_ );
-    }
+  virtual void RefreshControls();
 
-    EnableOrDisableControls( enabled_ );
-  }
-
-  std::string GetName() const {
-    return name_;
-  }
+  std::string GetName() const;
 
   virtual void EnableOrDisableControls( bool enable ) {}
 
-  virtual bool IsEntityAllowed( const std::unique_ptr<bot::Entity>& entity ) const {
-    assert( false && "unhandled filter" );
-    return false;
-  }
+  virtual bool IsEntityAllowed(
+      const std::unique_ptr<bot::Entity>& entity ) const;
 
  protected:
   bool enabled_;

@@ -18,13 +18,11 @@ class LureTargetKeyOption : public Option {
 
   void EnableOrDisableControls( bool enable ) override {}
 
-  uint16_t GetLureKeyCode() {
-    return lure_key_code_;
-  }
+  uint16_t GetLureKeyCode();
 
-  void SetLureKeyCode( uint16_t bot_mode ) {
-    lure_key_code_ = bot_mode;
-  }
+  void SetLureKeyCode( uint16_t bot_mode );
+
+  virtual bool TryApplyOption() override;
 
  private:
   uint16_t lure_key_code_;
