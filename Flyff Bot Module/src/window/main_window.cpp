@@ -532,12 +532,6 @@ INT_PTR CALLBACK MainWindow::DialogProc( HWND window_handle,
       // WM_QUIT makes GetMessage return 0 and exit the message loop
       SendMessage( window_handle, WM_QUIT, 0, 0 );
 
-      /*
-      gwingui::messagebox::Warning( TEXT( "here" ) );
-
-      botcore->SetStarted( false );
-      */
-
       const auto local_player = botcore->GetFlyffClient()->CreateLocalPlayer();
 
       if ( local_player ) {

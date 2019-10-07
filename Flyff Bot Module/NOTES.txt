@@ -1,10 +1,6 @@
 TODO: Add opportunity to only Render/Update once every 0.5 seconds to avoid fps issues
 
-TODO: When stopping the bot, print the stats in the log. botting time, entities killed
-
 TODO: Add feature to make the character jump if getting stuck on a high wall
-
-TODO: Add feature to teleport monster to player for bootleg range hack
 
 TODO: Add feature to take screenshot when player dies to identify what might have caused the death
 
