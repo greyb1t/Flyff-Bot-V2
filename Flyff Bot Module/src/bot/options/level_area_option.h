@@ -34,7 +34,7 @@ class LevelAreaOption : public Option {
   bool IsInsideArea( const D3DXVECTOR3& start_position,
                      const D3DXVECTOR3& position ) const;
 
-  virtual bool IsEntityAllowed( const std::unique_ptr<Entity>& entity ) const;
+  virtual bool IsEntityAllowed( const Entity& entity ) const;
 
   bool TryApplyOption() override;
 

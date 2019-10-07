@@ -30,7 +30,7 @@ std::unique_ptr<bot::Entity> bot::KillingBot::FindNearestMonster(
           bool let_through = true;
 
           for ( const auto filter : entity_filters ) {
-            if ( !filter->IsEntityAllowed( entity ) ) {
+            if ( !filter->IsEntityAllowed( *entity ) ) {
               let_through = false;
               break;
             }

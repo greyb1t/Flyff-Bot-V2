@@ -45,7 +45,7 @@ std::string Option::GetName() const {
   return name_;
 }
 
-bool Option::IsEntityAllowed( const std::unique_ptr<bot::Entity>& entity ) const {
+bool Option::IsEntityAllowed( const bot::Entity& entity ) const {
   assert( false && "unhandled filter" );
   return false;
 }

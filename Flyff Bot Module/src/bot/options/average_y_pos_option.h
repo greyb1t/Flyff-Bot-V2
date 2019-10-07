@@ -14,7 +14,7 @@ class AverageYPosOption : public Option {
 
   float GetYPos() const;
 
-  virtual bool IsEntityAllowed( const std::unique_ptr<Entity>& entity ) const;
+  virtual bool IsEntityAllowed( const Entity& entity ) const;
 
   bool TryApplyOption() override;
 

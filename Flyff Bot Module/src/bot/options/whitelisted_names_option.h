@@ -18,7 +18,7 @@ class WhitelistedNamesOption : public ValueListOption<std::string> {
 
   void EnableOrDisableControls( bool enable ) override;
 
-  virtual bool IsEntityAllowed( const std::unique_ptr<Entity>& entity ) const;
+  virtual bool IsEntityAllowed( const Entity& entity ) const;
 
   bool TryApplyOption() override;
 

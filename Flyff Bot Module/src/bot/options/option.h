@@ -39,8 +39,7 @@ class Option : public bot::EntityFilter {
 
   virtual void EnableOrDisableControls( bool enable ) {}
 
-  virtual bool IsEntityAllowed(
-      const std::unique_ptr<bot::Entity>& entity ) const;
+  virtual bool IsEntityAllowed( const bot::Entity& entity ) const;
 
  protected:
   bool enabled_;

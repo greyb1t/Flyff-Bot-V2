@@ -11,10 +11,9 @@ float bot::AverageYPosOption::GetYPos() const {
   return average_y_pos_;
 }
 
-bool bot::AverageYPosOption::IsEntityAllowed(
-    const std::unique_ptr<Entity>& entity ) const {
+bool bot::AverageYPosOption::IsEntityAllowed( const Entity& entity ) const {
   if ( IsEnabled() )
-    return entity->GetPosition().y >= average_y_pos_;
+    return entity.GetPosition().y >= average_y_pos_;
   else
     return true;
 }
