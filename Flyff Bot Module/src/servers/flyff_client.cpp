@@ -15,6 +15,8 @@
 
 #include "gwinmem/process_memory_internal.h"
 
+#include "../utils/string_utls.h"
+
 namespace bot {
 
 FlyffClient::FlyffClient( const std::wstring& module_name )
@@ -45,57 +47,79 @@ bool FlyffClient::Search( HWND loading_window_handle ) {
 
   float excess_inc_val = 0.f;
 
-  for ( auto addr : server_addresses_finder_functions_ ) {
-    auto found_addr = addr.second();
+  std::vector<std::future<std::pair<MemoryContants, uint32_t>>>
+      address_search_results;
 
-    if ( IsAddressInvalid( found_addr ) ) {
-      gwingui::messagebox::Error(
-          TEXT( "An invalid address has been found with an id of " +
-                std::to_wstring( static_cast<uint32_t>( addr.first ) ) +
+  for ( auto addr : server_addresses_finder_functions_ ) {
+    auto result = std::async(
+        std::launch::async, [=]() -> std::pair<MemoryContants, uint32_t> {
+          return std::make_pair( addr.first, addr.second() );
+        } );
+
+    address_search_results.push_back( std::move( result ) );
+  }
+
+  try {
+    for ( auto& search_result : address_search_results ) {
+      const auto result = search_result.get();
+
+      const auto found_addr = result.second;
+
+      if ( IsAddressInvalid( found_addr ) ) {
+        gwingui::messagebox::Error(
+            TEXT(
+                "An invalid address has been found with an id of " +
+                std::to_wstring( static_cast<uint32_t>( result.first ) ) +
                 TEXT( ", the bot might not work properly. Contact greyb1t for "
                       "more information." ) ),
-          TEXT( "Error" ), loading_window_handle );
+            TEXT( "Error" ), loading_window_handle );
+      }
+
+      server_addresses_[ result.first ] = found_addr;
+
+      const auto string_to_hex = []( const uint64_t value ) -> std::wstring {
+        std::wstringstream ss;
+        ss << std::hex << value;
+        return ss.str();
+      };
+
+      const auto richedit_addresses_offsets = GWH( RICHEDIT_ADDRESSES_OFFSETS );
+
+      gwingui::richedit::AppendText(
+          richedit_addresses_offsets,
+          MemoryConstantToString( result.first ) + TEXT( ": 0x" ) +
+              string_to_hex( found_addr ) + TEXT( "\n" ) );
+
+      float more = 0;
+
+      if ( excess_inc_val > 1.f ) {
+        more = excess_inc_val;
+        excess_inc_val = 0.f;
+      }
+
+      const auto progressbar_load_addresses = GWH( PROGRESS_LOAD_ADDRESSES );
+      uint32_t old_pos =
+          gwingui::progressbar::GetPos( progressbar_load_addresses );
+
+      // Remove the slow progress bar animation
+      // https :  //
+      // stackoverflow.com/questions/5332616/disabling-net-progressbar-animation-when-changing-value
+      // Increase and decrease immediately
+      gwingui::progressbar::SetPos(
+          progressbar_load_addresses,
+          old_pos + static_cast<int>( progress_increment_value + more ) + 1 );
+      gwingui::progressbar::SetPos(
+          progressbar_load_addresses,
+          old_pos + static_cast<int>( progress_increment_value + more ) - 1 );
+
+      // gWin::Progressbar::IncementPos(PROGRESS_LOAD_ADDRESSES,
+      // static_cast<int>(progress_increment_value + more));
+      excess_inc_val += progress_increment_value_extra;
     }
-
-    server_addresses_[ addr.first ] = found_addr;
-
-    const auto string_to_hex = []( const uint64_t value ) -> std::wstring {
-      std::wstringstream ss;
-      ss << std::hex << value;
-      return ss.str();
-    };
-
-    const auto richedit_addresses_offsets = GWH( RICHEDIT_ADDRESSES_OFFSETS );
-
-    gwingui::richedit::AppendText(
-        richedit_addresses_offsets,
-        MemoryConstantToString( addr.first ) + TEXT( ": 0x" ) +
-            string_to_hex( found_addr ) + TEXT( "\n" ) );
-
-    float more = 0;
-
-    if ( excess_inc_val > 1.f ) {
-      more = excess_inc_val;
-      excess_inc_val = 0.f;
-    }
-
-    const auto progressbar_load_addresses = GWH( PROGRESS_LOAD_ADDRESSES );
-    uint32_t old_pos =
-        gwingui::progressbar::GetPos( progressbar_load_addresses );
-
-    // Remove the slow progress bar animation
-    // https://stackoverflow.com/questions/5332616/disabling-net-progressbar-animation-when-changing-value
-    // Increase and decrease immediately
-    gwingui::progressbar::SetPos(
-        progressbar_load_addresses,
-        old_pos + static_cast<int>( progress_increment_value + more ) + 1 );
-    gwingui::progressbar::SetPos(
-        progressbar_load_addresses,
-        old_pos + static_cast<int>( progress_increment_value + more ) - 1 );
-
-    // gWin::Progressbar::IncementPos(PROGRESS_LOAD_ADDRESSES,
-    // static_cast<int>(progress_increment_value + more));
-    excess_inc_val += progress_increment_value_extra;
+  } catch ( std::exception& ex ) {
+    gwingui::messagebox::Error(
+        TEXT( "An exception occured during search for focks sake!\n" ) +
+        stringutils::AnsiToWide( ex.what() ) );
   }
 
   PostAddressSearch();
