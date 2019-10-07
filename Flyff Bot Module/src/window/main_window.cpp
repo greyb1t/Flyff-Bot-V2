@@ -11,6 +11,7 @@
 #include "gwinguiv2/message_box.h"
 
 #include "gwinmem/process_memory_internal.h"
+#include "../bot/logging.h"
 
 typedef enum _PROCESSINFOCLASS {
   ProcessBasicInformation,  // q: PROCESS_BASIC_INFORMATION,
@@ -520,11 +521,22 @@ INT_PTR CALLBACK MainWindow::DialogProc( HWND window_handle,
       }
       */
 
+      auto botcore = Initializer().GetBotCore();
+
+      if ( botcore->GetStarted() ) {
+        gwingui::messagebox::Warning(
+            TEXT( "Please stop the bot before closing the bot." ) );
+        return 1;
+      }
+
       // WM_QUIT makes GetMessage return 0 and exit the message loop
       SendMessage( window_handle, WM_QUIT, 0, 0 );
 
-      auto botcore = Initializer().GetBotCore();
+      /*
+      gwingui::messagebox::Warning( TEXT( "here" ) );
+
       botcore->SetStarted( false );
+      */
 
       const auto local_player = botcore->GetFlyffClient()->CreateLocalPlayer();
 
