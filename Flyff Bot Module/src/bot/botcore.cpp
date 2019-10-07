@@ -701,6 +701,18 @@ void BotCore::ToggleBot() {
   SetStarted( !GetStarted() );
 
   if ( GetStarted() ) {
+    const auto level_area_option = bot_options_.GetOption<LevelAreaOption>();
+
+    if ( level_area_option.IsEnabled() ) {
+      // Check if the user starts the bot outside the level area and warn them
+      if ( !level_area_option.IsEntityAllowed( *local_player ) ) {
+        gwingui::messagebox::Warning(
+            TEXT( "You started the bot while being outside the level area you "
+                  "have set for the bot. This might cause the bot to not find "
+                  "monsters." ) );
+      }
+    }
+
     switch ( bot_options_.GetOption<BotModeOption>().GetBotMode() ) {
       case BotMode::kBotModeOneVsOne: {
         std::vector<std::unique_ptr<Bot>> bots;
