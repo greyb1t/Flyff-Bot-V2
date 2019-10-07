@@ -30,5 +30,6 @@
 #include <sstream>
 #include <VersionHelpers.h>
 #include <fstream>
+#include <future>
 
 #include "d3dx9math.h"
