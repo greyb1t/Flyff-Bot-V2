@@ -243,7 +243,7 @@ void BotAIOneVsOne::UpdateInternal() {
 
         // Adjust the camera to look the opposite direction for entities
         const float current_camera_degrees_x = local_player->GetCameraRotX();
-        local_player->SetCameraRotX( current_camera_degrees_x + 45.f );
+        local_player->SetCameraRotX( current_camera_degrees_x + 90.f );
 
         const auto offset = local_player->GetScrollDistance() * 4;
 
