@@ -1,3 +1,5 @@
+TODO: Add feature to wait before continuing to kill monsters until the player health is above the set limit if auto food option is enabled
+
 TODO: Add opportunity to only Render/Update once every 0.5 seconds to avoid fps issues
 
 TODO: Add feature to make the character jump if getting stuck on a high wall
@@ -6,6 +8,9 @@ TODO: Add feature to take screenshot when player dies to identify what might hav
 
 TODO: Add warning if users tries to start the bot while being outside the "Restricted Killing Area".
 	If no warning, the user might think the bot is not working bcuz it just keep looking but not finding.
+
+NOTE: If I ever sell it, if the user does not follow the agreements of the usage, add their information to a public list
+	Paypal email, account name
 
 Find if monster is aggro:
 * It is located about 40 bytes below authorization.
@@ -16,9 +21,6 @@ TODO: (Security) Manualmap most system DLLs and use those dlls to avoid any anti
 TODO: Fix if a aggressive non-whitelisted monster starts attacking the player, then kill it. 
 TODO: Add an new bot mode in the bot, RM support. Then disable all other controls that are not needed and used. Use the normal Start Bot button.
 TODO: If char dies while botting, add option to exit the client. Otherwise lying dead afk looks fishy.
-TODO: Add stats, e.g. total monsters killed. Bot run time. Last bot run time.
-
-NOTE: Continuous calls of logging::Log causes the flyff window to freeze
 
 Suspend the protection thread:
 The protection thread is dependent to run on the main thread. In other words,
@@ -37,55 +39,10 @@ seems to be checking for bad boy stuff.
 NOTE:
 NtClose Anti debug has argument 0xBAAD
 
-FIX:
-The bot gets stuck when the log printed out "Looking for closer entities"
-Make a universal function that is called "CheckIfBlockedSafety" or something.
-*POTENTIALLY SOLVED*
-
-FEATURE:
-bot rebuff, has a timer with a key sequence.
-When the timer has run out, we wait for bot to go into and reach an idle state and rebuff
-
-FIX:
-bug: When a mammoth stands in the char, the bot is blocked 
-by that mammoth while it tries to select other monsters, 
-it gets stuck in unlimited loop.
-E.g When another monster that is not whitelisted stands in the character preventing
-the bot from selecting the other whitelisted monsters, it gets unlimited loop until
-the non-whitelisted monster inside of the char moves away.
-Solution: Temporarily remove the bound box and restore it later
-Solution 2: When the bot is about to select the monster, remove all other entities bound boxes temporarily.
-*SOLVED*
-
-FEATURE:
-Client sided Admin - Shows several commands on chat, and the main thing in my eyes: Instant logout anywhere, and see Invisible Players / GM's
-
-DO ABOVE AND TEST IT IN EVENT, BYPASS IT
-Instead of changing the GM value, change the locations that accesses that value. Change the instructions to think the 70 value is a gm.
-
-FEATURE:
-remove all obstacles and ojbects bound boxess
-(HIDE THEM IF BOUND BOX DON'T WORK)
-*DONE* I removed them by changing their position high up in the sky.
-
-FEATURE:
-add option to rotate camera QUICKLY (ultra safe mode)
-
-FEATURE:
-cheat engine, change the upgrade water effect time
-
 FEATURE:
 full support rm
 find target by name
 have a connection between the two client to find out position of the target to heal then rm bot clicks its way to the target to find
-
-FIX:
-Fix the logging to avoid starting a new thread each call
-*DONE*
-
-FIX?:
-Manual Mapping does not work with the bot due to using e.g. SetWindowsHookEx. I tried using the Nt class of that function
-but no luck, the hook proc does being called.
 
 NOTE:
 I may have found the range offset in the player struct by using my range old offset
@@ -101,48 +58,12 @@ Ignite Speed Offset = 0x1918
 Ignite Range Offset = 0x1918 + 0x13c
 Ignite Range Offset: 0x1a54
 
-IDEA:
-Write text when detect player and stops bot.
-*DONE*
-
-FIX:
-Jakob has the issue that the bot targets and tries to kill the monsters on the side of the map.
-The character gets stuck down there.
-*FIXED*
-
-FIX:
-Fix the issue that Alex had, where the bot tried killing a monster without a hitbox.
-
-FIX:
-When the camera is unable in any way possible to have the target entiy on screen.
-Solution is to make a total amount of tries, then it temporarily blacklists it selects another monster.
-
-FIX:
-Sometimes the bot had issues pressing the first key in the char rebuff sequence
-instead it hopped on to the board. Never changed slots to the buff slot.
-*POTENTIALLY SOLVED*
-
-FIX:
-sO THE SPEED IS ALAYWAS SET WHEN STARTTING BOT
-*SOLVED*
-
-NOTE:
-A potential crash fix was checking if the window class has already been 
-registered, otherwise it'll override the wncproc with same wndproc 
-and cause it to get corrupted.
-
 FEATURE:
 RM Full-Support
 Rebuff on several different key sequences
 Healing Target - Works like Attack Sequence and rebuffs when in a different states and such
 CAN REUSE EVERYTHING INCLUDING THE GUI - JUST ADD ANOTHER BOT MODE - RM FULL SUPPORT
 THE ONLY DIFFERENCE IS THAT WE DISABLE ALL OTHER CONTROLS THAT CAN NOT BE USED WITH IT
-
-FIX:
-Avoid the spamming of keys with the auto-healing features.
-
-FEATURE:
-No Charge - The bow shoots charged shots at all times
 
 Hook the function void CMover::CMD_SetRangeAttack( OBJID idTarget, int nPower )
 Modify the second parameter (nPower) to 4. Then continue by calling the original function.
