@@ -609,6 +609,8 @@ void FlyffClientIgniteFlyff::PreHookInitialization() {
   // Flyff integrity checks are bypassed before modifying anything else in the
   // memory
 
+  // TODO: replace code below with hook manager
+
   crypt_hash_data_original_ = CryptHashData;
 
   DetourTransactionBegin();
