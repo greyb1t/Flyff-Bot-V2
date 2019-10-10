@@ -82,6 +82,8 @@ class BotOptions {
 
   template <typename T>
   T& InternalGetOption( OptionType type ) {
+    std::lock_guard<std::mutex> lock_guard( option_mutex_ );
+
     auto& option = options_[ type ];
     // In order for the static_cast to work, we cannot simply forward declare
     // the class, we need to include it because we use it
@@ -103,6 +105,8 @@ class BotOptions {
   std::map<OptionType, std::unique_ptr<Option>> options_;
 
   float speed_multiplier_;
+
+  std::mutex option_mutex_;
 };
 
 template <typename T>

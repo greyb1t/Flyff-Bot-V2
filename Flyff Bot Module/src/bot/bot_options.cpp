@@ -266,6 +266,8 @@ void BotOptions::CheckOptionControlsChanged( uint32_t control_identifier ) {
 }
 
 bool BotOptions::TryApplyOptions( const std::string& character_name ) {
+  std::lock_guard<std::mutex> lock_guard( option_mutex_ );
+
   // Try applying all the options
   for ( const auto& option : options_ ) {
     if ( !option.second->TryApplyOption() ) {
