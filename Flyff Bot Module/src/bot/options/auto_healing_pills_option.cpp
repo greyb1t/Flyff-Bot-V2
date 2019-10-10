@@ -6,6 +6,7 @@
 #include "gwinguiv2/controls/control.h"
 #include "gwinguiv2/controls/editcontrol.h"
 #include "gwinguiv2/controls/combobox.h"
+#include "gwinguiv2/controls/hotkey.h"
 
 namespace bot {
 
@@ -21,23 +22,15 @@ void AutoHealingPillsOption::RefreshControls() {
     gwingui::editcontrol::SetText( editcontrol_auto_pills_hp_limit,
                                    TEXT( "" ) );
 
-  std::wstring key_code_s =
-      optionutils::VirtualKeyCodeToAsciiKey( heal_key_code_ );
+  const auto hotkey_auto_health_pill_handle =
+      GWH( HOTKEY_AUTO_HEALTH_PILLS_KEY );
 
-  if ( !key_code_s.empty() ) {
-    const auto combobox_auto_health_pills_key =
-        GWH( COMBO_AUTO_HEALTH_PILLS_KEY );
-
-    int key_code_index = gwingui::combobox::FindString(
-        combobox_auto_health_pills_key, 0, key_code_s );
-
-    gwingui::combobox::SetSelectedIndex( combobox_auto_health_pills_key,
-                                         key_code_index );
-  }
+  gwingui::hotkey::SetCurrentHotkey( hotkey_auto_health_pill_handle,
+                                     heal_key_code_ );
 }
 
 void AutoHealingPillsOption::EnableOrDisableControls( bool enable ) {
-  gwingui::control::EnableOrDisable( GWH( COMBO_AUTO_HEALTH_PILLS_KEY ),
+  gwingui::control::EnableOrDisable( GWH( HOTKEY_AUTO_HEALTH_PILLS_KEY ),
                                      enable );
   gwingui::control::EnableOrDisable( GWH( EDIT_AUTO_PILLS_HP_LIMIT ), enable );
 }
@@ -48,22 +41,19 @@ bool AutoHealingPillsOption::TryApplyOption() {
   if ( gwingui::checkbox::IsChecked( checkbox_auto_health_pills ) ) {
     SetStatus( true );
 
-    const auto combo_auto_health_pills_key = GWH( COMBO_AUTO_HEALTH_PILLS_KEY );
+    const auto hotkey_auto_health_pills_key_handle =
+        GWH( HOTKEY_AUTO_HEALTH_PILLS_KEY );
 
-    const auto heal_key_index =
-        gwingui::combobox::GetSelectedIndex( combo_auto_health_pills_key );
+    const auto heal_virtual_keycode = gwingui::hotkey::GetCurrentHotkey(
+        hotkey_auto_health_pills_key_handle );
 
-    if ( heal_key_index == -1 ) {
+    if ( !heal_virtual_keycode ) {
       gwingui::messagebox::Error(
           TEXT( "You have to choose a key to use the pills." ) );
       return false;
     }
 
-    const auto heal_key_str = gwingui::combobox::GetString(
-        combo_auto_health_pills_key, heal_key_index );
-    const auto heal_key = optionutils::AsciiKeyToVirtualKeyCode( heal_key_str );
-
-    SetHealKeyCode( heal_key );
+    SetHealKeyCode( heal_virtual_keycode );
 
     const auto editcontrol_auto_pills_hp_limit =
         GWH( EDIT_AUTO_PILLS_HP_LIMIT );

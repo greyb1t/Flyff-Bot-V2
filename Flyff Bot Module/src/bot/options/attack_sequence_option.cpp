@@ -29,7 +29,7 @@ void AttackSequenceOption::RefreshControls() {
 
 void AttackSequenceOption::EnableOrDisableControls( bool enable ) {
   gwingui::control::EnableOrDisable( GWH( LISTVIEW_ATTACKS ), enable );
-  gwingui::control::EnableOrDisable( GWH( COMBO_ATTACK_KEY ), enable );
+  gwingui::control::EnableOrDisable( GWH( HOTKEY_ATTACK_KEY ), enable );
   gwingui::control::EnableOrDisable( GWH( EDIT_ATTACK_KEY_INTERVAL ), enable );
   gwingui::control::EnableOrDisable( GWH( BUTTON_ADD_ATTACK ), enable );
   gwingui::control::EnableOrDisable( GWH( BUTTON_REMOVE_ATTACK ), enable );

@@ -6,6 +6,7 @@
 #include "gwinguiv2/controls/control.h"
 #include "gwinguiv2/controls/editcontrol.h"
 #include "gwinguiv2/controls/combobox.h"
+#include "gwinguiv2/controls/hotkey.h"
 
 namespace bot {
 
@@ -62,6 +63,13 @@ void AutoHealingOption::RefreshControls() {
   else
     gwingui::editcontrol::SetText( editcontrol_auto_food_hp_limit, TEXT( "" ) );
 
+  const auto hotkey_auto_food_hp_limit_handle =
+      GWH( HOTKEY_AUTO_HEALTH_FOOD_KEY );
+
+  gwingui::hotkey::SetCurrentHotkey( hotkey_auto_food_hp_limit_handle,
+                                     heal_key_code_ );
+
+  /*
   std::wstring key_code_s =
       optionutils::VirtualKeyCodeToAsciiKey( heal_key_code_ );
 
@@ -75,10 +83,11 @@ void AutoHealingOption::RefreshControls() {
     gwingui::combobox::SetSelectedIndex( combobox_auto_health_food_key,
                                          key_code_index );
   }
+  */
 }
 
 void AutoHealingOption::EnableOrDisableControls( bool enable ) {
-  gwingui::control::EnableOrDisable( GWH( COMBO_AUTO_HEALTH_FOOD_KEY ),
+  gwingui::control::EnableOrDisable( GWH( HOTKEY_AUTO_HEALTH_FOOD_KEY ),
                                      enable );
   gwingui::control::EnableOrDisable( GWH( EDIT_AUTO_FOOD_HP_LIMIT ), enable );
 }
@@ -89,23 +98,19 @@ bool AutoHealingOption::TryApplyOption() {
   if ( gwingui::checkbox::IsChecked( checkbox_auto_health_food ) ) {
     SetStatus( true );
 
-    const auto combobox_auto_health_food_key =
-        GWH( COMBO_AUTO_HEALTH_FOOD_KEY );
+    const auto hotkey_auto_health_food_key_handle =
+        GWH( HOTKEY_AUTO_HEALTH_FOOD_KEY );
 
-    const auto heal_key_index =
-        gwingui::combobox::GetSelectedIndex( combobox_auto_health_food_key );
+    const auto auto_heal_food_virtual_keycode =
+        gwingui::hotkey::GetCurrentHotkey( hotkey_auto_health_food_key_handle );
 
-    if ( heal_key_index == -1 ) {
+    if ( !auto_heal_food_virtual_keycode ) {
       gwingui::messagebox::Error(
           TEXT( "You have to choose a key to use the food." ) );
       return false;
     }
 
-    const auto heal_key_str = gwingui::combobox::GetString(
-        combobox_auto_health_food_key, heal_key_index );
-    const auto heal_key = optionutils::AsciiKeyToVirtualKeyCode( heal_key_str );
-
-    SetHealKeyCode( heal_key );
+    SetHealKeyCode( auto_heal_food_virtual_keycode );
 
     const auto editcontrol_auto_food_hp_limit = GWH( EDIT_AUTO_FOOD_HP_LIMIT );
     auto health_limit =

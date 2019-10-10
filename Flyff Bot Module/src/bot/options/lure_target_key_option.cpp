@@ -5,6 +5,7 @@
 #include "option_utils.h"
 
 #include "gwinguiv2/controls/combobox.h"
+#include "gwinguiv2/controls/hotkey.h"
 
 namespace bot {
 
@@ -31,16 +32,9 @@ void LureTargetKeyOption::LoadJson( const json& json_parent ) {
 }
 
 void LureTargetKeyOption::RefreshControls() {
-  std::wstring key_code_s =
-      optionutils::VirtualKeyCodeToAsciiKey( lure_key_code_ );
+  const auto lure_key_hotkey_handle = GWH( HOTKEY_TARGET_LURE );
 
-  const auto combobox_target_lure_key_handle = GWH( COMBO_TARGET_LURE_KEY );
-
-  int key_code_index = gwingui::combobox::FindString(
-      combobox_target_lure_key_handle, 0, key_code_s );
-
-  gwingui::combobox::SetSelectedIndex( combobox_target_lure_key_handle,
-                                       key_code_index );
+  gwingui::hotkey::SetCurrentHotkey( lure_key_hotkey_handle, lure_key_code_ );
 }
 
 uint16_t LureTargetKeyOption::GetLureKeyCode() {
@@ -52,22 +46,18 @@ void LureTargetKeyOption::SetLureKeyCode( uint16_t bot_mode ) {
 }
 
 bool LureTargetKeyOption::TryApplyOption() {
-  const auto combo_target_lure_key = GWH( COMBO_TARGET_LURE_KEY );
+  const auto lure_key_hotkey_handle = GWH( HOTKEY_TARGET_LURE );
 
-  const auto lure_key_index =
-      gwingui::combobox::GetSelectedIndex( combo_target_lure_key );
+  const auto lure_virtual_keycode =
+      gwingui::hotkey::GetCurrentHotkey( lure_key_hotkey_handle );
 
-  if ( lure_key_index == -1 ) {
+  if ( !lure_virtual_keycode ) {
     gwingui::messagebox::Error(
         TEXT( "You have to choose a key to lure the target." ) );
     return false;
   }
 
-  const auto lure_key_str =
-      gwingui::combobox::GetString( combo_target_lure_key, lure_key_index );
-  const auto lure_key = optionutils::AsciiKeyToVirtualKeyCode( lure_key_str );
-
-  SetLureKeyCode( lure_key );
+  SetLureKeyCode( lure_virtual_keycode );
 
   return true;
 }

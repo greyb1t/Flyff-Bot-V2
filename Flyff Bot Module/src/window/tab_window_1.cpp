@@ -8,6 +8,7 @@
 #include "gwinguiv2/controls/listview.h"
 #include "gwinguiv2/controls/listbox.h"
 #include "gwinguiv2/controls/richedit.h"
+#include "gwinguiv2/controls/hotkey.h"
 #include "gwinguiv2/message_box.h"
 
 #include "../bot/options/option_utils.h"
@@ -66,27 +67,6 @@ void TabWindow1::Initialize( const HWND window_handle ) {
 
   // gwingui::listview::EnableFullRowSelect( LISTVIEW_REBUFF_KEY_SEQUENCE );
 
-  // Fill the comboboxes with proper values
-  optionutils::FillComboBoxFKeys( COMBO_ATTACK_KEY );
-  optionutils::FillComboBoxNumbers( COMBO_ATTACK_KEY );
-  optionutils::FillComboBoxAlphabet( COMBO_ATTACK_KEY );
-
-  optionutils::FillComboBoxFKeys( COMBO_TARGET_LURE_KEY );
-  optionutils::FillComboBoxNumbers( COMBO_TARGET_LURE_KEY );
-  optionutils::FillComboBoxAlphabet( COMBO_TARGET_LURE_KEY );
-
-  optionutils::FillComboBoxFKeys( COMBO_AUTO_HEALTH_FOOD_KEY );
-  optionutils::FillComboBoxNumbers( COMBO_AUTO_HEALTH_FOOD_KEY );
-  optionutils::FillComboBoxAlphabet( COMBO_AUTO_HEALTH_FOOD_KEY );
-
-  optionutils::FillComboBoxFKeys( COMBO_AUTO_HEALTH_PILLS_KEY );
-  optionutils::FillComboBoxNumbers( COMBO_AUTO_HEALTH_PILLS_KEY );
-  optionutils::FillComboBoxAlphabet( COMBO_AUTO_HEALTH_PILLS_KEY );
-
-  optionutils::FillComboBoxFKeys( COMBO_REBUFF_KEY );
-  optionutils::FillComboBoxNumbers( COMBO_REBUFF_KEY );
-  optionutils::FillComboBoxAlphabet( COMBO_REBUFF_KEY );
-
   gwingui::combobox::AddString( GWH( COMBO_BOT_MODE ), TEXT( "OneVsOne" ) );
 }
 
@@ -99,7 +79,7 @@ void TabWindow1::OnControlHover( HWND control_handle,
       tip = TEXT( "Select the mode you want the bot to be operating in." );
     } break;
 
-    case COMBO_TARGET_LURE_KEY: {
+    case HOTKEY_TARGET_LURE: {
       tip = TEXT(
           "Select the key with the skill / action you would like the bot to "
           "use on the first time of attack." );
@@ -129,7 +109,7 @@ void TabWindow1::OnControlHover( HWND control_handle,
           "would like to use a combination of skills on a monster." );
     } break;
 
-    case COMBO_ATTACK_KEY: {
+    case HOTKEY_ATTACK_KEY: {
       tip = TEXT(
           "Select the key that you would like the bot to press for the "
           "specific action." );
@@ -148,7 +128,7 @@ void TabWindow1::OnControlHover( HWND control_handle,
           "limit." );
     } break;
 
-    case COMBO_AUTO_HEALTH_FOOD_KEY: {
+    case HOTKEY_AUTO_HEALTH_FOOD_KEY: {
       tip = TEXT(
           "Select the key that you would like the bot to press to heal." );
     } break;
@@ -191,7 +171,7 @@ void TabWindow1::OnControlHover( HWND control_handle,
           "the character." );
     } break;
 
-    case COMBO_REBUFF_KEY: {
+    case HOTKEY_REBUFF_KEY: {
       tip = TEXT(
           "Select the key of the specific skill / powerup or anything else." );
     } break;
@@ -378,20 +358,20 @@ void TabWindow1::OnButtonClick( HWND hCtrl, UINT ctrlId ) {
     } break;
 
     case BUTTON_ADD_ATTACK: {
-      const auto combobox_attack_key = GWH( COMBO_ATTACK_KEY );
+      const auto hotkey_attack_key_handle = GWH( HOTKEY_ATTACK_KEY );
 
-      const int selected_key_index =
-          gwingui::combobox::GetSelectedIndex( combobox_attack_key );
+      const auto selected_virtual_keycode =
+          gwingui::hotkey::GetCurrentHotkey( hotkey_attack_key_handle );
 
-      if ( selected_key_index == -1 ) {
+      if ( !selected_virtual_keycode ) {
         gwingui::messagebox::Error(
             TEXT( "You have to select a key for the bot to press in the combo "
                   "box." ) );
         return;
       }
 
-      const auto selected_key = gwingui::combobox::GetString(
-          combobox_attack_key, selected_key_index );
+      const auto selected_key_string =
+          gwingui::hotkey::VirtualKeycodeToString( selected_virtual_keycode );
 
       const auto editcontrol_attack_key_interval =
           GWH( EDIT_ATTACK_KEY_INTERVAL );
@@ -408,12 +388,13 @@ void TabWindow1::OnButtonClick( HWND hCtrl, UINT ctrlId ) {
       const auto listview_attacks = GWH( LISTVIEW_ATTACKS );
 
       const auto item_index = gwingui::listview::AddItem(
-          listview_attacks, selected_key,
+          listview_attacks, selected_key_string,
           gwingui::listview::GetItemCount( listview_attacks ) );
       gwingui::listview::AddSubitem(
           listview_attacks, std::to_wstring( interval ), item_index, 2 );
 
-      gwingui::combobox::SetSelectedIndex( GWH( COMBO_ATTACK_KEY ), -1 );
+      gwingui::hotkey::SetCurrentHotkey( hotkey_attack_key_handle, 0 );
+
       gwingui::editcontrol::SetText( editcontrol_attack_key_interval,
                                      TEXT( "" ) );
     } break;
@@ -596,21 +577,23 @@ void TabWindow1::OnButtonClick( HWND hCtrl, UINT ctrlId ) {
     } break;
 
     case BUTTON_REBUFF_KEY_ADD: {
-      const int selected_key_index =
-          gwingui::combobox::GetSelectedIndex( GWH( COMBO_REBUFF_KEY ) );
+      const auto hotkey_rebuff_handle = GWH( HOTKEY_REBUFF_KEY );
 
-      if ( selected_key_index == -1 ) {
+      const auto selected_virtual_keycode =
+          gwingui::hotkey::GetCurrentHotkey( hotkey_rebuff_handle );
+
+      if ( !selected_virtual_keycode ) {
         gwingui::messagebox::Error(
             TEXT( "You have to select a key for the bot to press in the combo "
                   "box." ) );
         return;
       }
 
-      const auto combo_rebuff_key = GWH( COMBO_REBUFF_KEY );
+      const auto selected_key_string =
+          gwingui::hotkey::VirtualKeycodeToString( selected_virtual_keycode );
+
       const auto edit_rebuff_key_interval = GWH( EDIT_REBUFF_KEY_INTERVAL );
 
-      const auto selected_key =
-          gwingui::combobox::GetString( combo_rebuff_key, selected_key_index );
       const auto interval =
           gwingui::editcontrol::GetInt( edit_rebuff_key_interval );
 
@@ -625,14 +608,14 @@ void TabWindow1::OnButtonClick( HWND hCtrl, UINT ctrlId ) {
           GWH( LISTVIEW_REBUFF_KEY_SEQUENCE );
 
       const auto item_index = gwingui::listview::AddItem(
-          listview_rebuff_key_sequence, selected_key,
+          listview_rebuff_key_sequence, selected_key_string,
           gwingui::listview::GetItemCount( listview_rebuff_key_sequence ) );
 
       gwingui::listview::AddSubitem( listview_rebuff_key_sequence,
                                      std::to_wstring( interval ), item_index,
                                      2 );
 
-      gwingui::combobox::SetSelectedIndex( combo_rebuff_key, -1 );
+      gwingui::hotkey::SetCurrentHotkey( hotkey_rebuff_handle, 0 );
       gwingui::editcontrol::SetText( edit_rebuff_key_interval, TEXT( "" ) );
     } break;
 
@@ -682,10 +665,18 @@ void TabWindow1::OnTrackbarSliderChanging( const HWND trackbar_handle,
   auto slider_id = gwingui::control::GetWindowId( trackbar_handle );
 }
 
-void TabWindow1::OnRichEditTextChanged( uint32_t ctrlId, CHANGENOTIFY* pCn ) {
+void TabWindow1::OnRichEditTextChanged( uint32_t control_id,
+                                        CHANGENOTIFY* cn ) {
   const auto botcore = Initializer().GetBotCore();
   auto& bot_options = botcore->GetBotOptions();
-  bot_options.CheckOptionControlsChanged( ctrlId );
+  bot_options.CheckOptionControlsChanged( control_id );
+}
+
+void TabWindow1::OnHotkeyChanged( const HWND hotkey_handle,
+                                  const uint32_t control_id ) {
+  const auto botcore = Initializer().GetBotCore();
+  auto& bot_options = botcore->GetBotOptions();
+  bot_options.CheckOptionControlsChanged( control_id );
 }
 
 }  // namespace bot

@@ -227,6 +227,7 @@ void BotOptions::CheckOptionControlsChanged( uint32_t control_identifier ) {
   // looking for these values instead
 
   switch ( control_identifier ) {
+    case HOTKEY_TARGET_LURE:
     case EDIT_LEVEL_AREA_ORIGIN_POS_X:
     case EDIT_LEVEL_AREA_ORIGIN_POS_Z:
     case EDIT_LEVEL_AREA_LENGTH1:
@@ -234,7 +235,7 @@ void BotOptions::CheckOptionControlsChanged( uint32_t control_identifier ) {
     case CHECK_LEVEL_AREA:
     case CHECK_UPDATE_POS_EACH_KILL:
     case CHECK_AUTO_HEALTH_PILLS:
-    case COMBO_AUTO_HEALTH_PILLS_KEY:
+    case HOTKEY_AUTO_HEALTH_PILLS_KEY:
     case EDIT_AUTO_PILLS_HP_LIMIT:
     case LISTBOX_REBUFF_SEQUENCES:
     case CHECK_REBUFF_SEQUENCES:
@@ -248,14 +249,13 @@ void BotOptions::CheckOptionControlsChanged( uint32_t control_identifier ) {
     case EDIT_WHITELISTED_PLAYER_NAME:
     case BUTTON_ADD_WHITELISTED_PLAYER_NAME:
     case BUTTON_WHITELIST_PLAYER_NAME_REMOVE:
-    case COMBO_AUTO_HEALTH_FOOD_KEY:
+    case HOTKEY_AUTO_HEALTH_FOOD_KEY:
     case CHECK_AUTO_HEALTH_FOOD:
     case CHECK_ATTACK_SEQUENCE:
     case CHECK_WHITELIST_NAMES:
     case BUTTON_WHITELIST_NAME_REMOVE:
     case BUTTON_ADD_WHITELISTED_NAME:
     case COMBO_BOT_MODE:
-    case COMBO_TARGET_LURE_KEY:
     case LISTVIEW_ATTACKS: {
       SetOptionHasBeenChanged( true );
     } break;

@@ -72,7 +72,7 @@ void CharacterRebuffOption::RefreshControls() {
 void CharacterRebuffOption::EnableOrDisableControls( bool enable ) {
   gwingui::control::EnableOrDisable( GWH( LISTVIEW_REBUFF_KEY_SEQUENCE ),
                                      enable );
-  gwingui::control::EnableOrDisable( GWH( COMBO_REBUFF_KEY ), enable );
+  gwingui::control::EnableOrDisable( GWH( HOTKEY_REBUFF_KEY ), enable );
   gwingui::control::EnableOrDisable( GWH( EDIT_REBUFF_KEY_INTERVAL ), enable );
   gwingui::control::EnableOrDisable( GWH( EDIT_REBUFF_SEQUENCE_INTERVAL ),
                                      enable );

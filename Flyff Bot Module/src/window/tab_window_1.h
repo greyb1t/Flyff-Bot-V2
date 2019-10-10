@@ -19,8 +19,8 @@ class TabWindow1 : public gwingui::Window {
   void OnListBoxSelectionChanged( uint32_t control_identifier,
                                   HWND control_handle ) override;
   virtual void OnListBoxItemDeleted( const uint32_t control_id,
-    const HWND control_handle,
-    const uint32_t index );
+                                     const HWND control_handle,
+                                     const uint32_t index );
   void OnButtonClick( HWND hCtrl, UINT ctrlId ) override;
   void OnComboboxSelectionChanged( uint32_t control_id,
                                    HWND control_handle ) override;
@@ -29,6 +29,9 @@ class TabWindow1 : public gwingui::Window {
   void OnTrackbarSliderChanging( const HWND trackbar_handle,
                                  int32_t position ) override;
   void OnRichEditTextChanged( uint32_t ctrlId, CHANGENOTIFY* pCn ) override;
+
+  virtual void OnHotkeyChanged( const HWND hotkey_handle,
+                                const uint32_t control_id ) override;
 
  private:
   std::map<int, RebuffSequenceUiData> rebuff_sequences_map_;
