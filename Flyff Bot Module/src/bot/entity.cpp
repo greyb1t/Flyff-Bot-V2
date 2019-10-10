@@ -63,9 +63,6 @@ bool Entity::IsMonster() const {
 }
 
 bool Entity::IsAlive() const {
-  if ( IsDeletedOrInvalidMemory() )
-    return false;
-
   return GetHealth() > 0;
 }
 
@@ -105,7 +102,6 @@ bool Entity::IsAggro() const {
 
 bool Entity::IsUnknownEntity() const {
   return GetMotion() == 0;
-  // return GetSpeed() < 0 || GetMotion() == 0;
 }
 
 float Entity::DistanceTo( const Entity& entity ) const {
@@ -113,16 +109,11 @@ float Entity::DistanceTo( const Entity& entity ) const {
 }
 
 D3DXVECTOR3 Entity::GetPosition() const {
-  D3DXVECTOR3 pos = { 0.f, 0.f, 0.f };
-
-  if ( IsDeletedOrInvalidMemory() )
-    return pos;
-
   const auto position_offset =
       client_->GetClientVar( MemoryContants::kPositionOffset );
 
-  pos = gwinmem::CurrentProcess().Read<D3DXVECTOR3>( address_ptr_ +
-                                                     position_offset );
+  D3DXVECTOR3 pos = gwinmem::CurrentProcess().Read<D3DXVECTOR3>(
+      address_ptr_ + position_offset );
 
   return pos;
 }
@@ -155,18 +146,6 @@ int Entity::GetFatigue() const {
   return fatigue;
 }
 
-/*
-int Entity::GetSpeed() const {
-  const auto speed_offset =
-      client_->GetClientVar( MemoryContants::kSpeedOffset );
-
-  int speed =
-      gwinmem::CurrentProcess().Read<int>( address_ptr_ + speed_offset );
-
-  return speed;
-}
-*/
-
 int Entity::GetFlags() const {
   const auto flags_offset =
       client_->GetClientVar( MemoryContants::kObjectFlagsOffset );
@@ -192,22 +171,12 @@ int Entity::GetLevel() const {
 }
 
 int Entity::GetMotion() const {
-  if ( IsDeletedOrInvalidMemory() )
-    return 0;
-
   const auto movement_base_address =
       client_->GetClientVar( MemoryContants::kMovementOffset );
   const auto move_offset = client_->GetClientVar( MemoryContants::kMoveOffset );
 
-  int motion = 0;
-
-  // Use a try block because the pActionMover can be NULL
-  // try {
-  motion = gwinmem::CurrentProcess().Read<int>(
+  int motion = gwinmem::CurrentProcess().Read<int>(
       address_ptr_ + movement_base_address, { move_offset } );
-  // } catch ( gwinmem::BadMemoryException ) {
-  //   return 0;
-  // }
 
   return motion;
 }
@@ -238,10 +207,9 @@ void Entity::SetPosition( const D3DXVECTOR3 position ) {
 }
 
 std::string Entity::GetName() const {
-  if ( IsDeletedOrInvalidMemory() )
-    return "";
-
   // Is the entity not a mover? Then it has no name.
+  // TODO: I should actually use better polymorphism to fix this shit
+  // Eg. Object -> MoverEntity -> LocalPlayer
   if ( GetObjectType() != ObjectType::kObjectTypeMover )
     return "";
 
@@ -285,11 +253,11 @@ BOUND_BOX Entity::GetBoundBox() const {
 
   // Added the try catch because Render and DrawEntity failed because it seems
   // to have tried to draw an object that has no bound box
-  try {
-    bound_box = gwinmem::CurrentProcess().Read<BOUND_BOX>( model_ptr_address +
-                                                           bound_box_offset );
-  } catch ( gwinmem::BadMemoryException ) {
-  }
+  // try {
+  bound_box = gwinmem::CurrentProcess().Read<BOUND_BOX>( model_ptr_address +
+                                                         bound_box_offset );
+  // } catch ( gwinmem::BadMemoryException ) {
+  // }
 
   return bound_box;
 }
