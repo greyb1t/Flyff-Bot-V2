@@ -42,13 +42,13 @@ StateStatusReturnValue SelectTargetStateMachine::Select(
     } break;
 
     case TargetSelectionStates::Click: {
-      logging::Log( TEXT( "Clicking on the entity.\n" ) );
-
       const auto simulation_status = simulation_machine_.SimulateMouseclick(
           MouseClickButtons::kLeftMouseButton );
 
       switch ( simulation_status ) {
         case StateStatusReturnValue::kSucceeded: {
+          logging::Log( TEXT( "Clicked on the entity.\n" ) );
+
           // Set both the simulated and real cursor pos, because simulated
           // cursor pos is not enough.
           botcore->SetSimulatedCursorPos( old_cursor_pos_ );
