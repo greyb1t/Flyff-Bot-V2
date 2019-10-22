@@ -47,6 +47,7 @@ void WhitelistedNamesOption::RefreshControls() {
 
 void WhitelistedNamesOption::EnableOrDisableControls( bool enable ) {
   gwingui::control::EnableOrDisable( GWH( LISTBOX_WHITELIST_NAMES ), enable );
+  gwingui::control::EnableOrDisable( GWH( LISTBOX_WHITELIST_NAMES_VICINITY ), enable );
   gwingui::control::EnableOrDisable( GWH( EDIT_WHITELISTED_NAME ), enable );
   gwingui::control::EnableOrDisable( GWH( BUTTON_ADD_WHITELISTED_NAME ),
                                      enable );

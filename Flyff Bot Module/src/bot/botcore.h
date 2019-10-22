@@ -155,6 +155,7 @@ class BotCore {
   uint32_t fps_;
 
   uint64_t last_cheats_update_ms_;
+  uint64_t last_gui_entity_population_ms_;
 
   HHOOK kb_hook_handle_;
 

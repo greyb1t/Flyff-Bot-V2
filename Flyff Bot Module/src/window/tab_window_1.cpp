@@ -228,6 +228,17 @@ void TabWindow1::OnControlLeave( HWND control_handle,
 void TabWindow1::OnListBoxSelectionChanged( uint32_t control_identifier,
                                             HWND control_handle ) {
   switch ( control_identifier ) {
+    case LISTBOX_WHITELIST_NAMES_VICINITY: {
+      const auto selected_index =
+          gwingui::listbox::GetSelectedIndex( control_handle );
+      const auto selected_monster_name =
+          gwingui::listbox::GetText( control_handle, selected_index );
+
+      const auto whitelisted_name_edit_control = GWH( EDIT_WHITELISTED_NAME );
+      gwingui::editcontrol::SetText( whitelisted_name_edit_control,
+                                     selected_monster_name );
+    } break;
+
     case LISTBOX_REBUFF_SEQUENCES: {
       const auto botcore = Initializer().GetBotCore();
       auto& bot_options = botcore->GetBotOptions();

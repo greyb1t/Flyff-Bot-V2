@@ -36,6 +36,7 @@ BotCore::BotCore()
       last_frame_counter_( 0 ),
       simulated_cursor_pos_{ -1, -1 },
       last_cheats_update_ms_( 0 ),
+      last_gui_entity_population_ms_( 0 ),
       ms_elapsed_( 0 ),
       fps_( 0 ),
       fps_frame_counter_( 0 ),
@@ -485,6 +486,35 @@ void BotCore::DrawEntity( const Entity& local_player,
   }
 }
 
+void PopulateWhitelistedMonstersVicinityListbox( EntityList& entitylist ) {
+  const auto& mover_entities = entitylist.GetMoverEntities();
+
+  const auto vicinity_listbox_handle = GWH( LISTBOX_WHITELIST_NAMES_VICINITY );
+
+  std::unordered_set<std::wstring> names_in_vicinity;
+
+  for ( const auto& entity : mover_entities ) {
+    if ( entity->IsMonster() ) {
+      const auto entity_name = stringutils::AnsiToWide( entity->GetName() );
+
+      names_in_vicinity.insert( entity_name );
+    }
+  }
+
+  // We use async to exeucte the ui interaction code otherwise if we interact
+  // with the ui from the game thread, it freezes for some reason
+  std::async( [=]() {
+    for ( const auto& name : names_in_vicinity ) {
+      const bool exists_in_listbox =
+          gwingui::listbox::FindString( vicinity_listbox_handle, 0, name ) !=
+          LB_ERR;
+
+      if ( !exists_in_listbox )
+        gwingui::listbox::AddString( vicinity_listbox_handle, name );
+    }
+  } );
+}
+
 void BotCore::Render( LPDIRECT3DDEVICE9 pDevice ) {
   Stopwatch stopwatch;
   stopwatch.Start();
@@ -531,6 +561,13 @@ void BotCore::Render( LPDIRECT3DDEVICE9 pDevice ) {
       DrawEntity( *local_player_entity, *entity,
                   D3DCOLOR_RGBA( 255, 255, 255, 255 ) );
     }
+  }
+
+  // Every 300 ms do pop
+  if ( ( timeGetTime() - last_gui_entity_population_ms_ ) > 300 ) {
+    PopulateWhitelistedMonstersVicinityListbox( entity_list );
+
+    last_gui_entity_population_ms_ = timeGetTime();
   }
 
   /*
