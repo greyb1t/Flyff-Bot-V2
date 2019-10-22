@@ -103,6 +103,24 @@ void BotAIOneVsOne::UpdateInternal() {
         return;
       }
 
+      const auto& auto_health_food_option =
+          bot_options.GetOption<AutoHealingOption>();
+
+      // Check if the player health is above the limit
+      if ( auto_health_food_option.IsEnabled() ) {
+        if ( local_player->GetHealth() <
+             auto_health_food_option.GetHealthLimit() ) {
+          DO_ONCE( []() {
+            logging::Log(
+                TEXT( "Waiting for the player health to recover above the "
+                      "limit.\n" ) );
+          } );
+          // If the health is lower than the limit, wait and let it recover
+          // before killing more monsters
+          return;
+        }
+      }
+
       EntityList entity_list( client );
       auto& entities = entity_list.GetMoverEntities();
 
