@@ -140,6 +140,10 @@ std::vector<std::wstring> GetFilesInDirectory( const std::wstring& dir ) {
   gwinmem::SafeFindHandle file_handle =
       FindFirstFile( ( dir + TEXT( "\\*" ) ).c_str(), &find_data );
 
+  if ( file_handle.GetValue() == INVALID_HANDLE_VALUE ) {
+    return {};
+  }
+
   std::vector<std::wstring> files;
 
   do {
@@ -165,10 +169,19 @@ bool ReadTextFile( const std::wstring& filename, std::string* text ) {
 
 std::wstring FindCorrectOptionFile( const std::vector<std::wstring>& files,
                                     const std::wstring& character_name ) {
+  if ( !files.size() ) {
+    return std::wstring();
+  }
+
   const auto result = std::find_if(
       files.begin(), files.end(), [&]( const std::wstring& file ) {
         return file.find( character_name ) != std::wstring::npos;
       } );
+
+  // was it found? if not, return empty string
+  if ( result == files.end() ) {
+    return std::wstring();
+  }
 
   return *result;
 }
