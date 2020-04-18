@@ -5,6 +5,8 @@
 #include "gwinguiv2/controls/richedit.h"
 #include "gwinguiv2/controls/control.h"
 
+LoggerPump g_pump;
+
 LoggerPump::LoggerPump() {
   pump_thread_ = std::thread( &LoggerPump::LogPumpThread, this );
 }

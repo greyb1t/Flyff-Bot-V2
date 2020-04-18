@@ -1,9 +1,6 @@
 #pragma once
 
-enum class LoggingType {
-  kLoggingNormal,
-  kLoggingImportant
-};
+enum class LoggingType { kLoggingNormal, kLoggingImportant };
 
 struct LoggingMessage {
   LoggingType type;
@@ -11,42 +8,36 @@ struct LoggingMessage {
 };
 
 class LoggerPump {
-  public:
-    LoggerPump();
+ public:
+  LoggerPump();
 
-    void AddMessagePumpQueue( const std::wstring
-                              &message );
+  void AddMessagePumpQueue( const std::wstring& message );
 
-    void AddMessageImportantPumpQueue( const
-                                       std::wstring &message );
+  void AddMessageImportantPumpQueue( const std::wstring& message );
 
-    // Notify the thread to "parse" all the pending messages
-    void Notify();
+  // Notify the thread to "parse" all the pending messages
+  void Notify();
 
-    void Exit();
+  void Exit();
 
-    static inline LoggerPump &GetInstance() {
-      static LoggerPump pump;
-      return pump;
-    }
+ private:
+  void LogPumpThread();
 
-  private:
-    void LogPumpThread();
-
-    std::thread pump_thread_;
-    std::mutex mutex_;
-    std::queue<LoggingMessage> message_queue_;
-    std::condition_variable cv_;
+  std::thread pump_thread_;
+  std::mutex mutex_;
+  std::queue<LoggingMessage> message_queue_;
+  std::condition_variable cv_;
 };
 
-inline LoggerPump &LogQueue() {
-  return LoggerPump::GetInstance();
+extern LoggerPump g_pump;
+
+inline LoggerPump& LogQueue() {
+  return g_pump;
 }
 
 namespace logging {
 
-inline void Log( const std::wstring &s ) {
-
+inline void Log( const std::wstring& s ) {
   LogQueue().AddMessagePumpQueue( s );
 
   /*
@@ -65,8 +56,7 @@ inline void Log( const std::wstring &s ) {
   */
 }
 
-inline void LogImportant( const std::wstring
-                          &s ) {
+inline void LogImportant( const std::wstring& s ) {
   LogQueue().AddMessageImportantPumpQueue( s );
   /*
     std::thread thread([=]() {
@@ -84,6 +74,4 @@ inline void LogImportant( const std::wstring
   */
 }
 
-
-
-}
+}  // namespace logging
