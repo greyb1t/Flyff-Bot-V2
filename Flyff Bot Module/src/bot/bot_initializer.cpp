@@ -30,16 +30,57 @@ ServerType DetectServer( const HWND target_window ) {
   std::wstring window_title_lower =
       stringutils::WideStringToLower( window_title );
 
-  if ( window_title_lower.find( TEXT( "mazey" ) ) != std::wstring::npos )
+  if ( window_title_lower.find( TEXT( "mazey" ) ) != std::wstring::npos ) {
     return ServerType::MazeyFlyff;
-  else if ( window_title_lower.find( TEXT( "ignite" ) ) != std::wstring::npos )
+  } else if ( window_title_lower.find( TEXT( "ignite" ) ) !=
+              std::wstring::npos ) {
     return ServerType::IgniteFlyff;
-  else if ( window_title_lower.find( TEXT( "dragon crusade" ) ) !=
-            std::wstring::npos )
+  } else if ( window_title_lower.find( TEXT( "dragon crusade" ) ) !=
+              std::wstring::npos ) {
     return ServerType::DragonCrusade;
+  } else if ( window_title_lower.find( TEXT( "eclipse flyff" ) ) !=
+              std::wstring::npos ) {
+    return ServerType::EclipseFlyff;
+  }
 
   return ServerType::Unknown;
 }
+
+typedef struct _UNICODE_STRING {
+  WORD Length;
+  WORD MaximumLength;
+  WORD* Buffer;
+} UNICODE_STRING, *PUNICODE_STRING;
+
+typedef struct _LDR_DATA_TABLE_ENTRY {
+  LIST_ENTRY InLoadOrderLinks;
+  LIST_ENTRY InMemoryOrderLinks;
+  LIST_ENTRY InInitializationOrderLinks;
+  PVOID DllBase;
+  PVOID EntryPoint;
+  ULONG SizeOfImage;
+  UNICODE_STRING FullDllName;
+  UNICODE_STRING BaseDllName;
+  ULONG Flags;
+  WORD LoadCount;
+  WORD TlsIndex;
+  union {
+    LIST_ENTRY HashLinks;
+    struct {
+      PVOID SectionPointer;
+      ULONG CheckSum;
+    };
+  };
+  union {
+    ULONG TimeDateStamp;
+    PVOID LoadedImports;
+  };
+  _ACTIVATION_CONTEXT* EntryPointActivationContext;
+  PVOID PatchInformation;
+  LIST_ENTRY ForwarderLinks;
+  LIST_ENTRY ServiceTagLinks;
+  LIST_ENTRY StaticLinks;
+} LDR_DATA_TABLE_ENTRY, *PLDR_DATA_TABLE_ENTRY;
 
 bool GetClientServerTypeAndWindowHandle( ServerType* server_type,
                                          HWND* window_handle ) {
@@ -91,22 +132,34 @@ void OpenConsole() {
   }();
 }
 
+gwinmem::LDR_DATA_TABLE_ENTRY* g_entry;
+
 int BotInitializer::Load( HINSTANCE instance_handle,
                           const uint32_t reserved_value ) {
-  // Currently not used because not needed. I tried this to fix the crash issues
-  // when using static without /GL (Whole Program Optimization). It still
-  // crashed. fuckin assshit.
-#if 0
-  const auto status = LOL( reinterpret_cast<uintptr_t>( instance_handle ) );
+  g_entry = new gwinmem::LDR_DATA_TABLE_ENTRY{ 0 };
+  g_entry->DllBase = instance_handle;
 
-  gwingui::messagebox::Error( std::to_wstring( status ) );
+  // Initializing the static tls on a manual mapped dll fixes the crashing issues with using the static keyword
+  // Previously I was required to use /GL (Whole Program Optimization)
+  //
+  auto static_tls_succeeded =
+      gwinmem::CurrentProcess().ManualMapHandleStaticTlsData( g_entry );
 
-  if ( status >= 0 ) {
-    gwingui::messagebox::Error( TEXT( "success" ) );
-  } else {
-    gwingui::messagebox::Error( TEXT( "failed" ) );
+  if ( !static_tls_succeeded ) {
+    gwingui::messagebox::Error(
+        TEXT( "Failed to initialize static tls data" ) );
+    return -1;
   }
-#endif
+
+  static std::vector<int> test_static_tls_data_temp_var = { 1337, 1338 };
+
+  // If the static tls initialization call above does not work properly, inform us about that shits
+  //
+  if ( test_static_tls_data_temp_var.size() == 0 ) {
+    gwingui::messagebox::Error( TEXT(
+        "Static tls data is not working properly, have you initialized it?" ) );
+    return -1;
+  }
 
 #if ENABLE_PROTECTION
 
@@ -144,8 +197,6 @@ int BotInitializer::Load( HINSTANCE instance_handle,
   }
 #endif
 
-  // TODO: modify most of my code with std functions
-
   ServerType server_type;
   HWND target_window_handle;
 
@@ -182,6 +233,8 @@ int BotInitializer::Load( HINSTANCE instance_handle,
 
 #if ENABLE_DEBUGGING
   OpenConsole();
+
+  GWIN_TRACE( "Console had been opened" );
 #endif
 
   instance_handle_ = instance_handle;
@@ -199,8 +252,17 @@ int BotInitializer::Load( HINSTANCE instance_handle,
     return -1;
   }
 
-  const HMODULE crash_rpt_module =
-      GetModuleHandle( TEXT( "CrashRpt1403.dll" ) );
+  HMODULE crash_rpt_module = GetModuleHandle( TEXT( "CrashRpt1403.dll" ) );
+
+  // TODO: do it properly
+  if ( !crash_rpt_module ) {
+    crash_rpt_module = GetModuleHandle( TEXT( "CrashRpt1402.dll" ) );
+  }
+
+  // TODO: Find a better way to unregister their exception handler, probably by thread hijacking
+  // TODO: instead of checking if the module is there, iterate all the modules and find any exports that has "crUninstall"
+  // can be as simple as iterate modules, and then call getprocaddress on each module to see if crUninstall exists
+  // if so, unregister it
 
   // Check if the target client has a known crash reporter module
   if ( crash_rpt_module ) {
@@ -221,11 +283,15 @@ int BotInitializer::Load( HINSTANCE instance_handle,
     return -1;
   }
 
+  GWIN_TRACE( "Starting MM free thread" );
+
   // Crashes in debug mode without Whole Program Optimization = On
   // Start a thread that run until this thread is finished, then it free's the
   // memory
   gwinmem::CurrentProcess().ManualMapStartFreeDllThread(
       reinterpret_cast<uintptr_t>( instance_handle ) );
+
+  GWIN_TRACE( "Replacing exception handler" );
 
   prev_filter_ =
       SetUnhandledExceptionFilter( crash_handler::MainExceptionHandler );
@@ -260,7 +326,9 @@ int BotInitializer::Load( HINSTANCE instance_handle,
     gui.Run();
 
     // Once the message loop has stopped, unload the bot
-    if ( !bot::Initializer().Unload( mainwindow_handle ) ) {
+    if ( !bot::Initializer().Unload(
+             mainwindow_handle,
+             reinterpret_cast<uintptr_t>( instance_handle ) ) ) {
       gwingui::messagebox::Error(
           TEXT( "Error while attempting to unload the bot." ) );
       return -1;
@@ -275,9 +343,20 @@ int BotInitializer::Load( HINSTANCE instance_handle,
   return 0;
 }
 
-bool BotInitializer::Unload( const HWND mainwindow_handle ) {
+bool BotInitializer::Unload( const HWND mainwindow_handle,
+                             const uintptr_t dllbase ) {
   // Wait for all the hooked functions to not execute
   std::lock_guard<std::mutex> hooks_lock_guard( g_hooks_mutex );
+
+  // Free the static tls data, otherwise the process will get fucked (crash) when unloading the bot
+  //
+  const auto free_static_tls_result =
+      gwinmem::CurrentProcess().ManualMapFreeStaticTlsData( g_entry );
+
+  if ( !free_static_tls_result ) {
+    gwingui::messagebox::Error( TEXT( "Failed to free static tls data: " ) );
+    return false;
+  }
 
   // Give the hooked functions a chance to completely stop executing
   // without this it might crash
@@ -373,14 +452,23 @@ bool BotInitializer::UnregisterExceptionHandler(
     return false;
   }
 
-  copy_rect_original_ = reinterpret_cast<decltype( CopyRect )*>(
-      GetProcAddress( user32, "CopyRect" ) );
+  //copy_rect_original_ = reinterpret_cast<decltype( CopyRect )*>(
+  //    GetProcAddress( user32, "CopyRect" ) );
+  //def_window_proc_a_original_ = reinterpret_cast<decltype( DefWindowProcA )*>(
+  //    GetProcAddress( user32, "DefWindowProcA" ) );
+  peek_message_a_original_ = reinterpret_cast<decltype( PeekMessageA )*>(
+      GetProcAddress( user32, "PeekMessageA" ) );
 
-  if ( !copy_rect_original_ )
+  //if ( !copy_rect_original_ )
+  //  return false;
+
+  if ( !peek_message_a_original_ )
     return false;
 
-  DetourAttach( reinterpret_cast<PVOID*>( &copy_rect_original_ ),
-                BotInitializer::CopyRectHooked );
+  //DetourAttach( reinterpret_cast<PVOID*>( &copy_rect_original_ ),
+  //              BotInitializer::CopyRectHooked );
+  DetourAttach( reinterpret_cast<PVOID*>( &peek_message_a_original_ ),
+                BotInitializer::PeekMessageAHooked );
 
   if ( DetourTransactionCommit() != NO_ERROR ) {
     gwingui::messagebox::Error(
@@ -394,10 +482,166 @@ bool BotInitializer::UnregisterExceptionHandler(
   return true;
 }
 
-BOOL WINAPI BotInitializer::CopyRectHooked( LPRECT destination,
-                                            const RECT* source ) {
+LRESULT WINAPI BotInitializer::DefWindowProcAHooked( HWND window_handle,
+                                                     UINT message,
+                                                     WPARAM wparam,
+                                                     LPARAM lparam ) {
   if ( GetCurrentThreadId() == Initializer().thread_id_of_ex_handlers_ ) {
     HMODULE crash_rpt_module = GetModuleHandle( TEXT( "CrashRpt1403.dll" ) );
+
+    // TODO: do it properly
+    if ( !crash_rpt_module ) {
+      crash_rpt_module = GetModuleHandle( TEXT( "CrashRpt1402.dll" ) );
+    }
+
+    if ( crash_rpt_module ) {
+      using tCrUninstall = int ( * )();
+      using tCrGetLastErrorMsgW = int ( * )( LPWSTR pszBuffer, UINT uBuffSize );
+
+      const auto cr_uninstall = reinterpret_cast<tCrUninstall>(
+          GetProcAddress( crash_rpt_module, "crUninstall" ) );
+
+      /*
+      const auto cr_get_last_error_msg_w =
+          reinterpret_cast<tCrGetLastErrorMsgW>(
+              GetProcAddress( crash_rpt_module, "crGetLastErrorMsgW" ) );
+      */
+
+      const auto result = cr_uninstall();
+
+      /*
+      if ( result != 0 ) {
+        wchar_t error_message[ 256 ];
+        cr_get_last_error_msg_w( error_message, sizeof( error_message ) );
+
+        gwingui::messagebox::Error(
+            TEXT( "Failed to remove crash handler.\ncrUninstall returned "
+                  "with " ) +
+            std::to_wstring( result ) + TEXT( "\nError message: " ) +
+            std::wstring( error_message ) );
+      }
+      */
+
+      GWIN_TRACE( "Removed the crash handler with return code: %d\n", result );
+    } else {
+      GWIN_TRACE( "Crash handler is not found.\n" );
+    }
+
+    DetourTransactionBegin();
+
+    DetourUpdateThread( GetCurrentThread() );
+
+    auto user32 = GetModuleHandle( TEXT( "user32.dll" ) );
+
+    if ( !user32 ) {
+      gwingui::messagebox::Error(
+          TEXT( "user32.dll is not loaded into memory." ) );
+      return -1;
+    }
+
+    DetourDetach(
+        reinterpret_cast<PVOID*>( &Initializer().def_window_proc_a_original_ ),
+        BotInitializer::DefWindowProcAHooked );
+
+    if ( DetourTransactionCommit() != NO_ERROR ) {
+      gwingui::messagebox::Error( TEXT( "Error while trying to hook." ) );
+      return false;
+    }
+
+    Initializer().has_removed_exception_handler_ = true;
+  }
+
+  return Initializer().def_window_proc_a_original_( window_handle, message,
+                                                    wparam, lparam );
+}
+
+BOOL WINAPI BotInitializer::PeekMessageAHooked( LPMSG message,
+                                                HWND window_handle,
+                                                UINT msg_filter_min,
+                                                UINT msg_filter_max,
+                                                UINT remove_msg ) {
+  if ( GetCurrentThreadId() == Initializer().thread_id_of_ex_handlers_ ) {
+    HMODULE crash_rpt_module = GetModuleHandle( TEXT( "CrashRpt1403.dll" ) );
+
+    // TODO: do it properly
+    if ( !crash_rpt_module ) {
+      crash_rpt_module = GetModuleHandle( TEXT( "CrashRpt1402.dll" ) );
+    }
+
+    if ( crash_rpt_module ) {
+      using tCrUninstall = int ( * )();
+      using tCrGetLastErrorMsgW = int ( * )( LPWSTR pszBuffer, UINT uBuffSize );
+
+      const auto cr_uninstall = reinterpret_cast<tCrUninstall>(
+          GetProcAddress( crash_rpt_module, "crUninstall" ) );
+
+      /*
+      const auto cr_get_last_error_msg_w =
+          reinterpret_cast<tCrGetLastErrorMsgW>(
+              GetProcAddress( crash_rpt_module, "crGetLastErrorMsgW" ) );
+      */
+
+      const auto result = cr_uninstall();
+
+      /*
+      if ( result != 0 ) {
+        wchar_t error_message[ 256 ];
+        cr_get_last_error_msg_w( error_message, sizeof( error_message ) );
+
+        gwingui::messagebox::Error(
+            TEXT( "Failed to remove crash handler.\ncrUninstall returned "
+                  "with " ) +
+            std::to_wstring( result ) + TEXT( "\nError message: " ) +
+            std::wstring( error_message ) );
+      }
+      */
+
+      GWIN_TRACE( "Removed the crash handler with return code: %d\n", result );
+    } else {
+      GWIN_TRACE( "Crash handler is not found.\n" );
+    }
+
+    DetourTransactionBegin();
+
+    DetourUpdateThread( GetCurrentThread() );
+
+    auto user32 = GetModuleHandle( TEXT( "user32.dll" ) );
+
+    if ( !user32 ) {
+      gwingui::messagebox::Error(
+          TEXT( "user32.dll is not loaded into memory." ) );
+      return -1;
+    }
+
+    DetourDetach(
+        reinterpret_cast<PVOID*>( &Initializer().peek_message_a_original_ ),
+        BotInitializer::PeekMessageAHooked );
+
+    if ( DetourTransactionCommit() != NO_ERROR ) {
+      gwingui::messagebox::Error( TEXT( "Error while trying to hook." ) );
+      return false;
+    }
+
+    Initializer().has_removed_exception_handler_ = true;
+  }
+
+  return Initializer().peek_message_a_original_(
+      message, window_handle, msg_filter_min, msg_filter_max, remove_msg );
+}
+
+BOOL WINAPI BotInitializer::CopyRectHooked( LPRECT destination,
+                                            const RECT* source ) {
+  gwingui::messagebox::Warning(
+      std::to_wstring( GetCurrentThreadId() ) + TEXT( " : " ) +
+      std::to_wstring( Initializer().thread_id_of_ex_handlers_ ) );
+
+  if ( GetCurrentThreadId() == Initializer().thread_id_of_ex_handlers_ ) {
+    HMODULE crash_rpt_module = GetModuleHandle( TEXT( "CrashRpt1403.dll" ) );
+
+    // TODO: do it properly
+    if ( !crash_rpt_module ) {
+      crash_rpt_module = GetModuleHandle( TEXT( "CrashRpt1402.dll" ) );
+    }
 
     if ( crash_rpt_module ) {
       using tCrUninstall = int ( * )();
@@ -449,8 +693,7 @@ BOOL WINAPI BotInitializer::CopyRectHooked( LPRECT destination,
         BotInitializer::CopyRectHooked );
 
     if ( DetourTransactionCommit() != NO_ERROR ) {
-      gwingui::messagebox::Error(
-          TEXT( "Error while trying to hook NtQueryInformationProcess." ) );
+      gwingui::messagebox::Error( TEXT( "Error while trying to hook." ) );
       return false;
     }
 
@@ -468,172 +711,6 @@ BotInitializer g_init;
 
 BotInitializer& BotInitializer::Instance() {
   return g_init;
-}
-
-typedef struct _UNICODE_STRING {
-  WORD Length;
-  WORD MaximumLength;
-  WORD* Buffer;
-} UNICODE_STRING, *PUNICODE_STRING;
-
-typedef struct _LDR_DATA_TABLE_ENTRY {
-  LIST_ENTRY InLoadOrderLinks;
-  LIST_ENTRY InMemoryOrderLinks;
-  LIST_ENTRY InInitializationOrderLinks;
-  PVOID DllBase;
-  PVOID EntryPoint;
-  ULONG SizeOfImage;
-  UNICODE_STRING FullDllName;
-  UNICODE_STRING BaseDllName;
-  ULONG Flags;
-  WORD LoadCount;
-  WORD TlsIndex;
-  union {
-    LIST_ENTRY HashLinks;
-    struct {
-      PVOID SectionPointer;
-      ULONG CheckSum;
-    };
-  };
-  union {
-    ULONG TimeDateStamp;
-    PVOID LoadedImports;
-  };
-  _ACTIVATION_CONTEXT* EntryPointActivationContext;
-  PVOID PatchInformation;
-  LIST_ENTRY ForwarderLinks;
-  LIST_ENTRY ServiceTagLinks;
-  LIST_ENTRY StaticLinks;
-} LDR_DATA_TABLE_ENTRY, *PLDR_DATA_TABLE_ENTRY;
-
-struct PdbInfo {
-  DWORD signature;
-  GUID guid;
-  DWORD age;
-  char pdb_filename[ 1 ];
-};
-
-std::string GuidToString( const GUID& guid ) {
-  char guid_string[ 37 ];  // 32 hex chars + 4 hyphens + null terminator
-  snprintf( guid_string, sizeof( guid_string ),
-            "%08x%04x%04x%02x%02x%02x%02x%02x%02x%02x%02x", guid.Data1,
-            guid.Data2, guid.Data3, guid.Data4[ 0 ], guid.Data4[ 1 ],
-            guid.Data4[ 2 ], guid.Data4[ 3 ], guid.Data4[ 4 ], guid.Data4[ 5 ],
-            guid.Data4[ 6 ], guid.Data4[ 7 ] );
-  return guid_string;
-}
-
-PdbInfo* GetPdbFromModule( const uintptr_t module_address ) {
-  const auto dos_header = reinterpret_cast<IMAGE_DOS_HEADER*>( module_address );
-
-  if ( dos_header->e_magic != IMAGE_DOS_SIGNATURE )
-    return nullptr;
-
-  const auto nt_header = reinterpret_cast<IMAGE_NT_HEADERS*>(
-      module_address + dos_header->e_lfanew );
-
-  const auto debug_data_directory =
-      &nt_header->OptionalHeader.DataDirectory[ IMAGE_DIRECTORY_ENTRY_DEBUG ];
-
-  if ( !debug_data_directory->Size )
-    return nullptr;
-
-  const auto debug_directory = reinterpret_cast<IMAGE_DEBUG_DIRECTORY*>(
-      module_address + debug_data_directory->VirtualAddress );
-
-  if ( IMAGE_DEBUG_TYPE_CODEVIEW == debug_directory->Type ) {
-    const auto pdb_info = reinterpret_cast<PdbInfo*>(
-        module_address + debug_directory->AddressOfRawData );
-
-    return pdb_info;
-  }
-
-  return nullptr;
-}
-
-NTSTATUS LOL( const uintptr_t dllbase ) {
-  const auto ntdll = LoadLibrary( TEXT( "ntdll.dll" ) );
-
-  const auto pdb_info =
-      GetPdbFromModule( reinterpret_cast<uintptr_t>( ntdll ) );
-
-  printf( "PDB path: %s\n", pdb_info->pdb_filename );
-  printf( "dicks: %s", GuidToString( pdb_info->guid ).c_str() );
-
-  std::string pdb_path = std::string( pdb_info->pdb_filename ) + "/" +
-                         GuidToString( pdb_info->guid ) +
-                         std::to_string( pdb_info->age ) + "/" +
-                         std::string( pdb_info->pdb_filename );
-
-  const auto symbol_server_url = "http://msdl.microsoft.com/download/symbols/";
-
-  const auto result =
-      URLDownloadToFileA( nullptr, ( symbol_server_url + pdb_path ).c_str(),
-                          "D:\\test.pdb", 0, nullptr );
-
-  if ( result != S_OK )
-    return 1;
-
-  // Get better debugging error messages
-  // SymSetOptions( SymGetOptions() | SYMOPT_DEBUG );
-
-  if ( !SymInitialize( GetCurrentProcess(), NULL, FALSE ) )
-    return 1;
-
-  const auto kDummyBaseAddress = 0x10000000;
-
-  const auto pdb_file_handle = CreateFile( TEXT( "D:\\test.pdb" ), GENERIC_READ,
-                                           0, NULL, OPEN_EXISTING, 0, NULL );
-
-  const auto pdb_file_size = GetFileSize( pdb_file_handle, NULL );
-
-  CloseHandle( pdb_file_handle );
-
-  const auto addr =
-      SymLoadModuleEx( GetCurrentProcess(), NULL, "D:\\test.pdb", NULL,
-                       kDummyBaseAddress, pdb_file_size, NULL, 0 );
-
-  if ( !addr )
-    return 1;
-
-  char lol[ MAX_SYM_NAME ];
-
-  SYMBOL_INFO sym_info;
-
-  sym_info.SizeOfStruct = sizeof( SYMBOL_INFO );
-  sym_info.MaxNameLen = MAX_SYM_NAME;
-  *reinterpret_cast<char*>( sym_info.Name ) = lol[ 0 ];
-
-  if ( !SymFromName( GetCurrentProcess(), "LdrpHandleTlsData", &sym_info ) )
-    return 1;
-
-  printf( "addr: %I64d\n", sym_info.Address );
-
-  SymUnloadModule64( GetCurrentProcess(), addr );
-
-  if ( !SymCleanup( GetCurrentProcess() ) )
-    return 1;
-
-  using LdrpHandleTlsData_stdcall_t =
-      NTSTATUS( __stdcall* )( PLDR_DATA_TABLE_ENTRY ModuleEntry );
-
-  using LdrpHandleTlsData_thiscall_t =
-      NTSTATUS( __thiscall* )( PLDR_DATA_TABLE_ENTRY ModuleEntry );
-
-  const auto rva = sym_info.Address - kDummyBaseAddress;
-
-  const auto func = reinterpret_cast<uint64_t>( ntdll ) + rva;
-
-  const auto func_typed =
-      reinterpret_cast<LdrpHandleTlsData_thiscall_t>( func );
-
-  LDR_DATA_TABLE_ENTRY entr = {};
-
-  entr.DllBase = reinterpret_cast<PVOID>( dllbase );
-
-  // TODO: either use the manual mapped dll loader... or only fill dllbase..?
-
-  return func_typed( &entr );
 }
 
 HINSTANCE BotInitializer::GetInstance() {
