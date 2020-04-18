@@ -61,6 +61,7 @@
     <ClInclude Include="src\pch\pch.h" />
     <ClInclude Include="src\servers\flyff_client.h" />
     <ClInclude Include="src\servers\flyff_client_dragon_crusade.h" />
+    <ClInclude Include="src\servers\flyff_client_eclipse.h" />
     <ClInclude Include="src\servers\flyff_client_ignite.h" />
     <ClInclude Include="src\servers\flyff_client_mazey.h" />
     <ClInclude Include="src\utils\d3d_drawing.h" />
@@ -125,6 +126,7 @@
     </ClCompile>
     <ClCompile Include="src\servers\flyff_client.cpp" />
     <ClCompile Include="src\servers\flyff_client_dragon_crusade.cpp" />
+    <ClCompile Include="src\servers\flyff_client_eclipse.cpp" />
     <ClCompile Include="src\servers\flyff_client_ignite.cpp" />
     <ClCompile Include="src\utils\d3d_drawing.cpp" />
     <ClCompile Include="src\bot\entity.cpp" />
@@ -204,7 +206,6 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <WholeProgramOptimization>true</WholeProgramOptimization>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>G:\development\external dependencies\Detours Pro 3.0.316\lib.X86;G:\development\external dependencies\dxsdk_oct_2004\Lib;G:\development\projects\C++\gwinmem\bin\Win32\Debug;G:\development\projects\C++\gwingui_v2\bin\Win32\Debug</AdditionalLibraryDirectories>

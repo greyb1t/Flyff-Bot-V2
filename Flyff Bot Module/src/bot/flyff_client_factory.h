@@ -6,6 +6,7 @@ enum class ServerType {
   MazeyFlyff,
   IgniteFlyff,
   DragonCrusade,
+  EclipseFlyff,
 
   Unknown
 };

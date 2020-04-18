@@ -222,6 +222,9 @@
     <ClInclude Include="src\bot\options\update_char_pos_option.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\servers\flyff_client_eclipse.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -390,6 +393,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\bot\options\remove_all_obstacles_option.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\servers\flyff_client_eclipse.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

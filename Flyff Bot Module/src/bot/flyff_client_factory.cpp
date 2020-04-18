@@ -4,6 +4,7 @@
 #include "../servers/flyff_client_dragon_crusade.h"
 #include "../servers/flyff_client_ignite.h"
 #include "../servers/flyff_client_mazey.h"
+#include "../servers/flyff_client_eclipse.h"
 
 using namespace bot;
 using namespace bot::flyff_client_factory;
@@ -23,6 +24,10 @@ std::unique_ptr<FlyffClient> flyff_client_factory::CreateFlyffClient(
 
     case ServerType::DragonCrusade:
       client = std::make_unique<FlyffClientDragonCrusade>();
+      break;
+
+    case ServerType::EclipseFlyff:
+      client = std::make_unique<FlyffClientEclipseFlyff>();
       break;
 
     default:
