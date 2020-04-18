@@ -28,7 +28,6 @@
 #include <condition_variable>
 #include <queue>
 #include <sstream>
-#include <VersionHelpers.h>
 #include <fstream>
 #include <future>
 
