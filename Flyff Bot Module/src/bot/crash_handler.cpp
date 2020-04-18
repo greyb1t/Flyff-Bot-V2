@@ -9,6 +9,8 @@
 #include "gwinmem/utils/safe_handle.h"
 #include "gwinmem/process_memory_internal.h"
 
+#include "../utils/trace.h"
+
 bool WriteDump( EXCEPTION_POINTERS* ex_pointers,
                 const std::wstring path,
                 int flags ) {
@@ -84,8 +86,12 @@ DWORD WINAPI CrashDumpWriter( LPVOID param ) {
 bool has_allocated_console = false;
 
 LONG HandleException( EXCEPTION_POINTERS* ex ) {
+  GWIN_TRACE( "Notifying the log queue\n" );
+
   // Update the bot log
   LogQueue().Notify();
+
+  GWIN_TRACE( "Adding manual mapped dll to ldr\n" );
 
   // Add the manual mapped module (this one) as a dll to make it easier when
   // debugging the dump
@@ -94,13 +100,15 @@ LONG HandleException( EXCEPTION_POINTERS* ex ) {
       TEXT( "C:\\crerrpt.dll" ) );
 
   if ( !has_allocated_console ) {
+    GWIN_TRACE( "Allocating a console\n" );
+
     AllocConsole();
     freopen( "CONOUT$", "w", stdout );
 
     has_allocated_console = true;
   }
 
-  printf( "Exception occured\n" );
+  GWIN_TRACE( "Exception occured\n" );
 
   DWORD thread_id;
   gwinmem::SafeHandle thread_handle =
@@ -145,9 +153,9 @@ LONG WINAPI crash_handler::MainExceptionHandler( EXCEPTION_POINTERS* ex ) {
       has_allocated_console = true;
     }
 
-    Sleep( INFINITE );
-
     printf( "An exception occured in the exception handler\n" );
+
+    Sleep( INFINITE );
   }
 
   return 0;
