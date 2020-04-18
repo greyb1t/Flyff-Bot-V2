@@ -1,13 +1,32 @@
-TODO: Add feature to wait before continuing to kill monsters until the player health is above the set limit if auto food option is enabled
+TODO:
+    If bot found another player while running to monsters (before attacking it), immediately stop.
+
+Create a root-kit like protection for the bot
+
+    Hook FindWindow, GetThreadContext, SetThreadContext, VirtualQueryEx, LoadLibrary,
+    GetActiveWindow 
+    EnumerateLoadedModulesEx
+
+    NtQueryVirtualMemory (MemorySectionName)
+    GetMappedFileName
+
+    Iteration of threads,
+    Iteration of modules,
+    Iteration of windows,
+
+    Checking if the appdata greyb1t folder exists hook
+
+    In other words, find out how Module32First is working under hood and hook Nt-Function
+
+
+NOTE: The DeSelectEntity(), might not be able to de-select quick enough on a laggy computer, need to add a state to ensure
+that the entity is deselected
 
 TODO: Add opportunity to only Render/Update once every 0.5 seconds to avoid fps issues
 
 TODO: Add feature to make the character jump if getting stuck on a high wall
 
 TODO: Add feature to take screenshot when player dies to identify what might have caused the death
-
-TODO: Add warning if users tries to start the bot while being outside the "Restricted Killing Area".
-	If no warning, the user might think the bot is not working bcuz it just keep looking but not finding.
 
 NOTE: If I ever sell it, if the user does not follow the agreements of the usage, add their information to a public list
 	Paypal email, account name
@@ -38,6 +57,9 @@ seems to be checking for bad boy stuff.
 
 NOTE:
 NtClose Anti debug has argument 0xBAAD
+
+NOTE:
+Sending win32 messages through the game thread (e.g. endscene) causes freezes, do it in a separate thread
 
 FEATURE:
 full support rm
