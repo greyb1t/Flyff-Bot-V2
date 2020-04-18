@@ -21,5 +21,6 @@ SpacesInCStyleCastParentheses: 'true'
 SpacesInParentheses: 'true'
 SpacesInSquareBrackets: 'true'
 TabWidth: '2'
+ReflowComments: 'false'
 
 ...
