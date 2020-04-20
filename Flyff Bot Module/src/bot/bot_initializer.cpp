@@ -132,18 +132,18 @@ void OpenConsole() {
   }();
 }
 
-gwinmem::LDR_DATA_TABLE_ENTRY* g_entry;
+// Why do I declare as global? Because ManualMapHandleStaticTlsData requires the same address of the entry
+gwinmem::LDR_DATA_TABLE_ENTRY g_entry;
 
 int BotInitializer::Load( HINSTANCE instance_handle,
                           const uint32_t reserved_value ) {
-  g_entry = new gwinmem::LDR_DATA_TABLE_ENTRY{ 0 };
-  g_entry->DllBase = instance_handle;
+  g_entry.DllBase = instance_handle;
 
   // Initializing the static tls on a manual mapped dll fixes the crashing issues with using the static keyword
   // Previously I was required to use /GL (Whole Program Optimization)
   //
   auto static_tls_succeeded =
-      gwinmem::CurrentProcess().ManualMapHandleStaticTlsData( g_entry );
+      gwinmem::CurrentProcess().ManualMapHandleStaticTlsData( &g_entry );
 
   if ( !static_tls_succeeded ) {
     gwingui::messagebox::Error(
@@ -351,7 +351,7 @@ bool BotInitializer::Unload( const HWND mainwindow_handle,
   // Free the static tls data, otherwise the process will get fucked (crash) when unloading the bot
   //
   const auto free_static_tls_result =
-      gwinmem::CurrentProcess().ManualMapFreeStaticTlsData( g_entry );
+      gwinmem::CurrentProcess().ManualMapFreeStaticTlsData( &g_entry );
 
   if ( !free_static_tls_result ) {
     gwingui::messagebox::Error( TEXT( "Failed to free static tls data: " ) );
