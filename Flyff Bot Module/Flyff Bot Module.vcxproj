@@ -199,7 +199,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>G:\development\external dependencies\Detours Pro 3.0.316\include;G:\development\external dependencies\dxsdk_oct_2004\Include;G:\development\external dependencies\openssl-1.1.0e-vs2015\include;%(AdditionalIncludeDirectories);$(ProjectDir)\src\pch;G:\development\projects\C++\gwinmem\gwinmem\src;G:\development\projects\C++\gwingui_v2\gwingui_v2</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\development\external dependencies\Detours Pro 3.0.316\include;C:\development\external dependencies\dxsdk_oct_2004\Include;C:\development\external dependencies\openssl-1.1.0e-vs2015\include;%(AdditionalIncludeDirectories);$(ProjectDir)\src\pch;C:\development\projects\C++\gwinmem\gwinmem\src;C:\development\projects\C++\gwingui_v2\gwingui_v2</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -208,7 +208,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>G:\development\external dependencies\Detours Pro 3.0.316\lib.X86;G:\development\external dependencies\dxsdk_oct_2004\Lib;G:\development\projects\C++\gwinmem\bin\Win32\Debug;G:\development\projects\C++\gwingui_v2\bin\Win32\Debug</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\development\external dependencies\Detours Pro 3.0.316\lib.X86;C:\development\external dependencies\dxsdk_oct_2004\Lib;C:\development\projects\C++\gwinmem\bin\Win32\Debug;C:\development\projects\C++\gwingui_v2\bin\Win32\Debug</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
       <EntryPointSymbol>
@@ -226,7 +226,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>G:\development\external dependencies\Detours Pro 3.0.316\include;G:\development\external dependencies\dxsdk_oct_2004\Include;G:\development\external dependencies\openssl-1.1.0e-vs2015\include;%(AdditionalIncludeDirectories);$(ProjectDir)\src\pch;G:\development\projects\C++\gwinmem\gwinmem\src;G:\development\projects\C++\gwingui_v2\gwingui_v2</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\development\external dependencies\Detours Pro 3.0.316\include;C:\development\external dependencies\dxsdk_oct_2004\Include;C:\development\external dependencies\openssl-1.1.0e-vs2015\include;%(AdditionalIncludeDirectories);$(ProjectDir)\src\pch;C:\development\projects\C++\gwinmem\gwinmem\src;C:\development\projects\C++\gwingui_v2\gwingui_v2</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -237,7 +237,7 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>G:\development\external dependencies\Detours Pro 3.0.316\lib.X86;G:\development\external dependencies\dxsdk_oct_2004\Lib;G:\development\projects\C++\gwinmem\bin\Win32\Release;G:\development\projects\C++\gwingui_v2\bin\Win32\Release</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\development\external dependencies\Detours Pro 3.0.316\lib.X86;C:\development\external dependencies\dxsdk_oct_2004\Lib;C:\development\projects\C++\gwinmem\bin\Win32\Release;C:\development\projects\C++\gwingui_v2\bin\Win32\Release</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>

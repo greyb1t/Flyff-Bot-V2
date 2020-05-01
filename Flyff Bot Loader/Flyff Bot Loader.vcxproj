@@ -72,13 +72,13 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>G:\development\projects\C++\gwingui_v2\gwingui_v2;G:\development\external dependencies\openssl-1.1.0e-vs2015\include;G:\development\projects\C++\gwinmem\gwinmem\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\development\projects\C++\gwingui_v2\gwingui_v2;C:\development\external dependencies\openssl-1.1.0e-vs2015\include;C:\development\projects\C++\gwinmem\gwinmem\src</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>G:\development\projects\C++\gwingui_v2\bin\Win32\Debug;G:\development\projects\C++\gwinmem\bin\Win32\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\development\projects\C++\gwingui_v2\bin\Win32\Debug;C:\development\projects\C++\gwinmem\bin\Win32\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
     </Link>
   </ItemDefinitionGroup>
@@ -90,7 +90,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>G:\development\projects\C++\gwingui_v2\gwingui_v2;G:\development\external dependencies\openssl-1.1.0e-vs2015\include;G:\development\projects\C++\gwinmem\gwinmem\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\development\projects\C++\gwingui_v2\gwingui_v2;C:\development\external dependencies\openssl-1.1.0e-vs2015\include;C:\development\projects\C++\gwinmem\gwinmem\src</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -99,7 +99,7 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>G:\development\projects\C++\gwingui_v2\bin\Win32\Release;G:\development\projects\C++\gwinmem\bin\Win32\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\development\projects\C++\gwingui_v2\bin\Win32\Release;C:\development\projects\C++\gwinmem\bin\Win32\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
