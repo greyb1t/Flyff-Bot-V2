@@ -137,175 +137,174 @@ gwinmem::LDR_DATA_TABLE_ENTRY g_entry;
 
 int BotInitializer::Load( HINSTANCE instance_handle,
                           const uint32_t reserved_value ) {
-  g_entry.DllBase = instance_handle;
+  try {
+    g_entry.DllBase = instance_handle;
 
-  // Initializing the static tls on a manual mapped dll fixes the crashing issues with using the static keyword
-  // Previously I was required to use /GL (Whole Program Optimization)
-  //
-  auto static_tls_succeeded =
-      gwinmem::CurrentProcess().ManualMapHandleStaticTlsData( &g_entry );
+    // Initializing the static tls on a manual mapped dll fixes the crashing issues with using the static keyword
+    // Previously I was required to use /GL (Whole Program Optimization)
+    //
+    auto static_tls_succeeded =
+        gwinmem::CurrentProcess().ManualMapHandleStaticTlsData( &g_entry );
 
-  if ( !static_tls_succeeded ) {
-    gwingui::messagebox::Error(
-        TEXT( "Failed to initialize static tls data" ) );
-    return -1;
-  }
+    if ( !static_tls_succeeded ) {
+      gwingui::messagebox::Error(
+          TEXT( "Failed to initialize static tls data" ) );
+      return -1;
+    }
 
-  static std::vector<int> test_static_tls_data_temp_var = { 1337, 1338 };
+    static std::vector<int> test_static_tls_data_temp_var = { 1337, 1338 };
 
-  // If the static tls initialization call above does not work properly, inform us about that shits
-  //
-  if ( test_static_tls_data_temp_var.size() == 0 ) {
-    gwingui::messagebox::Error( TEXT(
-        "Static tls data is not working properly, have you initialized it?" ) );
-    return -1;
-  }
+    // If the static tls initialization call above does not work properly, inform us about that shits
+    //
+    if ( test_static_tls_data_temp_var.size() == 0 ) {
+      gwingui::messagebox::Error(
+          TEXT( "Static tls data is not working properly, have you initialized "
+                "it?" ) );
+      return -1;
+    }
 
 #if ENABLE_PROTECTION
 
-  // Check if the value in the dll header is 1
-  uint8_t* dll_header_data = reinterpret_cast<uint8_t*>( instance_handle );
+    // Check if the value in the dll header is 1
+    uint8_t* dll_header_data = reinterpret_cast<uint8_t*>( instance_handle );
 
-  auto dos_headers = reinterpret_cast<IMAGE_DOS_HEADER*>( dll_header_data );
+    auto dos_headers = reinterpret_cast<IMAGE_DOS_HEADER*>( dll_header_data );
 
-  auto nt_headers = reinterpret_cast<IMAGE_NT_HEADERS*>(
-      dll_header_data + dos_headers->e_lfanew );
+    auto nt_headers = reinterpret_cast<IMAGE_NT_HEADERS*>(
+        dll_header_data + dos_headers->e_lfanew );
 
-  DWORD old_protection;
-  VirtualProtect( &nt_headers->OptionalHeader.CheckSum,
-                  sizeof( nt_headers->OptionalHeader.CheckSum ), PAGE_READWRITE,
-                  &old_protection );
+    DWORD old_protection;
+    VirtualProtect( &nt_headers->OptionalHeader.CheckSum,
+                    sizeof( nt_headers->OptionalHeader.CheckSum ),
+                    PAGE_READWRITE, &old_protection );
 
-  // If the checksum is not 0, then the dll has been dumped
-  if ( nt_headers->OptionalHeader.CheckSum != 0 ) {
-    botcore_.bad_boy_present_ = true;
-  }
+    // If the checksum is not 0, then the dll has been dumped
+    if ( nt_headers->OptionalHeader.CheckSum != 0 ) {
+      botcore_.bad_boy_present_ = true;
+    }
 
-  // Modify a dll header to indicate that we are running, if someone dumps the
-  // dll and tries to inject it, it won't work =)
-  nt_headers->OptionalHeader.CheckSum = 1;
+    // Modify a dll header to indicate that we are running, if someone dumps the
+    // dll and tries to inject it, it won't work =)
+    nt_headers->OptionalHeader.CheckSum = 1;
 
-  VirtualProtect( &nt_headers->OptionalHeader.CheckSum,
-                  sizeof( nt_headers->OptionalHeader.CheckSum ), old_protection,
-                  &old_protection );
+    VirtualProtect( &nt_headers->OptionalHeader.CheckSum,
+                    sizeof( nt_headers->OptionalHeader.CheckSum ),
+                    old_protection, &old_protection );
 
-  // When we manual map out dll, we use the value 1 for the reserved parameter
-  // in dllmain. If the reserved value is not 1, then someone tries to inject
-  // without my injector.
-  if ( reserved_value != 1 ) {
-    botcore_.bad_boy_present_ = true;
-  }
+    // When we manual map out dll, we use the value 1 for the reserved parameter
+    // in dllmain. If the reserved value is not 1, then someone tries to inject
+    // without my injector.
+    if ( reserved_value != 1 ) {
+      botcore_.bad_boy_present_ = true;
+    }
 #endif
 
-  ServerType server_type;
-  HWND target_window_handle;
+    ServerType server_type;
+    HWND target_window_handle;
 
-  if ( !GetClientServerTypeAndWindowHandle( &server_type,
-                                            &target_window_handle ) ) {
-    gwingui::messagebox::Error( TEXT(
-        "Cannot identify the server type or get the target window. Is the "
-        "server supported?" ) );
-    return -1;
-  }
-
-  botcore_.client_ = flyff_client_factory::CreateFlyffClient( server_type );
-  botcore_.target_window_handle_ = target_window_handle;
-
-  botcore_.kb_hook_handle_ =
-      SetWindowsHookEx( WH_KEYBOARD_LL, BotCore::KeyboardCallback, NULL, NULL );
-
-  if ( !botcore_.kb_hook_handle_ ) {
-    gwingui::messagebox::Error(
-        TEXT( "Failed to hook keyboard with error code: " ) +
-        std::to_wstring( GetLastError() ) );
-    return -1;
-  }
-
-  assert( botcore_.client_ != nullptr );
-
-  // Initialize the flyff client e.g. ignite flyff has integrity checks to be
-  // bypassed
-  if ( !botcore_.client_->Initialize() ) {
-    gwingui::messagebox::Error(
-        TEXT( "The flyff client failed to initialize properly." ) );
-    return -1;
-  }
-
-#if ENABLE_DEBUGGING
-  OpenConsole();
-
-  GWIN_TRACE( "Console had been opened" );
-#endif
-
-  instance_handle_ = instance_handle;
-
-  const auto main_window_thread_id =
-      GetWindowThreadProcessId( target_window_handle, 0 );
-
-  if ( !main_window_thread_id ) {
-    gwingui::messagebox::Error(
-        TEXT( "The main window thread is 0, with the target handle: " ) +
-        std::to_wstring( reinterpret_cast<uintptr_t>( target_window_handle ) ) +
-        TEXT( "WindowText: " ) +
-        gwingui::control::GetText( target_window_handle ) );
-
-    return -1;
-  }
-
-  HMODULE crash_rpt_module = GetModuleHandle( TEXT( "CrashRpt1403.dll" ) );
-
-  // TODO: do it properly
-  if ( !crash_rpt_module ) {
-    crash_rpt_module = GetModuleHandle( TEXT( "CrashRpt1402.dll" ) );
-  }
-
-  // TODO: Find a better way to unregister their exception handler, probably by thread hijacking
-  // TODO: instead of checking if the module is there, iterate all the modules and find any exports that has "crUninstall"
-  // can be as simple as iterate modules, and then call getprocaddress on each module to see if crUninstall exists
-  // if so, unregister it
-
-  // Check if the target client has a known crash reporter module
-  if ( crash_rpt_module ) {
-    // Unregister the existing exception handler, that is required to make my
-    // handlers catch everything.
-    if ( !UnregisterExceptionHandler( main_window_thread_id ) ) {
-      gwingui::messagebox::Error(
-          TEXT( "Unable to un-register the existing exception handler." ) );
+    if ( !GetClientServerTypeAndWindowHandle( &server_type,
+                                              &target_window_handle ) ) {
+      gwingui::messagebox::Error( TEXT(
+          "Cannot identify the server type or get the target window. Is the "
+          "server supported?" ) );
       return -1;
     }
-  }
 
-  // Bypasses the RtlIsValidHandler check, it should always let any exception
-  // handler through.
-  if ( !gwinmem::CurrentProcess().ManualMapFixExceptionHandling() ) {
+    botcore_.client_ = flyff_client_factory::CreateFlyffClient( server_type );
+    botcore_.target_window_handle_ = target_window_handle;
+
+    botcore_.kb_hook_handle_ = SetWindowsHookEx(
+        WH_KEYBOARD_LL, BotCore::KeyboardCallback, NULL, NULL );
+
+    if ( !botcore_.kb_hook_handle_ ) {
+      gwingui::messagebox::Error(
+          TEXT( "Failed to hook keyboard with error code: " ) +
+          std::to_wstring( GetLastError() ) );
+      return -1;
+    }
+
+    assert( botcore_.client_ != nullptr );
+
+    // Initialize the flyff client e.g. ignite flyff has integrity checks to be
+    // bypassed
+    if ( !botcore_.client_->Initialize() ) {
+      gwingui::messagebox::Error(
+          TEXT( "The flyff client failed to initialize properly." ) );
+      return -1;
+    }
+
+#if ENABLE_DEBUGGING
+    OpenConsole();
+
+    GWIN_TRACE( "Console had been opened" );
+#endif
+
+    instance_handle_ = instance_handle;
+
+    const auto main_window_thread_id =
+        GetWindowThreadProcessId( target_window_handle, 0 );
+
+    if ( !main_window_thread_id ) {
+      gwingui::messagebox::Error(
+          TEXT( "The main window thread is 0, with the target handle: " ) +
+          std::to_wstring(
+              reinterpret_cast<uintptr_t>( target_window_handle ) ) +
+          TEXT( "WindowText: " ) +
+          gwingui::control::GetText( target_window_handle ) );
+
+      return -1;
+    }
+
+    HMODULE crash_rpt_module = GetModuleHandle( TEXT( "CrashRpt1403.dll" ) );
+
+    // TODO: do it properly
+    if ( !crash_rpt_module ) {
+      crash_rpt_module = GetModuleHandle( TEXT( "CrashRpt1402.dll" ) );
+    }
+
+    // TODO: Find a better way to unregister their exception handler, probably by thread hijacking
+    // TODO: instead of checking if the module is there, iterate all the modules and find any exports that has "crUninstall"
+    // can be as simple as iterate modules, and then call getprocaddress on each module to see if crUninstall exists
+    // if so, unregister it
+
+    // Check if the target client has a known crash reporter module
+    if ( crash_rpt_module ) {
+      // Unregister the existing exception handler, that is required to make my
+      // handlers catch everything.
+      if ( !UnregisterExceptionHandler( main_window_thread_id ) ) {
+        gwingui::messagebox::Error(
+            TEXT( "Unable to un-register the existing exception handler." ) );
+        return -1;
+      }
+    }
+
+    // Bypasses the RtlIsValidHandler check, it should always let any exception
+    // handler through.
+    if ( !gwinmem::CurrentProcess().ManualMapFixExceptionHandling() ) {
+      gwingui::messagebox::Error(
+          TEXT( "Unable to fix the exception handling." ) );
+      return -1;
+    }
+
+    GWIN_TRACE( "Starting MM free thread\n" );
+
+    // Crashes in debug mode without Whole Program Optimization = On
+    // Start a thread that run until this thread is finished, then it free's the
+    // memory
+    gwinmem::CurrentProcess().ManualMapStartFreeDllThread(
+        reinterpret_cast<uintptr_t>( instance_handle ) );
+
+    GWIN_TRACE( "Replacing exception handler\n" );
+  } catch ( ... ) {
     gwingui::messagebox::Error(
-        TEXT( "Unable to fix the exception handling." ) );
-    return -1;
+        TEXT( "An exception occured during initialization before our exception "
+              "handler has been added." ) );
   }
-
-  GWIN_TRACE( "Starting MM free thread" );
-
-  // Crashes in debug mode without Whole Program Optimization = On
-  // Start a thread that run until this thread is finished, then it free's the
-  // memory
-  gwinmem::CurrentProcess().ManualMapStartFreeDllThread(
-      reinterpret_cast<uintptr_t>( instance_handle ) );
-
-  GWIN_TRACE( "Replacing exception handler" );
 
   prev_filter_ =
       SetUnhandledExceptionFilter( crash_handler::MainExceptionHandler );
 
   GWIN_TRACE( "Prev Filter: %d\n", reinterpret_cast<int>( prev_filter_ ) );
-
-  // gwinmem::ProcessInternal().ManualMapFixStaticTls((uintptr_t)instance_handle);
-
-  // TODO: Fix static tls, easiest with LdrpHandleTlsData
-  // https://github.com/DarthTon/Blackbone/blob/ae70e7059a1fbc6c1f101e59d5fe201c93676c99/src/BlackBone/Symbols/PatternLoader.cpp#L70
-  // __stdcall turned into __thiscall
-  // https://www.unknowncheats.me/forum/general-programming-and-reversing/232300-fixing-static-tls.html
-  // use pdb to get the address:
-  // https://www.unknowncheats.me/forum/c-and-c-/248123-pdbparse.html
 
   gwingui::Gui gui( instance_handle );
 
@@ -319,24 +318,17 @@ int BotInitializer::Load( HINSTANCE instance_handle,
 
   gui.AddWindow( DIALOG_ADDRESSES, nullptr, new AddressesOffsetsWindow );
 
-  try {
-    PostGuiCreation( loading_window_handle );
+  PostGuiCreation( loading_window_handle );
 
-    // Begin the window message loop
-    gui.Run();
+  // Begin the window message loop
+  gui.Run();
 
-    // Once the message loop has stopped, unload the bot
-    if ( !bot::Initializer().Unload(
-             mainwindow_handle,
-             reinterpret_cast<uintptr_t>( instance_handle ) ) ) {
-      gwingui::messagebox::Error(
-          TEXT( "Error while attempting to unload the bot." ) );
-      return -1;
-    }
-  } catch ( std::exception ex ) {
-    gwingui::messagebox::Error( stringutils::AnsiToWide( ex.what() ) );
-    return -1;
-  } catch ( ... ) {
+  // Once the message loop has stopped, unload the bot
+  if ( !bot::Initializer().Unload(
+           mainwindow_handle,
+           reinterpret_cast<uintptr_t>( instance_handle ) ) ) {
+    gwingui::messagebox::Error(
+        TEXT( "Error while attempting to unload the bot." ) );
     return -1;
   }
 

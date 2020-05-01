@@ -26,12 +26,7 @@
 uint32_t g_reserved = 0;
 
 DWORD WINAPI WrappedDllMain( const HINSTANCE instance_handle ) {
-  try {
-    return bot::Initializer().Load( instance_handle, g_reserved );
-  } catch ( ... ) {
-    gwingui::messagebox::Error( TEXT( "Unhandled exception occured." ) );
-    return -1;
-  }
+  return bot::Initializer().Load( instance_handle, g_reserved );
 }
 
 BOOL WINAPI DllMain( HINSTANCE instance_handle,
