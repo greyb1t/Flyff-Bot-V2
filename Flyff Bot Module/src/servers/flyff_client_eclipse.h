@@ -65,6 +65,15 @@ class FlyffClientEclipseFlyff : public FlyffClient {
  public:
   FlyffClientEclipseFlyff();
   ~FlyffClientEclipseFlyff() {}
+
+  static LRESULT CALLBACK CallWndProcHook( int code,
+                                           WPARAM wParam,
+                                           LPARAM lParam );
+
+  void PreAddressSearch();
+
+ private:
+  static HHOOK wnd_proc_hook_handle_;
 };
 
 }  // namespace bot

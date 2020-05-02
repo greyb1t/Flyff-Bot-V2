@@ -1,6 +1,9 @@
 #include "pch.h"
 #include "flyff_client_eclipse.h"
 #include "gwinmem/process_memory_internal.h"
+#include "../bot/bot_initializer.h"
+
+HHOOK bot::FlyffClientEclipseFlyff::wnd_proc_hook_handle_ = 0;
 
 bot::FlyffClientEclipseFlyff::FlyffClientEclipseFlyff()
     : FlyffClient( TEXT( "Neuz.exe" ) ) {
@@ -207,4 +210,56 @@ bot::FlyffClientEclipseFlyff::FlyffClientEclipseFlyff()
 
     return offset;
   } );
+}
+
+LRESULT bot::FlyffClientEclipseFlyff::CallWndProcHook( int code,
+                                                       WPARAM wParam,
+                                                       LPARAM lParam ) {
+  auto botcore = Initializer().GetBotCore();
+
+  if ( code < 0 )
+    CallNextHookEx( wnd_proc_hook_handle_, code, wParam, lParam );
+
+  if ( code == HC_ACTION ) {
+    CWPSTRUCT* cwp = reinterpret_cast<CWPSTRUCT*>( lParam );
+
+    switch ( cwp->message ) {
+      case WM_KILLFOCUS: {
+        SendMessage( botcore->GetTargetWindow(), WM_ACTIVATE, WA_ACTIVE, 0 );
+      } break;
+
+      default:
+        break;
+    }
+  }
+
+  return CallNextHookEx( 0, code, wParam, lParam );
+}
+
+void bot::FlyffClientEclipseFlyff::PreAddressSearch() {
+  /*
+    Eclipse Flyff has protection against keypresses that is not 1-9 or F-keys
+    when the window is not in focus. They detect if the window is in focus or
+    not by handling WM_ACTIVATE I detect when the window goes out of focus and
+    then send a message with WM_ACTIVATE to say we are in focus again but in
+    reality we are not.
+  */
+
+  // Do it once to avoid having window out of focus when it never gets into
+  // focus
+  auto botcore = Initializer().GetBotCore();
+  SendMessage( botcore->GetTargetWindow(), WM_ACTIVATE, WA_ACTIVE, 0 );
+
+  const auto target_window = botcore->GetTargetWindow();
+
+  assert( target_window );
+
+  uint32_t window_thread_id = GetWindowThreadProcessId( target_window, 0 );
+
+  wnd_proc_hook_handle_ = SetWindowsHookEx( WH_CALLWNDPROC, CallWndProcHook,
+                                            NULL, window_thread_id );
+
+  if ( !wnd_proc_hook_handle_ ) {
+    gwingui::messagebox::Error( TEXT( "SetWindowsHookEx failed" ) );
+  }
 }
