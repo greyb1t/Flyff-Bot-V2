@@ -170,6 +170,8 @@ class BotCore {
 
   bool bad_boy_present_;
 
+  uintptr_t endscene_ret_addr_;
+
   friend class BotInitializer;
 };
 

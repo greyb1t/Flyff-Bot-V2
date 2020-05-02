@@ -91,10 +91,6 @@ void Bot::AdjustCameraTowardsEntity( const LocalPlayer* local_player,
                                scroll_distance_degree_offset );
 }
 
-void Bot::DeSelectEntity() {
-  simulation::SendVirtualKeypress( botcore_->GetTargetWindow(), VK_ESCAPE, 50 );
-}
-
 bool Bot::IsEntityValid( const Entity& entity ) {
   return !entity.IsDeletedOrInvalidMemory() && entity.IsMonster() &&
          entity.IsAlive();

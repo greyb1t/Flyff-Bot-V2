@@ -44,7 +44,8 @@ BotCore::BotCore()
       is_stopwatch_started_( false ),
       has_initialized_d3d_( false ),
       has_initialized_matrix_addresses_( false ),
-      bad_boy_present_( false ) {}
+      bad_boy_present_( false ),
+      endscene_ret_addr_( 0 ) {}
 
 HRESULT BotCore::EndSceneHooked( LPDIRECT3DDEVICE9 device ) {
   const auto endscene_original_hook =
@@ -53,6 +54,18 @@ HRESULT BotCore::EndSceneHooked( LPDIRECT3DDEVICE9 device ) {
 
   const auto endscene_original_function =
       reinterpret_cast<tEndScene>( endscene_original_hook.original_function );
+
+  const auto endscene_ret_addr = Initializer().GetBotCore()->endscene_ret_addr_;
+
+  // If we have saved the return address
+  if ( endscene_ret_addr != 0 ) {
+    // If the return address is not the same as the one we saved on the first call
+    // do not render to ensure we only do it once each frame
+    if ( reinterpret_cast<uintptr_t>( _ReturnAddress() ) !=
+         endscene_ret_addr ) {
+      return endscene_original_function( device );
+    }
+  }
 
   if ( !g_hooks_mutex.try_lock() ) {
     return endscene_original_function( device );
@@ -67,6 +80,19 @@ HRESULT BotCore::EndSceneHooked( LPDIRECT3DDEVICE9 device ) {
   }
 
   if ( !botcore->has_initialized_d3d_ ) {
+    // Flyff calls EndScene multiple times each frame
+    // Therefore we save the return address of the first call and
+    // only draw on that to increase performance and avoid issues
+    // with rendering on inventory and weird crap like that
+    // NOTE: This can causes issues with rendering in case it saves the incorrect return address
+    // but that has low chance of occuring, and one can only restart it to fix
+
+    const auto ret_addr = reinterpret_cast<uintptr_t>( _ReturnAddress() );
+
+    GWIN_TRACE( "Saved Return Address: %d\n", ret_addr );
+
+    botcore->endscene_ret_addr_ = ret_addr;
+
     botcore->drawing_.SetDevice( device );
     botcore->drawing_.CreateFontToMap( TEXT( "Arial" ), NORMAL_TEXT, 14 );
     botcore->drawing_.CreateFontToMap( TEXT( "Arial" ), NORMAL_TEXT_BIG, 18 );
@@ -367,6 +393,121 @@ void BotCore::ShowBotHasStoppedWindow() {
   }
 }
 
+//void BotCore::DrawEntityBBox( const Entity& local_player,
+//                              const Entity& entity,
+//                              BBOX& bbox,
+//                              const D3DCOLOR box_color ) {
+//  //BOUND_BOX bound_box = entity.GetBoundBox();
+//
+//  D3DXVECTOR3 screen_pos = {};
+//
+//  bbox.Extent[ 0 ] /= 2;
+//  bbox.Extent[ 1 ] /= 2;
+//  bbox.Extent[ 2 ] /= 2;
+//
+//  BOUND_BOX new_bb;
+//
+//  new_bb.pos[ 0 ].x = bbox.Extent[ 0 ];
+//  new_bb.pos[ 0 ].y = bbox.Extent[ 1 ];
+//  new_bb.pos[ 0 ].z = bbox.Extent[ 2 ];
+//
+//  new_bb.pos[ 4 ].x = bbox.Extent[ 0 ];
+//  new_bb.pos[ 4 ].y = -bbox.Extent[ 1 ];
+//  new_bb.pos[ 4 ].z = bbox.Extent[ 2 ];
+//
+//  new_bb.pos[ 5 ].x = bbox.Extent[ 0 ];
+//  new_bb.pos[ 5 ].y = -bbox.Extent[ 1 ];
+//  new_bb.pos[ 5 ].z = -bbox.Extent[ 2 ];
+//
+//  new_bb.pos[ 1 ].x = bbox.Extent[ 0 ];
+//  new_bb.pos[ 1 ].y = bbox.Extent[ 1 ];
+//  new_bb.pos[ 1 ].z = -bbox.Extent[ 2 ];
+//
+//  new_bb.pos[ 2 ].x = -bbox.Extent[ 0 ];
+//  new_bb.pos[ 2 ].y = bbox.Extent[ 1 ];
+//  new_bb.pos[ 2 ].z = -bbox.Extent[ 2 ];
+//
+//  new_bb.pos[ 6 ].x = -bbox.Extent[ 0 ];
+//  new_bb.pos[ 6 ].y = -bbox.Extent[ 1 ];
+//  new_bb.pos[ 6 ].z = -bbox.Extent[ 2 ];
+//
+//  new_bb.pos[ 7 ].x = -bbox.Extent[ 0 ];
+//  new_bb.pos[ 7 ].y = -bbox.Extent[ 1 ];
+//  new_bb.pos[ 7 ].z = bbox.Extent[ 2 ];
+//
+//  new_bb.pos[ 3 ].x = -bbox.Extent[ 0 ];
+//  new_bb.pos[ 3 ].y = bbox.Extent[ 1 ];
+//  new_bb.pos[ 3 ].z = bbox.Extent[ 2 ];
+//
+//  /*
+//    	Extent[0] = vExtent.x
+//      Extent[1] = vExtent.y
+//      Extent[2] = vExtent.z
+//  */
+//
+//  /*
+//    Front face
+//    0, 4, 5, 1
+//  */
+//
+//  //const bool inside_view =
+//  //    math::FlyffWorldToScreen( this, entity, loly, &screen_pos );
+//
+//  bool inside_view = true;
+//  BOUND_BOX bound_box_screen;
+//
+//  for ( int i = 0; i < BOUND_BOX::kBoxCorners; ++i ) {
+//    D3DXVECTOR3 screen_pos;
+//
+//    if ( !math::FlyffWorldToScreen( this, entity, new_bb.pos[ i ],
+//                                    &screen_pos ) ) {
+//      inside_view = false;
+//      break;
+//    }
+//
+//    bound_box_screen.pos[ i ] = screen_pos;
+//  }
+//
+//  // don't draw an entity outside of the screen
+//  //if ( !inside_view )
+//  //  return;
+//
+//  union ARGB {
+//    std::uint32_t color;
+//    struct {
+//      std::uint8_t b, g, r, a;
+//    };
+//  };
+//
+//  D3DCOLOR box_color_copy = box_color;
+//
+//  /*
+//  const float kCornerSize = 5.0f;
+//  drawing_.DrawRectangle( screen_pos.x - ( kCornerSize / 2 ),
+//                          screen_pos.y - ( kCornerSize / 2 ), kCornerSize,
+//                          kCornerSize, D3DCOLOR_RGBA( 255, 255, 255, 255 ) );
+//  */
+//
+//  drawing_.DrawBoundBoxOutline( &bound_box_screen, box_color_copy );
+//  reinterpret_cast<ARGB*>( &box_color_copy )->a = 30;
+//  drawing_.DrawBoundBoxFilled( &bound_box_screen, box_color_copy );
+//
+//  /*
+//  D3DXVECTOR3 bound_box_center_pos = math::CalculateBoxCenter( &bound_box );
+//  D3DXVECTOR3 bound_box_center_pos_screen;
+//
+//  if ( math::FlyffWorldToScreen( this, entity, bound_box_center_pos,
+//                                 &bound_box_center_pos_screen ) ) {
+//    const float rect_size = 5.f;
+//    // Draw the middle rectangle dot
+//    drawing_.DrawRectangle( bound_box_center_pos_screen.x - rect_size / 2,
+//                            bound_box_center_pos_screen.y - rect_size / 2,
+//                            rect_size, rect_size,
+//                            D3DCOLOR_RGBA( 255, 255, 255, 255 ) );
+//  }
+//  */
+//}
+
 void BotCore::DrawEntity( const Entity& local_player,
                           const Entity& entity,
                           const D3DCOLOR box_color ) {
@@ -526,6 +667,7 @@ void BotCore::Render( LPDIRECT3DDEVICE9 pDevice ) {
   drawing_.SetRenderStates( true );
 
   EntityList entity_list( client_.get() );
+
   auto& mover_entities = entity_list.GetMoverEntities();
 
   // add to the entities
@@ -553,6 +695,13 @@ void BotCore::Render( LPDIRECT3DDEVICE9 pDevice ) {
 
       return false;
     };
+
+    /*
+    if ( entity->IsPlayer() && entity->GetName() == "Sebi" ) {
+      DrawEntity( *local_player_entity, *entity,
+                  D3DCOLOR_RGBA( 0, 162, 232, 255 ) );
+    }
+    */
 
     if ( entity->IsPlayer() ) {
       DrawEntity( *local_player_entity, *entity,

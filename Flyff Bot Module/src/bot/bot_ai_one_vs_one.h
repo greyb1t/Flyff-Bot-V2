@@ -29,6 +29,8 @@ enum class OneVsOneStates {
   kUpdateCharacterPosition,
   kIdle,
   kCharacterDied,
+
+  DeselectEntity,
 };
 
 class BotAIOneVsOne : public KillingBot {
@@ -44,7 +46,7 @@ class BotAIOneVsOne : public KillingBot {
   void OnStateChanging() override;
 
  private:
-   std::unique_ptr<Entity> current_target_entity_;
+  std::unique_ptr<Entity> current_target_entity_;
   int32_t nearest_entity_hp_when_selected_;
   int32_t selected_entity_hp_when_started_hitting_;
 
@@ -83,6 +85,8 @@ class BotAIOneVsOne : public KillingBot {
   WalkToPositionStateMachine walk_to_pos_machine_;
   KeySequence rebuff_sequence_;
   IdleStateMachine idle_machine_;
+
+  OneVsOneStates state_after_deselect_;
 
   std::vector<const EntityFilter*> default_filter_;
 };

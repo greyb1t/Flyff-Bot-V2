@@ -42,8 +42,6 @@ class Bot : public StateMachine {
   void AdjustCameraTowardsEntity( const LocalPlayer* local_player,
                                   const Entity& entity );
 
-  void DeSelectEntity();
-
   bool IsEntityValid( const Entity& entity );
 
   // Returns the entity if found, nullptr otherwise

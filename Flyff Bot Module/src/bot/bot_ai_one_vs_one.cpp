@@ -11,6 +11,7 @@
 #include "options/update_char_pos_option.h"
 
 #include "../utils/string_utls.h"
+#include "../utils/simulation.h"
 
 namespace bot {
 
@@ -32,7 +33,8 @@ BotAIOneVsOne::BotAIOneVsOne( BotCore* botcore )
       check_around_counter_( 0 ),
       has_selected_unintended_target_count_( 0 ),
       local_player_health_start_( 0 ),
-      started_walking_backwards_( false ) {
+      started_walking_backwards_( false ),
+      state_after_deselect_( OneVsOneStates::kFindingTarget ) {
   auto& bot_options = botcore->GetBotOptions();
   auto& rebuff_sequence_list_option =
       bot_options.GetOption<CharacterRebuffListOption>();
@@ -93,6 +95,39 @@ void BotAIOneVsOne::UpdateInternal() {
   const auto current_state = GetCurrentState<OneVsOneStates>();
 
   switch ( current_state ) {
+    case OneVsOneStates::DeselectEntity: {
+      DO_ONCE( []() {
+        logging::Log( TEXT( "Trying to deselect current entity.\n" ) );
+      } );
+
+      // Press escape with 0 delay because we want it as quickly as possible
+      const auto simulation_status =
+          simulation_machine_.KeyPress( VK_ESCAPE, 0 );
+
+      if ( simulation_status == StateStatusReturnValue::kSucceeded ) {
+        // Check if entity was successfully deselected
+        if ( !local_player->IsEntitySelected() ) {
+          DO_ONCE( []() {
+            logging::Log( TEXT( "Successfully deselected entity.\n" ) );
+          } );
+
+          // Continue with the next state
+          SetNextState( state_after_deselect_ );
+        } else {
+          DO_ONCE(
+              []() { logging::Log( TEXT( "Failed deselected entity.\n" ) ); } );
+
+          // If it failed to deselect, try again, we do not need to call
+          // Reset because it does not internally, only do so for clarity
+          simulation_machine_.Reset();
+        }
+      } else if ( simulation_status == StateStatusReturnValue::kInProgress ) {
+        DO_ONCE( []() {
+          logging::Log( TEXT( "Deselect entity in progress.\n" ) );
+        } );
+      }
+    } break;
+
     case OneVsOneStates::kFindingTarget: {
       if ( !local_player->IsStandingStill() ) {
         DO_ONCE( []() {
@@ -418,8 +453,6 @@ void BotAIOneVsOne::UpdateInternal() {
            current_target_entity_->GetPointerAddress() ) {
         logging::Log( TEXT( "An unintended target was selected.\n" ) );
 
-        DeSelectEntity();
-
         if ( has_selected_unintended_target_count_ > 5 ) {
           logging::Log( TEXT(
               "Five tries has been done, retrying from the beginning.\n" ) );
@@ -447,7 +480,9 @@ void BotAIOneVsOne::UpdateInternal() {
 
         ++has_selected_unintended_target_count_;
 
-        SetNextState( OneVsOneStates::kFocusOnTarget );
+        // Deselect the entity, then continue on focus target
+        state_after_deselect_ = OneVsOneStates::kFocusOnTarget;
+        SetNextState( OneVsOneStates::DeselectEntity );
         return;
 
         // Add the entity that the bot tried to select to a temporary blacklist
@@ -464,9 +499,6 @@ void BotAIOneVsOne::UpdateInternal() {
       if ( !selected_entity->IsMonster() || !selected_entity->IsAlive() ) {
         logging::Log( TEXT( "The entity selected is not valid, retrying.\n" ) );
 
-        // Press escape to deselect current entity that was invalid
-        DeSelectEntity();
-
         // Add the entity that the bot tried to select to a temporary blacklist
         // to avoid selecting it again risking that we select the same invalid
         // entity as we did this time.
@@ -474,9 +506,12 @@ void BotAIOneVsOne::UpdateInternal() {
 
         RestoreBlockedBoundBoxes();
 
+        // Press escape to deselect current entity that was invalid
         // Go to the beginning again, it will find another target and
         // not the one we blacklisted that resulted in an invalid selection
-        SetNextState( OneVsOneStates::kFindingTarget );
+        state_after_deselect_ = OneVsOneStates::kFindingTarget;
+        SetNextState( OneVsOneStates::DeselectEntity );
+
         return;
       }
 
@@ -607,13 +642,13 @@ void BotAIOneVsOne::UpdateInternal() {
                    new_target_distance_to_player ) {
                 logging::Log( TEXT( "Selecting a closer entity.\n" ) );
 
-                // A close entity was found, deselect the current one and select
-                // the new one
-                DeSelectEntity();
-
                 current_target_entity_ = std::move( entity );
 
-                SetNextState( OneVsOneStates::kFocusOnTarget );
+                // A close entity was found, deselect the current one and select
+                // the new one
+                state_after_deselect_ = OneVsOneStates::kFocusOnTarget;
+                SetNextState( OneVsOneStates::DeselectEntity );
+
                 return;
               }
             }
@@ -723,18 +758,17 @@ void BotAIOneVsOne::UpdateInternal() {
     case OneVsOneStates::kBlockedTypeRunningIntoObstacle: {
       logging::Log( TEXT( "kBlockedTypeRunningIntoObstacle.\n" ) );
 
-      // Press escape to deselect current entity that was invalid
-      DeSelectEntity();
-
       // Add the entity that the bot tried to select to a temporary blacklist to
       // avoid selecting it again risking that we select the same invalid entity
       // as we did this time.
       blacklisted_entities_temporary_.push_back( *current_target_entity_ );
 
+      // Press escape to deselect current entity that was invalid
       // Go to the beginning again, it will find another target and
       // not the one we blacklisted that resulted in an invalid selection
-      // SetNextState(FindingTarget);
-      SetNextState( OneVsOneStates::kFindingTarget );
+      state_after_deselect_ = OneVsOneStates::kFindingTarget;
+      SetNextState( OneVsOneStates::DeselectEntity );
+
       return;
 
       // Simulate a monster beside the character and make it click on the ground
@@ -752,18 +786,17 @@ void BotAIOneVsOne::UpdateInternal() {
     case OneVsOneStates::kBlockedTypeShootThroughObstacle: {
       logging::Log( TEXT( "kBlockedTypeShootThroughObstacle.\n" ) );
 
-      // Press escape to deselect current entity that was invalid
-      DeSelectEntity();
-
       // Add the entity that the bot tried to select to a temporary blacklist to
       // avoid selecting it again risking that we select the same invalid entity
       // as we did this time.
       blacklisted_entities_temporary_.push_back( *current_target_entity_ );
 
+      // Press escape to deselect current entity that was invalid
       // Go to the beginning again, it will find another target and
       // not the one we blacklisted that resulted in an invalid selection
-      // SetNextState(FindingTarget);
-      SetNextState( OneVsOneStates::kFindingTarget );
+      state_after_deselect_ = OneVsOneStates::kFindingTarget;
+      SetNextState( OneVsOneStates::DeselectEntity );
+
       return;
 
       // print_once_6.Do([&]() {
