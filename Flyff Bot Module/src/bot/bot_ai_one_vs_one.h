@@ -17,7 +17,7 @@ enum class OneVsOneStates {
   kSelectTarget,
   kVerifyTarget,
   kLureTarget,
-  kBeginAttackTarget,
+  kRunTowardsTarget,
   kStartedAttackingTarget,
   kStartedHittingTarget,
   kBlockedTypeRunningIntoObstacle,

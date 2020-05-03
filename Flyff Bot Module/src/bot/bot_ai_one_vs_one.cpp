@@ -546,7 +546,7 @@ void BotAIOneVsOne::UpdateInternal() {
           break;
 
         case StateStatusReturnValue::kSucceeded: {
-          SetNextState( OneVsOneStates::kBeginAttackTarget );
+          SetNextState( OneVsOneStates::kRunTowardsTarget );
         } break;
 
         default:
@@ -555,7 +555,7 @@ void BotAIOneVsOne::UpdateInternal() {
       }
     } break;
 
-    case OneVsOneStates::kBeginAttackTarget: {
+    case OneVsOneStates::kRunTowardsTarget: {
       // If the target is no longer selected, it has either disappeared or been
       // killed
       if ( !local_player->IsEntitySelected() ) {
@@ -618,7 +618,28 @@ void BotAIOneVsOne::UpdateInternal() {
         // While the character is running to the target and has not stopped
         // running
         if ( local_player->IsRunning() && !has_stopped_running_ ) {
-          // LogOnce(print_once_1, TEXT("Looking for closer entities.\n"));
+          const auto& avoid_engaged_monsters_option =
+              bot_options.GetOption<AvoidEngagedMonsterOption>();
+
+          if ( avoid_engaged_monsters_option.IsEnabled() ) {
+            // Check if the target entity we are running towards is engaged,
+            // that means someone else has started attacking it
+            const auto is_entity_engaged =
+                !avoid_engaged_monsters_option.IsEntityAllowed(
+                    *current_target_entity_ );
+
+            if ( is_entity_engaged ) {
+              DO_ONCE( []() {
+                logging::Log( TEXT(
+                    "Monster became engaged, finding another target.\n" ) );
+              } );
+
+              // Find another target instead
+              state_after_deselect_ = OneVsOneStates::kFindingTarget;
+              SetNextState( OneVsOneStates::DeselectEntity );
+              return;
+            }
+          }
 
           DO_ONCE( []() {
             logging::Log( TEXT( "Looking for closer entities.\n" ) );
