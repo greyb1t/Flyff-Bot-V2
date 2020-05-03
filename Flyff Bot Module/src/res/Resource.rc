@@ -119,7 +119,7 @@ BEGIN
     CTEXT           "Static",STATIC_WAITING_TEXT,7,7,149,64
 END
 
-DIALOG_TAB1 DIALOGEX 0, 0, 405, 1256
+DIALOG_TAB1 DIALOGEX 0, 0, 405, 1618
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
@@ -193,8 +193,8 @@ BEGIN
     LTEXT           "Monsters in vicinity to choose from",IDC_STATIC,17,527,171,8
     LTEXT           "Selected monsters to kill",IDC_STATIC,212,527,175,8
     LTEXT           "Allowed nearby player names",IDC_STATIC,17,718,260,8
-    CONTROL         "Do not kill engaged entities",CHECK_AVOID_ENGAGED_ENTITIES,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,1176,102,10
+    CONTROL         "Do not kill monsters near another player",CHECK_DO_NOT_KILL_OTHER_PLAYERS_MONSTERS,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,210,689,144,10
 END
 
 DIALOG_LOADING DIALOGEX 0, 0, 229, 87
@@ -255,7 +255,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 398
         TOPMARGIN, 7
-        BOTTOMMARGIN, 1249
+        BOTTOMMARGIN, 1611
     END
 
     DIALOG_LOADING, DIALOG

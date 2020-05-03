@@ -24,7 +24,7 @@ void BotModeOption::LoadJson( const json& json_parent ) {
   }
 }
 
-void BotModeOption::RefreshControls() {
+void BotModeOption::RefreshControls( bot::BotOptions* bot_options ) {
   const auto combobox_handle = GWH( COMBO_BOT_MODE );
   gwingui::combobox::SetSelectedIndex( combobox_handle,
                                        static_cast<int>( bot_mode_ ) );

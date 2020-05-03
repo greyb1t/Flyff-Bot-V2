@@ -7,8 +7,9 @@
 
 namespace bot {
 
-void AttackSequenceOption::RefreshControls() {
-  Option::RefreshControls();
+void AttackSequenceOption::RefreshControls(
+    bot::BotOptions* bot_options ) {
+  Option::RefreshControls( bot_options );
 
   const auto listview_attacks = GWH( LISTVIEW_ATTACKS );
 
@@ -27,7 +28,9 @@ void AttackSequenceOption::RefreshControls() {
   }
 }
 
-void AttackSequenceOption::EnableOrDisableControls( bool enable ) {
+void AttackSequenceOption::EnableOrDisableControls(
+    bool enable,
+    bot::BotOptions* bot_options ) {
   gwingui::control::EnableOrDisable( GWH( LISTVIEW_ATTACKS ), enable );
   gwingui::control::EnableOrDisable( GWH( HOTKEY_ATTACK_KEY ), enable );
   gwingui::control::EnableOrDisable( GWH( EDIT_ATTACK_KEY_INTERVAL ), enable );

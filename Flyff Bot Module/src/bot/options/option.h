@@ -10,6 +10,10 @@
 
 using namespace nlohmann;
 
+namespace bot {
+class BotOptions;
+}
+
 class Option : public bot::EntityFilter {
  public:
   Option( const std::string& option_name, const uint32_t control_identifier )
@@ -33,13 +37,16 @@ class Option : public bot::EntityFilter {
 
   bool JsonExists( const json& j, const std::string& key );
 
-  virtual void RefreshControls();
+  virtual void RefreshControls( bot::BotOptions* bot_options );
 
   std::string GetName() const;
 
-  virtual void EnableOrDisableControls( bool enable ) {}
+  virtual void EnableOrDisableControls( bool enable,
+                                        bot::BotOptions* bot_options ) {}
 
   virtual bool IsEntityAllowed( const bot::Entity& entity ) const;
+
+  uint32_t GetControlIdentifier() const;
 
  protected:
   bool enabled_;

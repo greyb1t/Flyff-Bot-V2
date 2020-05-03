@@ -1,15 +1,16 @@
 #include "pch.h"
-#include "whitelisted_player_names_option.h"
+#include "avoid_engaged_monsters.h"
 #include "../../res/resource.h"
 
 #include "gwinguiv2/controls/listbox.h"
 
 #include "../utils/string_utls.h"
 
-#include "avoid_engaged_monsters.h"
+#include "whitelisted_player_names_option.h"
 #include "../bot_options.h"
+#include "../servers/flyff_client.h"
 
-void bot::WhitelistedPlayerNamesOption::RefreshControls(
+void bot::AvoidEngagedMonsterOption::RefreshControls(
     bot::BotOptions* bot_options ) {
   Option::RefreshControls( bot_options );
 
@@ -20,16 +21,16 @@ void bot::WhitelistedPlayerNamesOption::RefreshControls(
   }
 }
 
-void bot::WhitelistedPlayerNamesOption::EnableOrDisableControls(
+void bot::AvoidEngagedMonsterOption::EnableOrDisableControls(
     bool enable,
     bot::BotOptions* bot_options ) {
-  const auto avoid_engaged_option =
-      bot_options->GetOption<AvoidEngagedMonsterOption>();
+  const auto whitelisted_player_names_option =
+      bot_options->GetOption<WhitelistedPlayerNamesOption>();
 
-  // Since we are using the same controls for both AvoidEngagedMonsterOption and this option
+  // Since we are using the same controls for both WhitelistedPlayersOption and this option
   // Make sure we do not disable the controls if the only option is enabled
   if ( gwingui::checkbox::IsChecked(
-           GWH( avoid_engaged_option.GetControlIdentifier() ) ) ) {
+           GWH( whitelisted_player_names_option.GetControlIdentifier() ) ) ) {
     enable = true;
   }
 
@@ -45,13 +46,13 @@ void bot::WhitelistedPlayerNamesOption::EnableOrDisableControls(
       GWH( BUTTON_WHITELIST_FILL_SELECTED_PLAYER_NAME ), enable );
 }
 
-bool bot::WhitelistedPlayerNamesOption::TryApplyOption() {
+bool bot::AvoidEngagedMonsterOption::TryApplyOption() {
   Clear();
 
-  const auto checkbox_whitelist_playernames =
-      GWH( CHECK_WHITELIST_PLAYER_NAMES );
+  const auto checkbox_avoid_engaged_entities =
+      GWH( CHECK_DO_NOT_KILL_OTHER_PLAYERS_MONSTERS );
 
-  if ( gwingui::checkbox::IsChecked( checkbox_whitelist_playernames ) ) {
+  if ( gwingui::checkbox::IsChecked( checkbox_avoid_engaged_entities ) ) {
     SetStatus( true );
 
     const auto listbox_whitelist_playernames =
@@ -67,6 +68,47 @@ bool bot::WhitelistedPlayerNamesOption::TryApplyOption() {
     }
   } else
     SetStatus( false );
+
+  return true;
+}
+
+bool bot::AvoidEngagedMonsterOption::IsEntityAllowed(
+    const bot::Entity& entity ) const {
+  if ( IsEnabled() ) {
+    if ( entity.IsEngaged() ) {
+      return false;
+    }
+
+    auto flyff_client = entity.GetFlyffClient();
+
+    bot::EntityList entity_list( flyff_client );
+    auto& entities = entity_list.GetMoverEntities();
+
+    std::vector<bot::Entity> players;
+
+    for ( const auto& entity : entities ) {
+      if ( entity->IsPlayer() ) {
+        players.push_back( *entity );
+      }
+    }
+
+    const auto& local_player = flyff_client->CreateLocalPlayer();
+
+    for ( const auto player : players ) {
+      if ( player.GetPointerAddress() == local_player->GetPointerAddress() ) {
+        continue;
+      }
+
+      bool is_player_whitelisted = ValueExists( player.GetName() );
+
+      if ( !is_player_whitelisted ) {
+        // If the player is within 15 m of the entity
+        if ( entity.DistanceTo( player ) < 15.f ) {
+          return false;
+        }
+      }
+    }
+  }
 
   return true;
 }

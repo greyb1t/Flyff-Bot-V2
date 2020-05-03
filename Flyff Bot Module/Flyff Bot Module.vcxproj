@@ -105,6 +105,7 @@
     <ClCompile Include="src\bot\options\attack_sequence_option.cpp" />
     <ClCompile Include="src\bot\options\auto_healing_pills_option.cpp" />
     <ClCompile Include="src\bot\options\average_y_pos_option.cpp" />
+    <ClCompile Include="src\bot\options\avoid_engaged_monsters.cpp" />
     <ClCompile Include="src\bot\options\bot_mode_option.cpp" />
     <ClCompile Include="src\bot\options\character_rebuff.cpp" />
     <ClCompile Include="src\bot\options\character_rebuff_list.cpp" />

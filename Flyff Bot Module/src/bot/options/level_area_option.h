@@ -25,9 +25,10 @@ class LevelAreaOption : public Option {
 
   void LoadJson( const json& json_parent ) override;
 
-  void RefreshControls() override;
+  void RefreshControls( bot::BotOptions* bot_options ) override;
 
-  void EnableOrDisableControls( bool enable ) override;
+  void EnableOrDisableControls( bool enable,
+                                bot::BotOptions* bot_options ) override;
 
   D3DXVECTOR3 GetCornerPosition( const D3DXVECTOR3& start_position,
                                  const uint32_t index ) const;

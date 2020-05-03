@@ -259,13 +259,13 @@ void TabWindow1::OnListBoxSelectionChanged( uint32_t control_identifier,
                   selected_sequence_index );
 
           // selected_char_rebuff_sequence.EnableOrDisableControls(true);
-          selected_char_rebuff_sequence.RefreshControls();
+          selected_char_rebuff_sequence.RefreshControls( &bot_options );
         } else {
           assert( false && "ehm" );
 
           CharacterRebuffOption rebuff_temp;
           rebuff_temp.SetStatus( true );
-          rebuff_temp.RefreshControls();
+          rebuff_temp.RefreshControls( &bot_options );
         }
       }
 
@@ -283,8 +283,11 @@ void TabWindow1::OnListBoxItemDeleted( const uint32_t control_id,
                                        const uint32_t index ) {
   switch ( control_id ) {
     case LISTBOX_REBUFF_SEQUENCES: {
+      const auto botcore = Initializer().GetBotCore();
+      auto& bot_options = botcore->GetBotOptions();
+
       CharacterRebuffOption rebuff_temp;
-      rebuff_temp.EnableOrDisableControls( false );
+      rebuff_temp.EnableOrDisableControls( false, &bot_options );
     } break;
 
     default:
@@ -301,7 +304,7 @@ void TabWindow1::OnButtonClick( HWND hCtrl, UINT ctrlId ) {
     case CHECK_WHITELIST_NAMES: {
       bool value = gwingui::checkbox::IsChecked( GWH( CHECK_WHITELIST_NAMES ) );
       bot_options.GetOption<WhitelistedNamesOption>().EnableOrDisableControls(
-          value );
+          value, &bot_options );
     } break;
 
     case BUTTON_ADD_WHITELISTED_NAME: {
@@ -365,7 +368,7 @@ void TabWindow1::OnButtonClick( HWND hCtrl, UINT ctrlId ) {
     case CHECK_ATTACK_SEQUENCE: {
       bool value = gwingui::checkbox::IsChecked( GWH( CHECK_ATTACK_SEQUENCE ) );
       bot_options.GetOption<AttackSequenceOption>().EnableOrDisableControls(
-          value );
+          value, &bot_options );
     } break;
 
     case BUTTON_ADD_ATTACK: {
@@ -429,26 +432,34 @@ void TabWindow1::OnButtonClick( HWND hCtrl, UINT ctrlId ) {
       bool value =
           gwingui::checkbox::IsChecked( GWH( CHECK_AUTO_HEALTH_FOOD ) );
       bot_options.GetOption<AutoHealingOption>().EnableOrDisableControls(
-          value );
+          value, &bot_options );
     } break;
 
     case CHECK_AUTO_HEALTH_PILLS: {
       bool value =
           gwingui::checkbox::IsChecked( GWH( CHECK_AUTO_HEALTH_PILLS ) );
       bot_options.GetOption<AutoHealingPillsOption>().EnableOrDisableControls(
-          value );
+          value, &bot_options );
     } break;
 
     case CHECK_WHITELIST_PLAYER_NAMES: {
       bool value =
           gwingui::checkbox::IsChecked( GWH( CHECK_WHITELIST_PLAYER_NAMES ) );
       bot_options.GetOption<WhitelistedPlayerNamesOption>()
-          .EnableOrDisableControls( value );
+          .EnableOrDisableControls( value, &bot_options );
+    } break;
+
+    case CHECK_DO_NOT_KILL_OTHER_PLAYERS_MONSTERS: {
+      bool value = gwingui::checkbox::IsChecked(
+          GWH( CHECK_DO_NOT_KILL_OTHER_PLAYERS_MONSTERS ) );
+      bot_options.GetOption<AvoidEngagedMonsterOption>()
+          .EnableOrDisableControls( value, &bot_options );
     } break;
 
     case CHECK_LEVEL_AREA: {
       bool value = gwingui::checkbox::IsChecked( GWH( CHECK_LEVEL_AREA ) );
-      bot_options.GetOption<LevelAreaOption>().EnableOrDisableControls( value );
+      bot_options.GetOption<LevelAreaOption>().EnableOrDisableControls(
+          value, &bot_options );
     } break;
 
     case BUTTON_LEVEL_AREA_GET_CURRENT_POS: {
@@ -533,11 +544,11 @@ void TabWindow1::OnButtonClick( HWND hCtrl, UINT ctrlId ) {
           gwingui::checkbox::IsChecked( GWH( CHECK_REBUFF_SEQUENCES ) );
 
       bot_options.GetOption<CharacterRebuffListOption>()
-          .EnableOrDisableControls( value );
+          .EnableOrDisableControls( value, &bot_options );
 
       if ( !value ) {
         CharacterRebuffOption rebuff_temp;
-        rebuff_temp.EnableOrDisableControls( false );
+        rebuff_temp.EnableOrDisableControls( false, &bot_options );
       }
     } break;
 

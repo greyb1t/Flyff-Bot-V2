@@ -10,8 +10,9 @@
 
 namespace bot {
 
-void AutoHealingPillsOption::RefreshControls() {
-  Option::RefreshControls();
+void AutoHealingPillsOption::RefreshControls(
+    bot::BotOptions* bot_options ) {
+  Option::RefreshControls( bot_options );
 
   const auto editcontrol_auto_pills_hp_limit = GWH( EDIT_AUTO_PILLS_HP_LIMIT );
 
@@ -29,7 +30,9 @@ void AutoHealingPillsOption::RefreshControls() {
                                      heal_key_code_ );
 }
 
-void AutoHealingPillsOption::EnableOrDisableControls( bool enable ) {
+void AutoHealingPillsOption::EnableOrDisableControls(
+    bool enable,
+    bot::BotOptions* bot_options ) {
   gwingui::control::EnableOrDisable( GWH( HOTKEY_AUTO_HEALTH_PILLS_KEY ),
                                      enable );
   gwingui::control::EnableOrDisable( GWH( EDIT_AUTO_PILLS_HP_LIMIT ), enable );

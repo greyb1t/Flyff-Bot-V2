@@ -10,9 +10,10 @@ class AutoHealingPillsOption : public AutoHealingOption {
                           const uint32_t control_identifier )
       : AutoHealingOption( name, control_identifier ) {}
 
-  void RefreshControls() override;
+  void RefreshControls( bot::BotOptions* bot_options ) override;
 
-  void EnableOrDisableControls( bool enable ) override;
+  void EnableOrDisableControls( bool enable,
+                                bot::BotOptions* bot_options ) override;
 
   virtual bool TryApplyOption() override;
 };

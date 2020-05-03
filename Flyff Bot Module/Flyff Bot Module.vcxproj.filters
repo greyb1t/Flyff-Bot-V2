@@ -401,6 +401,9 @@
     <ClCompile Include="src\servers\flyff_client_eclipse.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\bot\options\avoid_engaged_monsters.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\res\Resource.rc">

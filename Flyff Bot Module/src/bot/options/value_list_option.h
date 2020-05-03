@@ -24,7 +24,8 @@ class ValueListOption : public Option {
 
   void Clear();
 
-  void EnableOrDisableControls( bool enable ) override {}
+  void EnableOrDisableControls( bool enable,
+                                bot::BotOptions* bot_options ) override {}
 
  protected:
   std::vector<T> values_;

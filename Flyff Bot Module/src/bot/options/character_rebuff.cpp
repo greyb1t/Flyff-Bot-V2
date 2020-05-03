@@ -39,8 +39,8 @@ void CharacterRebuffOption::LoadJson( const json& json_parent ) {
   KeySequenceOption::LoadJsonKeySequenceObject( json_parent );
 }
 
-void CharacterRebuffOption::RefreshControls() {
-  Option::RefreshControls();
+void CharacterRebuffOption::RefreshControls( bot::BotOptions* bot_options ) {
+  Option::RefreshControls( bot_options );
 
   const auto edit_rebuff_seq_interval = GWH( EDIT_REBUFF_SEQUENCE_INTERVAL );
 
@@ -69,7 +69,9 @@ void CharacterRebuffOption::RefreshControls() {
   }
 }
 
-void CharacterRebuffOption::EnableOrDisableControls( bool enable ) {
+void CharacterRebuffOption::EnableOrDisableControls(
+    bool enable,
+    bot::BotOptions* bot_options ) {
   gwingui::control::EnableOrDisable( GWH( LISTVIEW_REBUFF_KEY_SEQUENCE ),
                                      enable );
   gwingui::control::EnableOrDisable( GWH( HOTKEY_REBUFF_KEY ), enable );

@@ -91,8 +91,9 @@ void CharacterRebuffListOption::LoadJson( const json& json_parent ) {
   }
 }
 
-void CharacterRebuffListOption::RefreshControls() {
-  Option::RefreshControls();
+void CharacterRebuffListOption::RefreshControls(
+    bot::BotOptions* bot_options ) {
+  Option::RefreshControls( bot_options );
 
   for ( auto& value : rebuff_list_ ) {
     const auto listbox_rebuff_sequence_handle = GWH( LISTBOX_REBUFF_SEQUENCES );
@@ -103,7 +104,9 @@ void CharacterRebuffListOption::RefreshControls() {
   }
 }
 
-void CharacterRebuffListOption::EnableOrDisableControls( bool enable ) {
+void CharacterRebuffListOption::EnableOrDisableControls(
+    bool enable,
+    bot::BotOptions* bot_options ) {
   gwingui::control::EnableOrDisable( GWH( LISTBOX_REBUFF_SEQUENCES ), enable );
   gwingui::control::EnableOrDisable( GWH( BUTTON_ADD_REBUFF_SEQUENCE ),
                                      enable );

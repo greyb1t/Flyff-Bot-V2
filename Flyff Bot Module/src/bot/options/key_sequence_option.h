@@ -27,7 +27,8 @@ class KeySequenceOption : public ValueListOption<Key> {
   void LoadJson( const json& json_parent ) override;
   void LoadJsonKeySequenceObject( const json& json_key_sequence_object );
 
-  void EnableOrDisableControls( bool enable ) override {}
+  void EnableOrDisableControls( bool enable,
+                                bot::BotOptions* bot_options ) override {}
 
  private:
   const static std::string kKeysJsonName;

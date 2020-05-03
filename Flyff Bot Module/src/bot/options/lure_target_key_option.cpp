@@ -31,7 +31,7 @@ void LureTargetKeyOption::LoadJson( const json& json_parent ) {
   }
 }
 
-void LureTargetKeyOption::RefreshControls() {
+void LureTargetKeyOption::RefreshControls( bot::BotOptions* bot_options ) {
   const auto lure_key_hotkey_handle = GWH( HOTKEY_TARGET_LURE );
 
   gwingui::hotkey::SetCurrentHotkey( lure_key_hotkey_handle, lure_key_code_ );

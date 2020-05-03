@@ -52,8 +52,8 @@ void AutoHealingOption::LoadJson( const json& json_parent ) {
   }
 }
 
-void AutoHealingOption::RefreshControls() {
-  Option::RefreshControls();
+void AutoHealingOption::RefreshControls( bot::BotOptions* bot_options ) {
+  Option::RefreshControls( bot_options );
 
   const auto editcontrol_auto_food_hp_limit = GWH( EDIT_AUTO_FOOD_HP_LIMIT );
 
@@ -86,7 +86,9 @@ void AutoHealingOption::RefreshControls() {
   */
 }
 
-void AutoHealingOption::EnableOrDisableControls( bool enable ) {
+void AutoHealingOption::EnableOrDisableControls(
+    bool enable,
+    bot::BotOptions* bot_options ) {
   gwingui::control::EnableOrDisable( GWH( HOTKEY_AUTO_HEALTH_FOOD_KEY ),
                                      enable );
   gwingui::control::EnableOrDisable( GWH( EDIT_AUTO_FOOD_HP_LIMIT ), enable );

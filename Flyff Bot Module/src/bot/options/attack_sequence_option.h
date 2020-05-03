@@ -10,9 +10,10 @@ class AttackSequenceOption : public KeySequenceOption {
                         const uint32_t control_identifier )
       : KeySequenceOption( name, control_identifier ) {}
 
-  void RefreshControls() override;
+  void RefreshControls( bot::BotOptions* bot_options ) override;
 
-  void EnableOrDisableControls( bool enable ) override;
+  void EnableOrDisableControls( bool enable,
+                                bot::BotOptions* bot_options ) override;
 
   bool TryApplyOption() override;
 };

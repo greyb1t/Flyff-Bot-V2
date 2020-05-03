@@ -78,8 +78,8 @@ void LevelAreaOption::LoadJson( const json& json_parent ) {
   }
 }
 
-void LevelAreaOption::RefreshControls() {
-  Option::RefreshControls();
+void LevelAreaOption::RefreshControls( bot::BotOptions* bot_options ) {
+  Option::RefreshControls( bot_options );
 
   const auto editcontrol_levelarea_length2 = GWH( EDIT_LEVEL_AREA_LENGTH2 );
 
@@ -116,7 +116,9 @@ void LevelAreaOption::RefreshControls() {
     gwingui::editcontrol::SetText( editcontrol_levelarea_origin_z, TEXT( "" ) );
 }
 
-void LevelAreaOption::EnableOrDisableControls( bool enable ) {
+void LevelAreaOption::EnableOrDisableControls(
+    bool enable,
+    bot::BotOptions* bot_options ) {
   gwingui::control::EnableOrDisable( GWH( EDIT_LEVEL_AREA_LENGTH2 ), enable );
   gwingui::control::EnableOrDisable( GWH( EDIT_LEVEL_AREA_LENGTH1 ), enable );
   gwingui::control::EnableOrDisable( GWH( EDIT_LEVEL_AREA_ORIGIN_POS_X ),

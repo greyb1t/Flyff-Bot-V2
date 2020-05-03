@@ -14,9 +14,10 @@ class WhitelistedNamesOption : public ValueListOption<std::string> {
 
   void LoadJson( const json& json_parent ) override;
 
-  void RefreshControls() override;
+  void RefreshControls( bot::BotOptions* bot_options ) override;
 
-  void EnableOrDisableControls( bool enable ) override;
+  void EnableOrDisableControls( bool enable,
+                                bot::BotOptions* bot_options ) override;
 
   virtual bool IsEntityAllowed( const Entity& entity ) const;
 

@@ -66,7 +66,8 @@ BotOptions::BotOptions()
 
   options_[ OptionType::kOptionTypeAvoidEngagedMonsters ] =
       std::make_unique<AvoidEngagedMonsterOption>(
-          "avoid_engaged_monsters", CHECK_AVOID_ENGAGED_ENTITIES );
+          "do_not_kill_other_players_monsters",
+          CHECK_DO_NOT_KILL_OTHER_PLAYERS_MONSTERS );
 }
 
 bool WriteTextFile( const std::wstring& filename_dir,
@@ -222,7 +223,7 @@ void BotOptions::LoadOptions( const std::string& character_name ) {
 
   for ( auto& option : options_ ) {
     option.second->LoadJson( j );
-    option.second->RefreshControls();
+    option.second->RefreshControls( this );
   }
 
   SetOptionHasBeenChanged( false );
@@ -245,7 +246,7 @@ void BotOptions::CheckOptionControlsChanged( uint32_t control_identifier ) {
   // looking for these values instead
 
   switch ( control_identifier ) {
-    case CHECK_AVOID_ENGAGED_ENTITIES:
+    case CHECK_DO_NOT_KILL_OTHER_PLAYERS_MONSTERS:
     case HOTKEY_TARGET_LURE:
     case EDIT_LEVEL_AREA_ORIGIN_POS_X:
     case EDIT_LEVEL_AREA_ORIGIN_POS_Z:
