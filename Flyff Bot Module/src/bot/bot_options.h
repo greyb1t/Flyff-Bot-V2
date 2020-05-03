@@ -13,6 +13,7 @@
 #include "options/auto_healing_pills_option.h"
 #include "options/level_area_option.h"
 #include "options/bot_mode_option.h"
+#include "options/avoid_engaged_monsters.h"
 
 namespace bot {
 
@@ -28,7 +29,8 @@ enum class OptionType {
   kOptionTypeLureTargetKeyCode,
   kOptionTypeCharacterRebuffList,
   kOptionTypeUpdateCharacterPos,
-  kOptionTypeLevelArea
+  kOptionTypeLevelArea,
+  kOptionTypeAvoidEngagedMonsters,
 };
 
 class BotOptions {
@@ -79,6 +81,9 @@ class BotOptions {
 
   template <>
   LureTargetKeyOption& GetOption<LureTargetKeyOption>();
+
+  template <>
+  AvoidEngagedMonsterOption& GetOption<AvoidEngagedMonsterOption>();
 
   template <typename T>
   T& InternalGetOption( OptionType type ) {
@@ -183,6 +188,12 @@ template <>
 LureTargetKeyOption& BotOptions::GetOption<LureTargetKeyOption>() {
   return InternalGetOption<LureTargetKeyOption>(
       OptionType::kOptionTypeLureTargetKeyCode );
+}
+
+template <>
+AvoidEngagedMonsterOption& BotOptions::GetOption<AvoidEngagedMonsterOption>() {
+  return InternalGetOption<AvoidEngagedMonsterOption>(
+      OptionType::kOptionTypeAvoidEngagedMonsters );
 }
 
 }  // namespace bot

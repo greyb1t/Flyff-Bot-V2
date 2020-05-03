@@ -19,6 +19,7 @@
 #include "options/bot_mode_option.h"
 #include "options/remove_all_obstacles_option.h"
 #include "options/update_char_pos_option.h"
+#include "options/avoid_engaged_monsters.h"
 
 #include "../utils/string_utls.h"
 
@@ -62,6 +63,10 @@ BotOptions::BotOptions()
 
   options_[ OptionType::kOptionTypeLevelArea ] =
       std::make_unique<LevelAreaOption>( "level_area", CHECK_LEVEL_AREA );
+
+  options_[ OptionType::kOptionTypeAvoidEngagedMonsters ] =
+      std::make_unique<AvoidEngagedMonsterOption>(
+          "avoid_engaged_monsters", CHECK_AVOID_ENGAGED_ENTITIES );
 }
 
 bool WriteTextFile( const std::wstring& filename_dir,
@@ -240,6 +245,7 @@ void BotOptions::CheckOptionControlsChanged( uint32_t control_identifier ) {
   // looking for these values instead
 
   switch ( control_identifier ) {
+    case CHECK_AVOID_ENGAGED_ENTITIES:
     case HOTKEY_TARGET_LURE:
     case EDIT_LEVEL_AREA_ORIGIN_POS_X:
     case EDIT_LEVEL_AREA_ORIGIN_POS_Z:

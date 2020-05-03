@@ -84,7 +84,9 @@ public:
   int GetLevel() const;
   int GetMotion() const;
 
-  float GetSpeedMultiplier();
+  bool IsEngaged() const;
+
+  float GetSpeedMultiplier() const;
   void SetSpeedMultiplier( float value ) const;
   virtual void SetPosition( const D3DXVECTOR3 position );
 

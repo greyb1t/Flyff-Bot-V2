@@ -225,6 +225,9 @@
     <ClInclude Include="src\servers\flyff_client_eclipse.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\bot\options\avoid_engaged_monsters.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">

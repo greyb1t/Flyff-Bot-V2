@@ -40,6 +40,7 @@
     <ClInclude Include="src\bot\logic_specialization\local_player_ignite.h" />
     <ClInclude Include="src\bot\monster_definitions.h" />
     <ClInclude Include="src\bot\options\character_rebuff_list.h" />
+    <ClInclude Include="src\bot\options\avoid_engaged_monsters.h" />
     <ClInclude Include="src\bot\options\key_sequence_option.h" />
     <ClInclude Include="src\bot\options\level_area_option.h" />
     <ClInclude Include="src\bot\options\lure_target_key_option.h" />

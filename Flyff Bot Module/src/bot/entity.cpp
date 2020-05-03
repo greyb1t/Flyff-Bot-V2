@@ -181,7 +181,14 @@ int Entity::GetMotion() const {
   return motion;
 }
 
-float Entity::GetSpeedMultiplier() {
+bool Entity::IsEngaged() const {
+  // We check whether or not an entity is engaged/attacking through their speed multiplier
+  // Flyff doubles the speed multiplier of monsters when attacked/attacking/running
+  const auto speed_multiplier = GetSpeedMultiplier();
+  return speed_multiplier == 2.f;
+}
+
+float Entity::GetSpeedMultiplier() const {
   const auto speed_multiplier_offset =
       client_->GetClientVar( MemoryContants::kSpeedMultiplierOffset );
 

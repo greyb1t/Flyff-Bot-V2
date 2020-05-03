@@ -46,10 +46,13 @@ BotAIOneVsOne::BotAIOneVsOne( BotCore* botcore )
       bot_options.GetOption<WhitelistedNamesOption>();
   const auto& average_y_position = bot_options.GetOption<AverageYPosOption>();
   const auto& level_area = bot_options.GetOption<LevelAreaOption>();
+  const auto& avoid_engaged_monsters =
+      bot_options.GetOption<AvoidEngagedMonsterOption>();
 
   default_filter_.push_back( &whitelisted_names );
   default_filter_.push_back( &average_y_position );
   default_filter_.push_back( &level_area );
+  default_filter_.push_back( &avoid_engaged_monsters );
 
   //////////////////////////////////////////////////////////////////////////
 
