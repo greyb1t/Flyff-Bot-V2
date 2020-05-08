@@ -9,6 +9,10 @@ namespace simulation {
 // Will only work if the target window is in focus
 // void SendKeypress(HWND window_handle, WORD key_code);
 
+void SendMouseDown( const HWND window_handle, const POINT& p );
+
+void SendMouseUp( const HWND window_handle, const POINT& p );
+
 // Sends a message to the target window with a left click request, the delay_ms
 // is sleeping between requests
 void SendVirtualMouseClick( const HWND window_handle, const int delay_ms );

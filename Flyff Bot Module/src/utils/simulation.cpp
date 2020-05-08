@@ -41,6 +41,14 @@ namespace simulation {
   }
 */
 
+void SendMouseDown( const HWND window_handle, const POINT& p ) {
+  SendMessage( window_handle, WM_LBUTTONDOWN, 0, MAKELPARAM( p.x, p.y ) );
+}
+
+void SendMouseUp( const HWND window_handle, const POINT& p ) {
+  SendMessage( window_handle, WM_LBUTTONUP, 0, MAKELPARAM( p.x, p.y ) );
+}
+
 void SendVirtualMouseClick( const HWND window_handle, const int delay_ms ) {
   SendMessage( window_handle, WM_LBUTTONDOWN, 0, 0 );
   Sleep( delay_ms );

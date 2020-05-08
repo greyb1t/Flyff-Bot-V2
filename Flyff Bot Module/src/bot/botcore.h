@@ -126,6 +126,7 @@ class BotCore {
   void SetActiveBots( std::vector<std::unique_ptr<Bot>>&& bots );
 
   void SetSimulatedCursorPos( POINT& pos );
+  POINT GetSimulatedCursorPos() const;
   void SetViewport( D3DVIEWPORT9 viewport );
   void SetStarted( bool started );
   void SetIsDebuggerAttached( bool value );

@@ -96,7 +96,8 @@ StateStatusReturnValue SimulationStateMachine::SimulateMouseclick(
 
   switch ( current_state ) {
     case PressStates::Down: {
-      SendMessage( botcore->GetTargetWindow(), WM_LBUTTONDOWN, 0, 0 );
+      simulation::SendMouseDown( botcore->GetTargetWindow(),
+                                 botcore->GetSimulatedCursorPos() );
 
       SetNextState( PressStates::Up );
 
@@ -104,7 +105,8 @@ StateStatusReturnValue SimulationStateMachine::SimulateMouseclick(
     } break;
 
     case PressStates::Up: {
-      SendMessage( botcore->GetTargetWindow(), WM_LBUTTONUP, 0, 0 );
+      simulation::SendMouseUp( botcore->GetTargetWindow(),
+                               botcore->GetSimulatedCursorPos() );
 
       // Reset the state for next time
       SetNextState( PressStates::Down );

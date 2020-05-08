@@ -996,4 +996,8 @@ void BotCore::SetSimulatedCursorPos( POINT& pos ) {
   simulated_cursor_pos_ = pos;
 }
 
+POINT BotCore::GetSimulatedCursorPos() const {
+  return simulated_cursor_pos_;
+}
+
 }  // namespace bot
