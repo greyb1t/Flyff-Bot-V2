@@ -3,6 +3,32 @@
 #include "gwinmem/process_memory_internal.h"
 #include "../bot/bot_initializer.h"
 
+/*
+  kD3dVec3ProjectAddress: 0x6c2006e6
+  kPlayerBaseAddress: 0xa7b788
+  kScrollDistanceAddress: 0xb11aa0
+  kAccountNameAddress: 0xa06728
+  kSelectedEntityAddress: 0xb18f9c
+  kEntityListAddress: 0xab8fb0
+  kMovementOffset: 0x38c
+  kModelOffset: 0x170
+  kBoundBoxOffset: 0xc
+  kWorldMatrixOffset: 0xe8
+  kPositionOffset: 0x190
+  kHealthOffset: 0x770
+  kManaOffset: 0x774
+  kFatigueOffset: 0x778
+  kLevelOffset: 0x734
+  kNameOffset: 0x1b84
+  kObjectFlagsOffset: 0x4
+  kSelectedEntityOffset: 0x20
+  kSpeedMultiplierOffset: 0x8C0
+  kMoveOffset: 0x4
+  kObjectTypeOffset: 0x168
+  kCameraAddress: 0xb119a4
+  kProjectionMatrixAddress: 0xaf0e00
+  kViewMatrixAddress: 0xb119b4
+*/
 HHOOK bot::FlyffClientEclipseFlyff::wnd_proc_hook_handle_ = 0;
 
 bot::FlyffClientEclipseFlyff::FlyffClientEclipseFlyff()
@@ -186,8 +212,23 @@ bot::FlyffClientEclipseFlyff::FlyffClientEclipseFlyff()
   // Find a steady offset by logging in and out while finding out what is
   // accessing the value
   AddSearchFunction( MemoryContants::kSpeedMultiplierOffset, [=]() {
+    /*
+      0042282E - Neuz.exe+2282E (+4)
+      F3 ? ? ? ? ? ? ? 0F 2F ? ? ? ? ? 76 7A
+
+      004224C8 - Neuz.exe+224C8 (+4) (best?)
+      F3 ? ? ? ? ? ? ? 83 F8 05 0F 95 C1
+
+      004A0910 - Neuz.exe+A0910 (+4)
+      F3 ? ? ? ? ? ? ? 0F 57 C9 F3 0F 59 D0
+
+    */
+
+    //uint32_t addr = pattern_matcher_.FindIdaSignature(
+    //    "F3 ? ? ? ? ? ? ? F3 0F 59 C8 F3 ? ? ? ? ? ? ? 0F 2E" );
+
     uint32_t addr = pattern_matcher_.FindIdaSignature(
-        "F3 ? ? ? ? ? ? ? F3 0F 59 C8 F3 ? ? ? ? ? ? ? 0F 2E" );
+        "F3 ? ? ? ? ? ? ? 83 F8 05 0F 95 C1" );
 
     if ( IsAddressInvalid( addr ) )
       return addr;
