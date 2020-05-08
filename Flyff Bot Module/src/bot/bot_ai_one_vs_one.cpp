@@ -34,7 +34,9 @@ BotAIOneVsOne::BotAIOneVsOne( BotCore* botcore )
       has_selected_unintended_target_count_( 0 ),
       local_player_health_start_( 0 ),
       started_walking_backwards_( false ),
-      state_after_deselect_( OneVsOneStates::kFindingTarget ) {
+      state_after_deselect_( OneVsOneStates::kFindingTarget ),
+      entity_engaged_counter_( 0 ),
+      who_engaged_prev_engaged_entity_( "" ) {
   auto& bot_options = botcore->GetBotOptions();
   auto& rebuff_sequence_list_option =
       bot_options.GetOption<CharacterRebuffListOption>();
@@ -629,15 +631,46 @@ void BotAIOneVsOne::UpdateInternal() {
                     *current_target_entity_ );
 
             if ( is_entity_engaged ) {
-              DO_ONCE( []() {
-                logging::Log( TEXT(
-                    "Monster became engaged, finding another target.\n" ) );
-              } );
+              // If the last close player is the same as the previous time
+              // and has not killed a monster since the last time
 
-              // Find another target instead
-              state_after_deselect_ = OneVsOneStates::kFindingTarget;
-              SetNextState( OneVsOneStates::DeselectEntity );
-              return;
+              EntityList entity_list( client );
+              auto& entities = entity_list.GetMoverEntities();
+
+              const auto closest_non_whitelisted_player =
+                  avoid_engaged_monsters_option.GetClosestNonWhitelistedPlayer(
+                      client, entities, *current_target_entity_ );
+
+              const bool is_same_player_as_before =
+                  closest_non_whitelisted_player->GetName() ==
+                  who_engaged_prev_engaged_entity_;
+
+              // If the previous close player is the same as the one this time and
+              // if is has occured more 1 time or more in a row without killing a monster
+              if ( entity_engaged_counter_ >= 1 && is_same_player_as_before ) {
+                // Continue with this monster
+                // Why? To avoid suspicious activity if a random player decides to follow you
+                DO_ONCE( []() {
+                  logging::Log(
+                      TEXT( "Monster possibly taken by another player, but "
+                            "this time ignoring it.\n" ) );
+                } );
+              } else {
+                // Find another monster to target
+                DO_ONCE( []() {
+                  logging::Log(
+                      TEXT( "Monster possibly taken by another player.\n" ) );
+                } );
+
+                entity_engaged_counter_++;
+                who_engaged_prev_engaged_entity_ =
+                    closest_non_whitelisted_player->GetName();
+
+                // Find another target instead
+                state_after_deselect_ = OneVsOneStates::kFindingTarget;
+                SetNextState( OneVsOneStates::DeselectEntity );
+                return;
+              }
             }
           }
 
@@ -896,6 +929,9 @@ void BotAIOneVsOne::UpdateInternal() {
           logging::Log( TEXT( "The target has been killed.\n" ) );
           monster_kill_count_++;
         } );
+
+        // Reset the engaged counter after a monster has been killed
+        entity_engaged_counter_ = 0;
 
         if ( bot_options.GetOption<UpdateCharPosOption>().IsEnabled() ) {
           // Walk backwards to update the characters position

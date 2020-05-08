@@ -14,9 +14,7 @@ StateStatusReturnValue SimulationStateMachine::KeyPress(
   return KeyPress( key_code, [&]() -> bool {
     bool ret = false;
 
-    wait_timer_.DoEachIntervalAfter( ms_delay, [&]() {
-      ret = true;
-    } );
+    wait_timer_.DoEachIntervalAfter( ms_delay, [&]() { ret = true; } );
 
     return ret;
   } );

@@ -51,9 +51,6 @@ void SendVirtualKeypress( const HWND window_handle,
                           const uint16_t key_code,
                           const uint32_t delay_ms ) {
   SendMessage( window_handle, WM_KEYDOWN, key_code, 0 );
-  // Sleep(delay_ms);
-  // SendMessage(window_handle, WM_KEYUP, key_code, 0);
-  // PostMessage(window_handle, WM_KEYUP, key_code, 0);
 }
 
 void SendVirtualKeyDown( const HWND window_handle, const uint16_t key_code ) {
@@ -68,8 +65,6 @@ void SendVirtualKeyDown( const HWND window_handle, const uint16_t key_code ) {
                   ( context << 29 ) | ( previousState << 30 ) |
                   ( transition << 31 );
 
-  // SendMessage(window_handle, WM_KEYDOWN, key_code, lParam);
-  // PostMessage(window_handle, WM_KEYDOWN, key_code, 3276801u);
   PostMessage( window_handle, WM_KEYDOWN, key_code, lParam );
 }
 
@@ -85,8 +80,6 @@ void SendVirtualKeyUp( const HWND window_handle, const uint16_t key_code ) {
                   ( context << 29 ) | ( previousState << 30 ) |
                   ( transition << 31 );
 
-  // SendMessage(window_handle, WM_KEYUP, key_code, lParam);
-  // PostMessage(window_handle, WM_KEYUP, key_code, 3224502273u);
   PostMessage( window_handle, WM_KEYUP, key_code, lParam );
 }
 

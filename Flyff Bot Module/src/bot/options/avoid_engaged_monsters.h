@@ -21,6 +21,11 @@ class AvoidEngagedMonsterOption : public WhitelistedNamesOption {
 
   bool TryApplyOption() override;
 
+  std::unique_ptr<bot::Entity> GetClosestNonWhitelistedPlayer(
+      bot::FlyffClient* client,
+      const std::vector<std::unique_ptr<bot::Entity>>& entities,
+      const bot::Entity& entity_to_compare_against ) const;
+
   virtual bool IsEntityAllowed( const bot::Entity& entity ) const;
 
   /*

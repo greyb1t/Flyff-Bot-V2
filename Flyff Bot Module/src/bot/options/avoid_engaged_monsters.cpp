@@ -72,6 +72,37 @@ bool bot::AvoidEngagedMonsterOption::TryApplyOption() {
   return true;
 }
 
+std::unique_ptr<bot::Entity>
+bot::AvoidEngagedMonsterOption::GetClosestNonWhitelistedPlayer(
+    bot::FlyffClient* client,
+    const std::vector<std::unique_ptr<bot::Entity>>& entities,
+    const bot::Entity& entity_to_compare_against ) const {
+  std::vector<bot::Entity> players;
+
+  const auto& local_player = client->CreateLocalPlayer();
+
+  for ( const auto& entity : entities ) {
+    const bool is_me =
+        entity->GetPointerAddress() == local_player->GetPointerAddress();
+    if ( entity->IsPlayer() && !is_me ) {
+      players.push_back( *entity );
+    }
+  }
+
+  for ( const auto player : players ) {
+    bool is_player_whitelisted = ValueExists( player.GetName() );
+
+    if ( !is_player_whitelisted ) {
+      // If the player is within 15 m of the entity
+      if ( entity_to_compare_against.DistanceTo( player ) < 15.f ) {
+        return client->CreateEntity( player.GetPointerAddress() );
+      }
+    }
+  }
+
+  return nullptr;
+}
+
 bool bot::AvoidEngagedMonsterOption::IsEntityAllowed(
     const bot::Entity& entity ) const {
   if ( IsEnabled() ) {
@@ -84,29 +115,11 @@ bool bot::AvoidEngagedMonsterOption::IsEntityAllowed(
     bot::EntityList entity_list( flyff_client );
     auto& entities = entity_list.GetMoverEntities();
 
-    std::vector<bot::Entity> players;
+    const auto closest_non_whitelisted_player =
+        GetClosestNonWhitelistedPlayer( flyff_client, entities, entity );
 
-    for ( const auto& entity : entities ) {
-      if ( entity->IsPlayer() ) {
-        players.push_back( *entity );
-      }
-    }
-
-    const auto& local_player = flyff_client->CreateLocalPlayer();
-
-    for ( const auto player : players ) {
-      if ( player.GetPointerAddress() == local_player->GetPointerAddress() ) {
-        continue;
-      }
-
-      bool is_player_whitelisted = ValueExists( player.GetName() );
-
-      if ( !is_player_whitelisted ) {
-        // If the player is within 15 m of the entity
-        if ( entity.DistanceTo( player ) < 15.f ) {
-          return false;
-        }
-      }
+    if ( closest_non_whitelisted_player != nullptr ) {
+      return false;
     }
   }
 

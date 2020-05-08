@@ -88,6 +88,9 @@ class BotAIOneVsOne : public KillingBot {
 
   OneVsOneStates state_after_deselect_;
 
+  int entity_engaged_counter_;
+  std::string who_engaged_prev_engaged_entity_;
+
   std::vector<const EntityFilter*> default_filter_;
 };
 
