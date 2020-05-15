@@ -735,11 +735,17 @@ void BotAIOneVsOne::UpdateInternal() {
             running_target_blocked_timer.DoEachIntervalAfter(
                 2000,
                 [&]() {
-                  logging::Log(
-                      TEXT( "The character has been blocked by an obstacle "
-                            "while running to the target.\n" ) );
-                  SetNextState(
-                      OneVsOneStates::kBlockedTypeRunningIntoObstacle );
+                  const bool has_been_damaged =
+                      current_target_entity_->GetHealth() !=
+                      nearest_entity_hp_when_selected_;
+
+                  if ( !has_been_damaged ) {
+                    logging::Log(
+                        TEXT( "The character has been blocked by an obstacle "
+                              "while running to the target.\n" ) );
+                    SetNextState(
+                        OneVsOneStates::kBlockedTypeRunningIntoObstacle );
+                  }
                 },
                 [&]() {
                   if ( !local_player->IsStandingStill() &&
@@ -756,11 +762,6 @@ void BotAIOneVsOne::UpdateInternal() {
             SetNextState( OneVsOneStates::kStartedHittingTarget );
             break;
           }
-
-          // Idea:
-          // Since the models / obstacles are stored in the same entity array,
-          // I can just make all of the invisble or change their position to
-          // simulate no collision results in no type of blockage at all
 
           has_stopped_running_ = true;
         }
@@ -860,13 +861,6 @@ void BotAIOneVsOne::UpdateInternal() {
       // auto stuck_box = std::make_shared<EntityReplicateBox>(client,
       // local_player); botcore->AddEntityToDraw(stuck_box);
       //});
-    } break;
-
-    case OneVsOneStates::kBlockedSelectingPlayerInsideChar: {
-      // Move forward for 1 second, then go to beginning again.
-      blocked_move_forward_timer.DoEachIntervalAfter(
-          1000, [&]() { SetNextState( OneVsOneStates::kFindingTarget ); },
-          [&]() { local_player->MoveForward(); } );
     } break;
 
     case OneVsOneStates::kStartedHittingTarget: {

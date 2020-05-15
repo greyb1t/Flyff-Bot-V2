@@ -22,7 +22,6 @@ enum class OneVsOneStates {
   kStartedHittingTarget,
   kBlockedTypeRunningIntoObstacle,
   kBlockedTypeShootThroughObstacle,
-  kBlockedSelectingPlayerInsideChar,
   kWaitUntilPlayerLeaves,
   kCheckAroundForPlayers,
   kRebuffCharacter,
