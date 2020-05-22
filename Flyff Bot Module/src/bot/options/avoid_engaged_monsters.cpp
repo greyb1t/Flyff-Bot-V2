@@ -14,10 +14,17 @@ void bot::AvoidEngagedMonsterOption::RefreshControls(
     bot::BotOptions* bot_options ) {
   Option::RefreshControls( bot_options );
 
-  for ( auto& value : values_ ) {
-    const auto listbox_handle = GWH( LISTBOX_WHITELIST_PLAYER_NAMES );
-    gwingui::listbox::AddString( listbox_handle,
-                                 stringutils::AnsiToWide( value ) );
+  const auto whitelisted_player_names_option =
+      bot_options->GetOption<WhitelistedPlayerNamesOption>();
+
+  // Only update the controls if the other whitelisted player names option
+  // is not enabled to avoid adding double the amount of data
+  if ( !whitelisted_player_names_option.IsEnabled() ) {
+    for ( auto& value : values_ ) {
+      const auto listbox_handle = GWH( LISTBOX_WHITELIST_PLAYER_NAMES );
+      gwingui::listbox::AddString( listbox_handle,
+                                   stringutils::AnsiToWide( value ) );
+    }
   }
 }
 
