@@ -71,14 +71,8 @@ DWORD WINAPI CrashDumpWriter( LPVOID param ) {
   EXCEPTION_POINTERS* ex_pointers =
       reinterpret_cast<EXCEPTION_POINTERS*>( param );
 
-  if ( !WriteDump( ex_pointers, crash_dump_path,
-                   MiniDumpWithFullMemory | MiniDumpWithThreadInfo |
-                       MiniDumpWithFullMemoryInfo ) )
+  if ( !WriteDump( ex_pointers, crash_dump_path, MiniDumpWithFullMemory ) )
     printf( "Unable to write the full dump\n" );
-
-  if ( !WriteDump( ex_pointers, crash_dump_path + TEXT( ".tiny" ),
-                   MiniDumpNormal ) )
-    printf( "Unable to write the tiny dump\n" );
 
   return TRUE;
 }
