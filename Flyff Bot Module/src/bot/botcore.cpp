@@ -714,6 +714,9 @@ void BotCore::Render( LPDIRECT3DDEVICE9 pDevice ) {
       DrawEntity( *local_player_entity, *entity,
                   D3DCOLOR_RGBA( 255, 255, 255, 255 ) );
       //}
+    } else if ( GetStarted() && entity->IsPlayer() ) {
+      DrawEntity( *local_player_entity, *entity,
+                  D3DCOLOR_RGBA( 0, 162, 232, 255 ) );
     }
   }
 
