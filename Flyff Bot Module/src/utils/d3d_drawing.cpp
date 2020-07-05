@@ -23,6 +23,9 @@ void D3DDrawing::SetRenderStates( bool antialiasing ) {
 
   device_->SetRenderState( D3DRS_ANTIALIASEDLINEENABLE, antialiasing );
 
+  device_->SetRenderState( D3DRS_SRCBLEND, D3DBLEND_SRCALPHA );
+  device_->SetRenderState( D3DRS_LIGHTING, FALSE );
+
   // Fixes the issue when hovering over something in Flyff, then it stopped
   // drawing
   device_->SetTexture( 0, NULL );
@@ -102,7 +105,7 @@ void D3DDrawing::DrawBoundBoxOutline( const BOUND_BOX* bound_box,
 
 void D3DDrawing::DrawBoundBoxOutlineUnOptimized( const BOUND_BOX* bound_box,
                                                  const D3DCOLOR color ) {
-  auto draw_line = [=]( int x1, int y1, int x2, int y2 ) {
+  auto draw_line = [ = ]( int x1, int y1, int x2, int y2 ) {
     DrawLine( bound_box->pos[ x1 ].x, bound_box->pos[ y1 ].y,
               bound_box->pos[ x2 ].x, bound_box->pos[ y2 ].y, color );
   };
