@@ -102,6 +102,7 @@ void BotAIOneVsOne::UpdateInternal() {
     // Check if it is valid
     if ( current_target_entity_->IsDeletedOrInvalidMemory() ) {
       logging::Log( TEXT( "POSSIBLY PREVENTED A CRASH, BRUH!\n" ) );
+      current_target_entity_ = nullptr;
       SetNextState( OneVsOneStates::kFindingTarget );
     }
   }
