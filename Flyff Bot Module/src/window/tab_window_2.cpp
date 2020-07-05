@@ -4,6 +4,10 @@
 
 #include "gwinguiv2/message_box.h"
 #include "gwinguiv2/controls/trackbar.h"
+#include "gwinguiv2/controls/listbox.h"
+#include "gwinguiv2/controls/editcontrol.h"
+
+#include "../utils/string_utls.h"
 
 namespace bot {
 
@@ -64,6 +68,69 @@ void TabWindow2::OnButtonClick( const HWND button_handle,
       bot_options.SetNoCollision( value );
     } break;
 #endif
+
+    case BUTTON_ADD_DRAW_NAME: {
+      const auto text = gwingui::editcontrol::GetText( GWH( EDIT_DRAW_NAME ) );
+      gwingui::listbox::AddString( GWH( LISTBOX_DRAW_NAMES ), text );
+      // also update in botcore vector
+
+      const auto botcore = Initializer().GetBotCore();
+
+      botcore->names_of_entities_to_draw.push_back(
+          stringutils::WideToAnsi( text ) );
+    } break;
+
+    case BUTTON_DRAW_FILL_NAME: {
+      const auto botcore = Initializer().GetBotCore();
+      const auto& client = botcore->GetFlyffClient();
+      const auto local_player = client->CreateLocalPlayer();
+
+      if ( local_player->IsDeletedOrInvalidMemory() ) {
+        gwingui::messagebox::Error( TEXT(
+            "Unable to fill the selected name, local player is invalid." ) );
+        return;
+      }
+
+      const auto selected_entity = local_player->GetSelectedEntity();
+
+      if ( !local_player->IsEntitySelected() ) {
+        gwingui::messagebox::Error( TEXT( "Please select an entity." ) );
+        return;
+      }
+
+      gwingui::editcontrol::SetText(
+          GWH( EDIT_DRAW_NAME ),
+          stringutils::AnsiToWide( selected_entity->GetName() ) );
+    } break;
+
+    case BUTTON_REMOVE_DRAW_NAME: {
+      const auto index =
+          gwingui::listbox::GetSelectedIndex( GWH( LISTBOX_DRAW_NAMES ) );
+
+      if ( index == -1 ) {
+        return;
+      }
+
+      const auto text =
+          gwingui::listbox::GetText( GWH( LISTBOX_DRAW_NAMES ), index );
+
+      gwingui::listbox::DeleteItem( GWH( LISTBOX_DRAW_NAMES ), index );
+
+      const auto botcore = Initializer().GetBotCore();
+
+      const auto to_remove =
+          std::find( botcore->names_of_entities_to_draw.begin(),
+                     botcore->names_of_entities_to_draw.end(),
+                     stringutils::WideToAnsi( text ) );
+
+      if ( to_remove == botcore->names_of_entities_to_draw.end() ) {
+        gwingui::messagebox::Error(
+            TEXT( "Did not exist in the internal cache?" ) );
+        return;
+      }
+
+      botcore->names_of_entities_to_draw.erase( to_remove );
+    } break;
 
     default:
       break;

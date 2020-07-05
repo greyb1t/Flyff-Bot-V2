@@ -131,6 +131,9 @@ class BotCore {
   void SetStarted( bool started );
   void SetIsDebuggerAttached( bool value );
 
+ public:
+  std::vector<std::string> names_of_entities_to_draw;
+
  private:
   D3DVIEWPORT9 viewport_;
   D3DDrawing drawing_;

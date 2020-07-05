@@ -704,12 +704,16 @@ void BotCore::Render( LPDIRECT3DDEVICE9 pDevice ) {
     }
     */
 
-    if ( entity->IsPlayer() ) {
-      DrawEntity( *local_player_entity, *entity,
-                  D3DCOLOR_RGBA( 0, 162, 232, 255 ) );
-    } else {
+    if ( std::find( names_of_entities_to_draw.begin(),
+                    names_of_entities_to_draw.end(),
+                    entity->GetName() ) != names_of_entities_to_draw.end() ) {
+      //if ( entity->IsPlayer() ) {
+      //  DrawEntity( *local_player_entity, *entity,
+      //              D3DCOLOR_RGBA( 0, 162, 232, 255 ) );
+      //} else {
       DrawEntity( *local_player_entity, *entity,
                   D3DCOLOR_RGBA( 255, 255, 255, 255 ) );
+      //}
     }
   }
 
