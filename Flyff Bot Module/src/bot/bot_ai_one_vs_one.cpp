@@ -97,6 +97,15 @@ void BotAIOneVsOne::UpdateInternal() {
     SetNextState( OneVsOneStates::kCharacterDied );
   }
 
+  // If we have an entity in the pointer
+  if ( current_target_entity_ ) {
+    // Check if it is valid
+    if ( current_target_entity_->IsDeletedOrInvalidMemory() ) {
+      logging::Log( TEXT( "POSSIBLY PREVENTED A CRASH, BRUH!\n" ) );
+      SetNextState( OneVsOneStates::kFindingTarget );
+    }
+  }
+
   const auto current_state = GetCurrentState<OneVsOneStates>();
 
   switch ( current_state ) {
@@ -582,12 +591,12 @@ void BotAIOneVsOne::UpdateInternal() {
 
         begin_target_attack_not_moving_timer.DoEachIntervalAfter(
             1000,
-            [&]() {
+            [ & ]() {
               logging::Log(
                   TEXT( "The character has not moved for 1 second.\n" ) );
               SetNextState( OneVsOneStates::kBlockedTypeShootThroughObstacle );
             },
-            [&]() { SetNextState( OneVsOneStates::kLureTarget ); } );
+            [ & ]() { SetNextState( OneVsOneStates::kLureTarget ); } );
       }
     } break;
 
@@ -734,7 +743,7 @@ void BotAIOneVsOne::UpdateInternal() {
 
             running_target_blocked_timer.DoEachIntervalAfter(
                 2000,
-                [&]() {
+                [ & ]() {
                   const bool has_been_damaged =
                       current_target_entity_->GetHealth() !=
                       nearest_entity_hp_when_selected_;
@@ -747,7 +756,7 @@ void BotAIOneVsOne::UpdateInternal() {
                         OneVsOneStates::kBlockedTypeRunningIntoObstacle );
                   }
                 },
-                [&]() {
+                [ & ]() {
                   if ( !local_player->IsStandingStill() &&
                        !local_player->IsRunning() ) {
                     logging::Log(
@@ -789,23 +798,25 @@ void BotAIOneVsOne::UpdateInternal() {
           SetNextState( OneVsOneStates::kStartedHittingTarget );
           break;
         } else {
-          block_check_while_attacking_timer2.DoEachIntervalAfter( 4000, [&]() {
-            // If the health has changed since the selection of the monster
-            if ( current_target_entity_->GetHealth() ==
-                 nearest_entity_hp_when_selected_ ) {
-              logging::Log(
-                  TEXT( "The monster has not been damaged for 4 seconds, "
-                        "anticipating that character is stuck.\n" ) );
+          block_check_while_attacking_timer2.DoEachIntervalAfter(
+              4000, [ & ]() {
+                // If the health has changed since the selection of the monster
+                if ( current_target_entity_->GetHealth() ==
+                     nearest_entity_hp_when_selected_ ) {
+                  logging::Log(
+                      TEXT( "The monster has not been damaged for 4 seconds, "
+                            "anticipating that character is stuck.\n" ) );
 
-              SetNextState( OneVsOneStates::kBlockedTypeRunningIntoObstacle );
-            }
-          } );
+                  SetNextState(
+                      OneVsOneStates::kBlockedTypeRunningIntoObstacle );
+                }
+              } );
         }
       }
 
       // Has the character been running to the monster for 8 seconds, then
       // something it wrong
-      block_check_while_attacking_timer2.DoEachIntervalAfter( 8000, [&]() {
+      block_check_while_attacking_timer2.DoEachIntervalAfter( 8000, [ & ]() {
         logging::Log(
             TEXT( "The monster has not been damaged for 8 seconds, "
                   "anticipating that character is stuck.\n" ) );
@@ -919,7 +930,7 @@ void BotAIOneVsOne::UpdateInternal() {
         //  }
         //}
 
-        DO_ONCE( [&]() {
+        DO_ONCE( [ & ]() {
           logging::Log( TEXT( "The target has been killed.\n" ) );
           monster_kill_count_++;
         } );
@@ -972,7 +983,7 @@ void BotAIOneVsOne::UpdateInternal() {
       DO_ONCE(
           []() { logging::Log( TEXT( "Started hitting the target.\n" ) ); } );
 
-      block_check_while_attacking_timer.DoEachIntervalAfter( 4000, [&]() {
+      block_check_while_attacking_timer.DoEachIntervalAfter( 4000, [ & ]() {
         if ( !has_checked_hp_ ) {
           // If the health has changed since the selection of the monster
           if ( current_target_entity_->GetHealth() ==
@@ -1013,7 +1024,7 @@ void BotAIOneVsOne::UpdateInternal() {
     } break;
 
     case OneVsOneStates::kWaitUntilPlayerLeaves: {
-      DO_ONCE( [&]() {
+      DO_ONCE( [ & ]() {
         // Store the health in order to check later on whether or not we have
         // been hurt
         local_player_health_start_ = local_player->GetHealth();
@@ -1022,8 +1033,8 @@ void BotAIOneVsOne::UpdateInternal() {
       const int minutes_5_ms = /*900000*/ 300000;
       wait_until_player_leaves_timer_.DoEachIntervalAfter(
           minutes_5_ms,
-          [&]() { SetNextState( OneVsOneStates::kCheckAroundForPlayers ); },
-          [&]() {
+          [ & ]() { SetNextState( OneVsOneStates::kCheckAroundForPlayers ); },
+          [ & ]() {
             // While waiting for a player to disappear, check if an aggressive
             // monster has started attacking us
 
