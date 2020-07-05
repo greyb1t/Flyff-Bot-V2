@@ -376,7 +376,7 @@ void BotCore::ShowBotHasStoppedWindow() {
       gwingui::control::EnableOrDisable( toggle_bot_button_handle, false );
 
       waiting_window::DisplayWaitingWindowAsync(
-          TEXT( "Waiting for the bot to finish its tasks..." ), [=]() {
+          TEXT( "Waiting for the bot to finish its tasks..." ), [ = ]() {
             // Wait until the state is set to stopped
             for ( const auto& bot : GetActiveBots() ) {
               while ( bot->GetInternalState() != BaseBotStates::Stopped )
@@ -644,7 +644,7 @@ void PopulateWhitelistedMonstersVicinityListbox( EntityList& entitylist ) {
 
   // We use async to exeucte the ui interaction code otherwise if we interact
   // with the ui from the game thread, it freezes for some reason
-  std::async( [=]() {
+  std::async( [ = ]() {
     for ( const auto& name : names_in_vicinity ) {
       const bool exists_in_listbox =
           gwingui::listbox::FindString( vicinity_listbox_handle, 0, name ) !=
@@ -697,7 +697,8 @@ void BotCore::Render( LPDIRECT3DDEVICE9 pDevice ) {
     };
 
     /*
-    if ( entity->IsPlayer() && entity->GetName() == "Sebi" ) {
+    if ( entity->IsPlayer() &&
+         ( entity->GetName() == "Kypo" || entity->GetName() == "Sebi" ) ) {
       DrawEntity( *local_player_entity, *entity,
                   D3DCOLOR_RGBA( 0, 162, 232, 255 ) );
     }
@@ -726,20 +727,20 @@ void BotCore::Render( LPDIRECT3DDEVICE9 pDevice ) {
     DrawEntity( local_player_entity, entity, D3DCOLOR_RGBA( 255, 0, 0, 255 ) );
   */
 
-  if ( GetStarted() ) {
-    auto& object_entities = entity_list.GetObjectEntities();
+  //if ( GetStarted() ) {
+  auto& object_entities = entity_list.GetObjectEntities();
 
-    for ( auto& entity : object_entities ) {
-      // is the option enabled?
-      if ( bot_options_.GetOption<RemoveAllObstacleOption>().IsEnabled() ) {
-        if ( entity->IsDeletedOrInvalidMemory() ) {
-          continue;
-        }
-
-        entity->SetFlags( entity->GetFlags() | OBJ_FLAG_DELETE );
+  for ( auto& entity : object_entities ) {
+    // is the option enabled?
+    if ( bot_options_.GetOption<RemoveAllObstacleOption>().IsEnabled() ) {
+      if ( entity->IsDeletedOrInvalidMemory() ) {
+        continue;
       }
+
+      entity->SetFlags( entity->GetFlags() | OBJ_FLAG_DELETE );
     }
   }
+  //}
 
   const auto& avg_y_pos = bot_options_.GetOption<AverageYPosOption>();
 
