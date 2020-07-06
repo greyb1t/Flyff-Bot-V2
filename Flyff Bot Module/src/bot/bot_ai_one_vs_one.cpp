@@ -612,6 +612,16 @@ void BotAIOneVsOne::UpdateInternal() {
       // the monster has been hit or not. If true, enter the obstacle running
       // block state
 
+      if ( !IsEntityValid( *current_target_entity_ ) ) {
+        logging::Log(
+            TEXT( "The bot is trying to select an invalid entity, back to "
+                  "beginning.\n" ) );
+
+        // Return to FindingTarget and redo the whole thing again
+        SetNextState( OneVsOneStates::kFindingTarget );
+        return;
+      }
+
       // Reset the time
       begin_target_attack_not_moving_timer.Reset();
 
@@ -882,6 +892,16 @@ void BotAIOneVsOne::UpdateInternal() {
     } break;
 
     case OneVsOneStates::kStartedHittingTarget: {
+      if ( !IsEntityValid( *current_target_entity_ ) ) {
+        logging::Log(
+            TEXT( "The bot is trying to select an invalid entity, back to "
+                  "beginning.\n" ) );
+
+        // Return to FindingTarget and redo the whole thing again
+        SetNextState( OneVsOneStates::kFindingTarget );
+        return;
+      }
+
       // A bootleg version of blade damage hack, does not work on the first hit,
       // but does so on the ones afterwards. I removed this and added another
       // method by hooking SendMeleeAttack to get the first hit as well.
