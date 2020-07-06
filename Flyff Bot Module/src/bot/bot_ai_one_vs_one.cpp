@@ -174,6 +174,41 @@ void BotAIOneVsOne::UpdateInternal() {
       EntityList entity_list( client );
       auto& entities = entity_list.GetMoverEntities();
 
+      current_target_entity_ =
+          FindNearestMonster( entities, *local_player, default_filter_ );
+
+      // No near entity was found
+      if ( !current_target_entity_ ) {
+        logging::Log( TEXT( "No near entity was found, trying again.\n" ) );
+
+        ++entities_not_found_counter_;
+
+        // If the bot has not found any entities after 3 tries, then we reset
+        // the blacklist
+        if ( entities_not_found_counter_ >= 3 ) {
+          logging::Log(
+              TEXT( "The bot has not found entities after 3 tries, reseting "
+                    "the blacklist.\n" ) );
+
+          blacklisted_entities_temporary_.clear();
+
+          entities_not_found_counter_ = 0;
+        }
+
+        // Adjust the camera to look the opposite direction for entities
+        const float current_camera_degrees_x = local_player->GetCameraRotX();
+        local_player->SetCameraRotX( current_camera_degrees_x + 90.f );
+
+        const auto offset = local_player->GetScrollDistance() * 4;
+
+        local_player->SetCameraRotY( 15.f - offset );
+
+        // Wait for the camera to adjust before searching for entities again
+        botcore->SkipUpdateForFrames( 35 );
+
+        return;
+      }
+
       const auto& whitelisted_player_names_option =
           bot_options.GetOption<WhitelistedPlayerNamesOption>();
 
@@ -288,40 +323,40 @@ void BotAIOneVsOne::UpdateInternal() {
       avg_y_pos.SetYPos( avg_y_pos.GetYPos() - 3.f );
       // average_y_pos_ -= 3.f;
 
-      current_target_entity_ =
-          FindNearestMonster( entities, *local_player, default_filter_ );
+      //current_target_entity_ =
+      //    FindNearestMonster( entities, *local_player, default_filter_ );
 
-      // No near entity was found
-      if ( !current_target_entity_ ) {
-        logging::Log( TEXT( "No near entity was found, trying again.\n" ) );
+      //// No near entity was found
+      //if ( !current_target_entity_ ) {
+      //  logging::Log( TEXT( "No near entity was found, trying again.\n" ) );
 
-        ++entities_not_found_counter_;
+      //  ++entities_not_found_counter_;
 
-        // If the bot has not found any entities after 3 tries, then we reset
-        // the blacklist
-        if ( entities_not_found_counter_ >= 3 ) {
-          logging::Log(
-              TEXT( "The bot has not found entities after 3 tries, reseting "
-                    "the blacklist.\n" ) );
+      //  // If the bot has not found any entities after 3 tries, then we reset
+      //  // the blacklist
+      //  if ( entities_not_found_counter_ >= 3 ) {
+      //    logging::Log(
+      //        TEXT( "The bot has not found entities after 3 tries, reseting "
+      //              "the blacklist.\n" ) );
 
-          blacklisted_entities_temporary_.clear();
+      //    blacklisted_entities_temporary_.clear();
 
-          entities_not_found_counter_ = 0;
-        }
+      //    entities_not_found_counter_ = 0;
+      //  }
 
-        // Adjust the camera to look the opposite direction for entities
-        const float current_camera_degrees_x = local_player->GetCameraRotX();
-        local_player->SetCameraRotX( current_camera_degrees_x + 90.f );
+      //  // Adjust the camera to look the opposite direction for entities
+      //  const float current_camera_degrees_x = local_player->GetCameraRotX();
+      //  local_player->SetCameraRotX( current_camera_degrees_x + 90.f );
 
-        const auto offset = local_player->GetScrollDistance() * 4;
+      //  const auto offset = local_player->GetScrollDistance() * 4;
 
-        local_player->SetCameraRotY( 15.f - offset );
+      //  local_player->SetCameraRotY( 15.f - offset );
 
-        // Wait for the camera to adjust before searching for entities again
-        botcore->SkipUpdateForFrames( 35 );
+      //  // Wait for the camera to adjust before searching for entities again
+      //  botcore->SkipUpdateForFrames( 35 );
 
-        return;
-      }
+      //  return;
+      //}
 
       nearest_entity_hp_when_selected_ = current_target_entity_->GetHealth();
 
