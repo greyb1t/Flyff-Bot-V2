@@ -71,7 +71,7 @@ HRESULT BotCore::EndSceneHooked( LPDIRECT3DDEVICE9 device ) {
     return endscene_original_function( device );
   }
 
-  std::lock_guard<std::mutex>( g_hooks_mutex, std::adopt_lock );
+  std::lock_guard<std::mutex> guard( g_hooks_mutex, std::adopt_lock );
 
   auto botcore = Initializer().GetBotCore();
 
@@ -220,7 +220,7 @@ BOOL BotCore::GetCursorPosHooked( LPPOINT lpPoint ) {
     return getcursorpos_hook_original_function( lpPoint );
   }
 
-  std::lock_guard<std::mutex>( g_hooks_mutex, std::adopt_lock );
+  std::lock_guard<std::mutex> guard( g_hooks_mutex, std::adopt_lock );
 
   const BOOL ret = getcursorpos_hook_original_function( lpPoint );
 
@@ -247,7 +247,7 @@ SHORT BotCore::GetKeyStateHooked( int nVirtKey ) {
     return getkeystate_hook_original_function( nVirtKey );
   }
 
-  std::lock_guard<std::mutex>( g_hooks_mutex, std::adopt_lock );
+  std::lock_guard<std::mutex> guard( g_hooks_mutex, std::adopt_lock );
 
   const auto module_name =
       Initializer().GetBotCore()->GetFlyffClient()->GetModuleName();
@@ -744,7 +744,9 @@ void BotCore::Render( LPDIRECT3DDEVICE9 pDevice ) {
         continue;
       }
 
-      entity->SetFlags( entity->GetFlags() | OBJ_FLAG_DELETE );
+      //entity->SetFlags( entity->GetFlags() | OBJ_FLAG_DELETE );
+      //gwinmem::CurrentProcess().Write<uint32_t>( entity->GetPointerAddress(),
+      //                                           0 );
     }
   }
   //}

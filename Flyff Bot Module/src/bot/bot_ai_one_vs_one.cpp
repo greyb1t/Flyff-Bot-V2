@@ -99,6 +99,7 @@ void BotAIOneVsOne::UpdateInternal() {
 
   const auto current_state = GetCurrentState<OneVsOneStates>();
 
+  /*
   // If we have an entity in the pointer and we have already found a target
   if ( current_target_entity_ ) {
     // Check if it is valid
@@ -108,6 +109,7 @@ void BotAIOneVsOne::UpdateInternal() {
       SetNextState( OneVsOneStates::kFindingTarget );
     }
   }
+  */
 
   switch ( current_state ) {
     case OneVsOneStates::DeselectEntity: {
@@ -149,8 +151,6 @@ void BotAIOneVsOne::UpdateInternal() {
           logging::Log(
               TEXT( "Character is not ready for another monster yet.\n" ) );
         } );
-
-        current_target_entity_.reset( nullptr );
         return;
       }
 
@@ -169,7 +169,6 @@ void BotAIOneVsOne::UpdateInternal() {
           // If the health is lower than the limit, wait and let it recover
           // before killing more monsters
 
-          current_target_entity_.reset( nullptr );
           return;
         }
       }
@@ -191,7 +190,6 @@ void BotAIOneVsOne::UpdateInternal() {
               stringutils::AnsiToWide( entity_found->GetName() ) +
               TEXT( "\n" ) );
           SetNextState( OneVsOneStates::kWaitUntilPlayerLeaves );
-          current_target_entity_.reset( nullptr );
           return;
         }
       }
@@ -238,7 +236,6 @@ void BotAIOneVsOne::UpdateInternal() {
                 idle_machine_.NextState(
                     static_cast<uint32_t>( OneVsOneStates::kRebuffCharacter ) );
                 SetNextState( OneVsOneStates::kIdle );
-                current_target_entity_.reset( nullptr );
                 return;
               } break;
 
@@ -256,7 +253,6 @@ void BotAIOneVsOne::UpdateInternal() {
                 TEXT( "Waiting until the character is standing still before "
                       "doing the rebuff sequence.\n" ) );
           } );
-          current_target_entity_.reset( nullptr );
           return;
         }
       }

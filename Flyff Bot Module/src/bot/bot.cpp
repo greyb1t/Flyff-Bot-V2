@@ -54,8 +54,8 @@ void Bot::SortEntitiesByDistanceToEntity(
     std::vector<std::unique_ptr<Entity>>& entities ) {
   std::sort(
       entities.begin(), entities.end(),
-      [=]( const std::unique_ptr<Entity>& e1,
-           const std::unique_ptr<Entity>& e2 ) -> bool {
+      [ = ]( const std::unique_ptr<Entity>& e1,
+             const std::unique_ptr<Entity>& e2 ) -> bool {
         if ( e1->IsDeletedOrInvalidMemory() || e2->IsDeletedOrInvalidMemory() )
           return false;
 
@@ -153,7 +153,8 @@ bool Bot::GetEntityScreenPosition( const Entity& entity,
 
   // Shrink the rect to avoid clicking the edges of something that is a window
   // in the window
-  neuz_window_rect = gwingui::drawing::GrowRect( neuz_window_rect, -100, -100 );
+  //neuz_window_rect = gwingui::drawing::GrowRect( neuz_window_rect, -100, -100 );
+  neuz_window_rect = gwingui::drawing::GrowRect( neuz_window_rect, -200, -200 );
 
   if ( PtInRect( &neuz_window_rect, entity_screen_pos ) )
     return true;

@@ -52,7 +52,7 @@ bool FlyffClient::Search( HWND loading_window_handle ) {
 
   for ( auto addr : server_addresses_finder_functions_ ) {
     auto result = std::async(
-        std::launch::async, [=]() -> std::pair<MemoryContants, uint32_t> {
+        std::launch::async, [ = ]() -> std::pair<MemoryContants, uint32_t> {
           return std::make_pair( addr.first, addr.second() );
         } );
 
@@ -127,7 +127,7 @@ bool FlyffClient::Search( HWND loading_window_handle ) {
   return true;
 }
 
-LPDIRECT3DDEVICE9 CreateD3DDevice() {
+LPDIRECT3DDEVICE9 CreateD3DDevice( HRESULT* result ) {
   D3DPRESENT_PARAMETERS present_params = { 0 };
 
   present_params.BackBufferWidth = 1;
@@ -142,19 +142,22 @@ LPDIRECT3DDEVICE9 CreateD3DDevice() {
 
   LPDIRECT3DDEVICE9 device_temp = NULL;
 
-  Direct3DCreate9( D3D_SDK_VERSION )
-      ->CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, 0,
-                      D3DCREATE_HARDWARE_VERTEXPROCESSING, &present_params,
-                      &device_temp );
+  *result = Direct3DCreate9( D3D_SDK_VERSION )
+                ->CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, 0,
+                                D3DCREATE_HARDWARE_VERTEXPROCESSING,
+                                &present_params, &device_temp );
 
   return device_temp;
 }
 
 void FlyffClient::InitializeDefaultHooks() {
-  const auto device = CreateD3DDevice();
+  HRESULT result = 0;
+  const auto device = CreateD3DDevice( &result );
 
-  if ( !device )
-    throw std::runtime_error( "Cannot create d3d9 device" );
+  if ( !device ) {
+    throw std::runtime_error( "Cannot create d3d9 device, HRESULT: " +
+                              std::to_string( result ) );
+  }
 
   const int kEncSceneVTableIndex = 42;
 

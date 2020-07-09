@@ -72,6 +72,8 @@ class FlyffClientEclipseFlyff : public FlyffClient {
 
   void PreAddressSearch();
 
+  void OnExit() override;
+
  private:
   static HHOOK wnd_proc_hook_handle_;
 };

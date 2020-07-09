@@ -33,14 +33,14 @@ HHOOK bot::FlyffClientEclipseFlyff::wnd_proc_hook_handle_ = 0;
 
 bot::FlyffClientEclipseFlyff::FlyffClientEclipseFlyff()
     : FlyffClient( TEXT( "Neuz.exe" ) ) {
-  AddSearchFunction( MemoryContants::kD3dVec3ProjectAddress, [=]() {
+  AddSearchFunction( MemoryContants::kD3dVec3ProjectAddress, [ = ]() {
     const auto d3dx_handle = GetModuleHandle( TEXT( "d3dx9_43.dll" ) );
 
     return reinterpret_cast<uint32_t>(
         GetProcAddress( d3dx_handle, "D3DXVec3Project" ) );
   } );
 
-  AddSearchFunction( MemoryContants::kPlayerBaseAddress, [=]() {
+  AddSearchFunction( MemoryContants::kPlayerBaseAddress, [ = ]() {
     uint32_t addr =
         pattern_matcher_.FindIdaSignature( "A1 ? ? ? ? 75 08 3B C7" );
 
@@ -52,7 +52,7 @@ bot::FlyffClientEclipseFlyff::FlyffClientEclipseFlyff()
     return address;
   } );
 
-  AddSearchFunction( MemoryContants::kScrollDistanceAddress, [=]() {
+  AddSearchFunction( MemoryContants::kScrollDistanceAddress, [ = ]() {
     uint32_t addr = pattern_matcher_.FindIdaSignature(
         "C7 05 ? ? ? ? ? ? ? ? 80 3D ? ? ? ? ? 74 55" );
 
@@ -64,7 +64,7 @@ bot::FlyffClientEclipseFlyff::FlyffClientEclipseFlyff()
     return address;
   } );
 
-  AddSearchFunction( MemoryContants::kAccountNameAddress, [=]() {
+  AddSearchFunction( MemoryContants::kAccountNameAddress, [ = ]() {
     uint32_t addr = pattern_matcher_.FindIdaSignature(
         "BA ? ? ? ? 8B ? ? ? ? ? 8A 01 8D 49 01" );
 
@@ -76,7 +76,7 @@ bot::FlyffClientEclipseFlyff::FlyffClientEclipseFlyff()
     return address;
   } );
 
-  AddSearchFunction( MemoryContants::kSelectedEntityAddress, [=]() {
+  AddSearchFunction( MemoryContants::kSelectedEntityAddress, [ = ]() {
     uint32_t addr = pattern_matcher_.FindIdaSignature(
         "8B ? ? ? ? ? 85 F6 74 4A 8B 56 20" );
 
@@ -88,7 +88,7 @@ bot::FlyffClientEclipseFlyff::FlyffClientEclipseFlyff()
     return address;
   } );
 
-  AddSearchFunction( MemoryContants::kEntityListAddress, [=]() {
+  AddSearchFunction( MemoryContants::kEntityListAddress, [ = ]() {
     uint32_t addr = pattern_matcher_.FindIdaSignature(
         "8B ? ? ? ? ? ? 85 F6 0F 84 ? ? ? ? 83 BF" );
 
@@ -100,7 +100,7 @@ bot::FlyffClientEclipseFlyff::FlyffClientEclipseFlyff()
     return address;
   } );
 
-  AddSearchFunction( MemoryContants::kMovementOffset, [=]() {
+  AddSearchFunction( MemoryContants::kMovementOffset, [ = ]() {
     uint32_t addr = pattern_matcher_.FindIdaSignature(
         "8B ? ? ? ? ? F7 40 ? ? ? ? ? 75 4E" );
 
@@ -112,14 +112,14 @@ bot::FlyffClientEclipseFlyff::FlyffClientEclipseFlyff()
     return offset;
   } );
 
-  AddSearchFunction( MemoryContants::kModelOffset, [=]() { return 0x170; } );
+  AddSearchFunction( MemoryContants::kModelOffset, [ = ]() { return 0x170; } );
 
-  AddSearchFunction( MemoryContants::kBoundBoxOffset, [=]() { return 0xc; } );
+  AddSearchFunction( MemoryContants::kBoundBoxOffset, [ = ]() { return 0xc; } );
 
   AddSearchFunction( MemoryContants::kWorldMatrixOffset,
-                     [=]() { return 0xe8; } );
+                     [ = ]() { return 0xe8; } );
 
-  AddSearchFunction( MemoryContants::kPositionOffset, [=]() {
+  AddSearchFunction( MemoryContants::kPositionOffset, [ = ]() {
     uint32_t addr = pattern_matcher_.FindIdaSignature(
         "F3 ? ? ? ? ? ? ? 8B ? ? ? ? ? 6A 01 83 EC 0C 8B CC 66 0F D6 01 89 41 "
         "08 8B CE" );
@@ -132,7 +132,7 @@ bot::FlyffClientEclipseFlyff::FlyffClientEclipseFlyff()
     return offset;
   } );
 
-  AddSearchFunction( MemoryContants::kHealthOffset, [=]() {
+  AddSearchFunction( MemoryContants::kHealthOffset, [ = ]() {
     uint32_t addr =
         pattern_matcher_.FindIdaSignature( "8B ? ? ? ? ? 0B ? ? ? ? ? 74 40" );
 
@@ -144,7 +144,7 @@ bot::FlyffClientEclipseFlyff::FlyffClientEclipseFlyff()
     return offset;
   } );
 
-  AddSearchFunction( MemoryContants::kManaOffset, [=]() {
+  AddSearchFunction( MemoryContants::kManaOffset, [ = ]() {
     uint32_t addr =
         pattern_matcher_.FindIdaSignature( "8B ? ? ? ? ? 0B ? ? ? ? ? 74 40" );
 
@@ -156,7 +156,7 @@ bot::FlyffClientEclipseFlyff::FlyffClientEclipseFlyff()
     return offset + 0x4;
   } );
 
-  AddSearchFunction( MemoryContants::kFatigueOffset, [=]() {
+  AddSearchFunction( MemoryContants::kFatigueOffset, [ = ]() {
     uint32_t addr =
         pattern_matcher_.FindIdaSignature( "8B ? ? ? ? ? 0B ? ? ? ? ? 74 40" );
 
@@ -168,7 +168,7 @@ bot::FlyffClientEclipseFlyff::FlyffClientEclipseFlyff()
     return offset + 0x8;
   } );
 
-  AddSearchFunction( MemoryContants::kLevelOffset, [=]() {
+  AddSearchFunction( MemoryContants::kLevelOffset, [ = ]() {
     uint32_t addr =
         pattern_matcher_.FindIdaSignature( "FF B0 ? ? ? ? 8D 45 F0" );
 
@@ -180,7 +180,7 @@ bot::FlyffClientEclipseFlyff::FlyffClientEclipseFlyff()
     return offset;
   } );
 
-  AddSearchFunction( MemoryContants::kNameOffset, [=]() {
+  AddSearchFunction( MemoryContants::kNameOffset, [ = ]() {
     uint32_t addr = pattern_matcher_.FindIdaSignature(
         "8D ? ? ? ? ? 8D ? ? ? ? ? 8B C8 2B D0" );
 
@@ -193,9 +193,9 @@ bot::FlyffClientEclipseFlyff::FlyffClientEclipseFlyff()
   } );
 
   AddSearchFunction( MemoryContants::kObjectFlagsOffset,
-                     [=]() { return 0x4; } );
+                     [ = ]() { return 0x4; } );
 
-  AddSearchFunction( MemoryContants::kSelectedEntityOffset, [=]() {
+  AddSearchFunction( MemoryContants::kSelectedEntityOffset, [ = ]() {
     return ( uint32_t )0x20;
 
     uint32_t addr =
@@ -211,7 +211,7 @@ bot::FlyffClientEclipseFlyff::FlyffClientEclipseFlyff()
 
   // Find a steady offset by logging in and out while finding out what is
   // accessing the value
-  AddSearchFunction( MemoryContants::kSpeedMultiplierOffset, [=]() {
+  AddSearchFunction( MemoryContants::kSpeedMultiplierOffset, [ = ]() {
     /*
       0042282E - Neuz.exe+2282E (+4)
       F3 ? ? ? ? ? ? ? 0F 2F ? ? ? ? ? 76 7A
@@ -238,9 +238,9 @@ bot::FlyffClientEclipseFlyff::FlyffClientEclipseFlyff()
     return offset;
   } );
 
-  AddSearchFunction( MemoryContants::kMoveOffset, [=]() { return 0x4; } );
+  AddSearchFunction( MemoryContants::kMoveOffset, [ = ]() { return 0x4; } );
 
-  AddSearchFunction( MemoryContants::kObjectTypeOffset, [=]() {
+  AddSearchFunction( MemoryContants::kObjectTypeOffset, [ = ]() {
     uint32_t addr =
         pattern_matcher_.FindIdaSignature( "8B ? ? ? ? ? 8B 4D 28" );
 
@@ -258,8 +258,9 @@ LRESULT bot::FlyffClientEclipseFlyff::CallWndProcHook( int code,
                                                        LPARAM lParam ) {
   auto botcore = Initializer().GetBotCore();
 
-  if ( code < 0 )
-    CallNextHookEx( wnd_proc_hook_handle_, code, wParam, lParam );
+  if ( code < 0 ) {
+    return CallNextHookEx( 0, code, wParam, lParam );
+  }
 
   if ( code == HC_ACTION ) {
     CWPSTRUCT* cwp = reinterpret_cast<CWPSTRUCT*>( lParam );
@@ -303,4 +304,8 @@ void bot::FlyffClientEclipseFlyff::PreAddressSearch() {
   if ( !wnd_proc_hook_handle_ ) {
     gwingui::messagebox::Error( TEXT( "SetWindowsHookEx failed" ) );
   }
+}
+
+void bot::FlyffClientEclipseFlyff::OnExit() {
+  UnhookWindowsHookEx( wnd_proc_hook_handle_ );
 }

@@ -14,8 +14,8 @@ class LocalPlayer : public Entity {
 
   BackCamera GetCamera() const;
 
-  void SetCameraRotX( const float& degrees ) const;
-  void SetCameraRotY( const float& degrees ) const;
+  void SetCameraRotX( float degrees ) const;
+  void SetCameraRotY( float degrees ) const;
 
   float GetCameraRotX() const;
   float GetCameraRotY() const;

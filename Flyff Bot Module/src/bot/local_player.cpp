@@ -39,14 +39,32 @@ BackCamera LocalPlayer::GetCamera() const {
   return camera;
 }
 
-void LocalPlayer::SetCameraRotX( const float& degrees ) const {
+void LocalPlayer::SetCameraRotX( float degrees ) const {
+  if ( degrees > 360 ) {
+    degrees = degrees - 360.f;
+  }
+
+  if ( degrees < 0 ) {
+    degrees = degrees + 360;
+  }
+
   const auto camera_address =
       client_->GetClientVar( MemoryContants::kCameraAddress );
   gwinmem::CurrentProcess().Write(
       camera_address + offsetof( BackCamera, m_fRotx ), degrees );
 }
 
-void LocalPlayer::SetCameraRotY( const float& degrees ) const {
+void LocalPlayer::SetCameraRotY( float degrees ) const {
+  const auto zoom = GetScrollDistance();
+
+  if ( degrees > ( 80 - ( zoom * 4 ) ) ) {
+    degrees = 80 - zoom * 4;
+  }
+
+  if ( degrees < ( -80 ) ) {
+    degrees = ( -80 );
+  }
+
   const auto camera_address =
       client_->GetClientVar( MemoryContants::kCameraAddress );
   gwinmem::CurrentProcess().Write(

@@ -36,7 +36,7 @@ StateStatusReturnValue SelectTargetStateMachine::Select(
             "The entity is visible and now trying to hover over it.\n" ) );
 
         // Save the current cursor position
-        GetCursorPos( &old_cursor_pos_ );
+        // GetCursorPos( &old_cursor_pos_ );
 
         // Force the target process to return the following position from
         // GetCursorPos
@@ -67,10 +67,10 @@ StateStatusReturnValue SelectTargetStateMachine::Select(
           // If the cursor is inside the flyff window, then set the real cursor
           // pos to the previous one If we always do it, the cursor lags when
           // doing other stuff
-          if ( WindowFromPoint( old_cursor_pos_ ) ==
-               botcore->GetTargetWindow() ) {
-            //SetCursorPos( old_cursor_pos_.x, old_cursor_pos_.y );
-          }
+          //if ( WindowFromPoint( old_cursor_pos_ ) ==
+          //     botcore->GetTargetWindow() ) {
+          //  //SetCursorPos( old_cursor_pos_.x, old_cursor_pos_.y );
+          //}
 
           SetNextState( TargetSelectionStates::ResetCursor );
         } break;
