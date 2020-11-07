@@ -159,6 +159,22 @@ HRESULT BotCore::EndSceneHooked( LPDIRECT3DDEVICE9 device ) {
   return endscene_original_function( device );
 }
 
+HRESULT BotCore::ResetHooked( LPDIRECT3DDEVICE9 device,
+                              D3DPRESENT_PARAMETERS* pPresentationParameters ) {
+  const auto reset_original_hook =
+      Initializer().GetBotCore()->GetFlyffClient()->GetHookManager()->GetHook(
+          HookType::Reset );
+
+  const auto reset_original_function =
+      reinterpret_cast<tReset>( reset_original_hook.original_function );
+
+  GWIN_TRACE( "\n" );
+  GWIN_TRACE( "ResetHooked()\n" );
+  GWIN_TRACE( "\n" );
+
+  return reset_original_function( device, pPresentationParameters );
+}
+
 D3DXVECTOR3* BotCore::D3DXVec3ProjectHooked( D3DXVECTOR3* pOut,
                                              const D3DXVECTOR3* pV,
                                              const D3DVIEWPORT9* pViewport,
@@ -704,20 +720,23 @@ void BotCore::Render( LPDIRECT3DDEVICE9 pDevice ) {
     }
     */
 
+    if ( entity->IsPlayer() ) {
+      DrawEntity( *local_player_entity, *entity,
+                  D3DCOLOR_RGBA( 0, 162, 232, 255 ) );
+    } else {
+      DrawEntity( *local_player_entity, *entity,
+                  D3DCOLOR_RGBA( 255, 255, 255, 255 ) );
+    }
+
+    /*
     if ( std::find( names_of_entities_to_draw.begin(),
                     names_of_entities_to_draw.end(),
                     entity->GetName() ) != names_of_entities_to_draw.end() ) {
-      //if ( entity->IsPlayer() ) {
-      //  DrawEntity( *local_player_entity, *entity,
-      //              D3DCOLOR_RGBA( 0, 162, 232, 255 ) );
-      //} else {
-      DrawEntity( *local_player_entity, *entity,
-                  D3DCOLOR_RGBA( 255, 255, 255, 255 ) );
-      //}
     } else if ( GetStarted() && entity->IsPlayer() ) {
       DrawEntity( *local_player_entity, *entity,
                   D3DCOLOR_RGBA( 0, 162, 232, 255 ) );
     }
+    */
   }
 
   // Every 300 ms do pop
@@ -744,9 +763,9 @@ void BotCore::Render( LPDIRECT3DDEVICE9 pDevice ) {
         continue;
       }
 
-      //entity->SetFlags( entity->GetFlags() | OBJ_FLAG_DELETE );
-      //gwinmem::CurrentProcess().Write<uint32_t>( entity->GetPointerAddress(),
-      //                                           0 );
+      entity->SetFlags( entity->GetFlags() | OBJ_FLAG_DELETE );
+      // gwinmem::CurrentProcess().Write<uint32_t>( entity->GetPointerAddress(),
+      //                                            0 );
     }
   }
   //}

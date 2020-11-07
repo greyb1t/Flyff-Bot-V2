@@ -16,9 +16,9 @@ enum class MemoryContants {
   kCameraAddress,
   kPlayerBaseAddress,
   kScrollDistanceAddress,
-  kAccountNameAddress,
-  kSelectedEntityAddress,
-  kEntityListAddress,
+  kAccountNameAddress, // ERROR
+  kSelectedEntityAddress, // ERROR
+  kEntityListAddress, // ERROR
   kCollisionAddress,
   // kSendMeleeAttackAddress,
   // kDoAttackMeleeAddress,
@@ -28,7 +28,7 @@ enum class MemoryContants {
   kModelOffset,
   kBoundBoxOffset,
   kWorldMatrixOffset,
-  kPositionOffset,
+  kPositionOffset, // ERROR
   kSpeedOffset,
   kHealthOffset,
   kManaOffset,
@@ -39,7 +39,7 @@ enum class MemoryContants {
   kSelectedEntityOffset,
   kSpeedMultiplierOffset,
   kMoveOffset,
-  kObjectTypeOffset,  // Read about no cast delay in
+  kObjectTypeOffset,  // Read about no cast delay in // ERROR
 
   // kIsAggroOffset is used to find if a monster is aggro (red name). The offset
   // is located about 40 bytes below auth value in the player structure.
@@ -111,8 +111,8 @@ class FlyffClient {
 
   HookManager hook_manager_;
 
- private:
   std::map<MemoryContants, uint32_t> server_addresses_;
+ private:
   std::map<MemoryContants, std::function<uint32_t()>>
       server_addresses_finder_functions_;
 };

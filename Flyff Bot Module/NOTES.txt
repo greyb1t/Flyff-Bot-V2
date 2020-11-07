@@ -1,9 +1,42 @@
-TODO:
-    If bot found another player while running to monsters (before attacking it), immediately stop.
+Make the level range a sphere instead, I did that in Unity!
+
+SetWindowsHookExA with WH_DEBUG to deny / remove their callbacks.
+
+TODO: Priority aggro monster over all filters. E.g. Avoid engageed.
+Why? If you're leech is being attacked by a monster, it is engaged, bot will never kill it.
+However, if you know it is aggro, it overrides all those filters and kills it
+
+Add random jumping to add indications that I am a player and not a bot
+
+If the target entity, is higher than the localplayer, jump towards the entity
+Why? Because we know it is on a mountain or some higher place
+How? Remove BB from target, jump, while in the air, click below the target. Restore BB.
+
+The "Do not kill monster close to player" can be abused by someone just following me
+How to fix? 
+Add an extra counter to check if a player seems to be following you.
+
+When getting stuck on an obstacle, rotate camera 180 degrees to find a monster in that direction
+OR somehow target only monsters in the absolute opposite direction, use math
+
+Add options to let user decide what happens when player is close.
+* Press Key (e.g. blinkwing), * Kill client, * Pause bot
+
+Eclipse Flyff:
+They added protection against bots by verifying if the mouse is above the monster when getting selected
+This ruined my bot because I reset the mouse position immediately (not on the monster).
+Temporary fix is to not reset the cursor position after clicking on a monster
+
+Fix the logging by avoiding so many calls to richedit::AppendText,
+add all messages to string, then one call to appendtext instead of that whole string
+
+RETURN TO START POINT
+On each monster kill, save the current position
+When the time comes to return, create boxes that make a path to the start point
 
 Create a root-kit like protection for the bot
 
-    Hook FindWindow, GetThreadContext, SetThreadContext, VirtualQueryEx, LoadLibrary,
+    Hook FindWindow, (NtGetThreadContext) GetThreadContext, SetThreadContext, VirtualQueryEx, LoadLibrary,
     GetActiveWindow 
     EnumerateLoadedModulesEx
 
@@ -18,9 +51,6 @@ Create a root-kit like protection for the bot
 
     In other words, find out how Module32First is working under hood and hook Nt-Function
 
-
-NOTE: The DeSelectEntity(), might not be able to de-select quick enough on a laggy computer, need to add a state to ensure
-that the entity is deselected
 
 TODO: Add opportunity to only Render/Update once every 0.5 seconds to avoid fps issues
 
@@ -64,7 +94,6 @@ Sending win32 messages through the game thread (e.g. endscene) causes freezes, d
 FEATURE:
 full support rm
 find target by name
-have a connection between the two client to find out position of the target to heal then rm bot clicks its way to the target to find
 
 NOTE:
 I may have found the range offset in the player struct by using my range old offset

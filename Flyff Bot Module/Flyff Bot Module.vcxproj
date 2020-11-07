@@ -27,6 +27,7 @@
     <ClInclude Include="src\bot\hook_manager.h" />
     <ClInclude Include="src\bot\idle_state_machine.h" />
     <ClInclude Include="src\bot\killing_bot.h" />
+    <ClInclude Include="src\bot\logic_specialization\local_player_eclipse.h" />
     <ClInclude Include="src\bot\options\attack_sequence_option.h" />
     <ClInclude Include="src\bot\options\auto_healing_pills_option.h" />
     <ClInclude Include="src\bot\options\average_y_pos_option.h" />
@@ -69,6 +70,7 @@
     <ClInclude Include="src\bot\entity.h" />
     <ClInclude Include="src\bot\entity_list.h" />
     <ClInclude Include="src\bot\local_player.h" />
+    <ClInclude Include="src\utils\software_bp_hook.h" />
     <ClInclude Include="src\utils\stopwatch.h" />
     <ClInclude Include="src\utils\string_utls.h" />
     <ClInclude Include="src\utils\trace.h" />
@@ -101,6 +103,7 @@
     <ClCompile Include="src\bot\key_sequence.cpp" />
     <ClCompile Include="src\bot\killing_bot.cpp" />
     <ClCompile Include="src\bot\logging.cpp" />
+    <ClCompile Include="src\bot\logic_specialization\local_player_eclipse.cpp" />
     <ClCompile Include="src\bot\logic_specialization\local_player_ignite.cpp" />
     <ClCompile Include="src\bot\options\attack_sequence_option.cpp" />
     <ClCompile Include="src\bot\options\auto_healing_pills_option.cpp" />
@@ -135,6 +138,7 @@
     <ClCompile Include="src\bot\entity_list.cpp" />
     <ClCompile Include="src\bot\local_player.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\utils\software_bp_hook.cpp" />
     <ClCompile Include="src\utils\stopwatch.cpp" />
     <ClCompile Include="src\utils\trace.cpp" />
     <ClCompile Include="src\window\loading_window.cpp" />

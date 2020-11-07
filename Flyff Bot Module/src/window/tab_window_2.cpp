@@ -91,12 +91,12 @@ void TabWindow2::OnButtonClick( const HWND button_handle,
         return;
       }
 
-      const auto selected_entity = local_player->GetSelectedEntity();
-
       if ( !local_player->IsEntitySelected() ) {
         gwingui::messagebox::Error( TEXT( "Please select an entity." ) );
         return;
       }
+
+      const auto selected_entity = local_player->GetSelectedEntity();
 
       gwingui::editcontrol::SetText(
           GWH( EDIT_DRAW_NAME ),

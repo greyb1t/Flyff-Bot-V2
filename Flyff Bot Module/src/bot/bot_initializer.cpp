@@ -301,10 +301,19 @@ int BotInitializer::Load( HINSTANCE instance_handle,
               "handler has been added." ) );
   }
 
+  // Why not SetUnhandledExceptionFilter()?
+  // Because it has worse performance..and I need the performance because I
+  // use the exception handler to catch the breakpoints I put out
+  // On the other hand:
+  // Why only use AddVectoredExceptionHandler() for breakpoint hooks?
+  // Because it catches everything BEFORE seh meaning that we cannot use
+  // basic try, catch to handle exceptions because veh is called immediately
   prev_filter_ =
+      AddVectoredExceptionHandler( 1, crash_handler::MainExceptionHandlerBp );
+  prev_filter_2_ =
       SetUnhandledExceptionFilter( crash_handler::MainExceptionHandler );
 
-  GWIN_TRACE( "Prev Filter: %d\n", reinterpret_cast<int>( prev_filter_ ) );
+  GWIN_TRACE( "Prev Filter: %d\n", reinterpret_cast<int>( prev_filter_2_ ) );
 
   gwingui::Gui gui( instance_handle );
 
@@ -370,7 +379,8 @@ bool BotInitializer::Unload( const HWND mainwindow_handle,
   // Call this in the thread that we called ManualMapFixExceptionHandling() in
   gwinmem::CurrentProcess().ManualMapResetExceptionHandling();
 
-  SetUnhandledExceptionFilter( prev_filter_ );
+  RemoveVectoredExceptionHandler( prev_filter_ );
+  SetUnhandledExceptionFilter( prev_filter_2_ );
 
   // Wait for the detoured funtions to finish before removing the code
   Sleep( 100 );

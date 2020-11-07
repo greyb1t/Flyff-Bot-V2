@@ -10,6 +10,7 @@
 #include "gwinmem/process_memory_internal.h"
 
 #include "../utils/trace.h"
+#include "../utils/software_bp_hook.h"
 
 bool WriteDump( EXCEPTION_POINTERS* ex_pointers,
                 const std::wstring path,
@@ -80,6 +81,20 @@ DWORD WINAPI CrashDumpWriter( LPVOID param ) {
 bool has_allocated_console = false;
 
 LONG HandleException( EXCEPTION_POINTERS* ex ) {
+  /*
+  if ( ex->ExceptionRecord->ExceptionCode < 0x80000000 ) {
+    return EXCEPTION_CONTINUE_EXECUTION;
+  }
+  */
+
+  // GWIN_TRACE( "ex continuable: %d\n", ex->ExceptionRecord->ExceptionFlags == 0 );
+
+  // The vectored exception handler catches fuckin' everything, even some informational errors from debug strings
+  // Therefore only handle the real errors
+  if ( !IS_ERROR( ex->ExceptionRecord->ExceptionCode ) ) {
+    return EXCEPTION_CONTINUE_EXECUTION;
+  }
+
   GWIN_TRACE( "Notifying the log queue\n" );
 
   // Update the bot log
@@ -136,7 +151,21 @@ LONG HandleException( EXCEPTION_POINTERS* ex ) {
   return EXCEPTION_CONTINUE_EXECUTION;
 }
 
+LONG WINAPI crash_handler::MainExceptionHandlerBp( EXCEPTION_POINTERS* ex ) {
+  if ( ex->ExceptionRecord->ExceptionCode == EXCEPTION_BREAKPOINT ) {
+    return software_bp_hook::BreakpointExceptionHandler( ex );
+  }
+
+  GWIN_TRACE( "MainExceptionHandlerBp()\n" );
+
+  return EXCEPTION_CONTINUE_SEARCH;
+}
+
 LONG WINAPI crash_handler::MainExceptionHandler( EXCEPTION_POINTERS* ex ) {
+  // if ( ex->ExceptionRecord->ExceptionCode == EXCEPTION_BREAKPOINT ) {
+  //   return software_bp_hook::BreakpointExceptionHandler( ex );
+  // }
+
   __try {
     return HandleException( ex );
   } __except ( 1 ) {

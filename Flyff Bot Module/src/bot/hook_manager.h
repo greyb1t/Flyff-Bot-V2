@@ -3,6 +3,7 @@
 enum class HookType {
   D3DVec3Project,
   EndScene,
+  Reset,
   GetCursorPos,
   GetKeyState,
 };

@@ -5,6 +5,49 @@
 #include "flyff_client.h"
 
 /*
+  Eclipse Flyff Analysis
+
+  Entity List Protection:
+
+	  Multiple lists exists, the list curerntly used changes constantly.
+	  All lists lay in the CWorld structure.
+
+	  // Esi holds the entity pointer
+	  mov esi,[ebx+eax*4+18]
+
+	  Meaning that:
+	  ebx: CWorld
+	  eax * 4: Some offset into the list
+	  + 18: just offset by 0x18 in the CWorld structure.
+
+	  How to get real entity list:
+	  Hook 
+		  add eax,ecx (which adds ecx which is a simple index for the entity in the list)
+	  which is the instruction just above 
+		  mov esi,[ebx+eax*4+18]
+
+	  Now simply calculate the way they calculate.
+	  ebx+eax*4+18
+
+	  https://i.imgur.com/KIZAmU9.png
+	  How to find the instructions above?
+	  Simply do as usual when trying to find entity list:
+	  Search a monster, hit it, de-select it, then search for new hp.
+	  Then you will find the monster in memory.
+	
+  Selected Entity Protection:
+
+	  The address the current selected entity is stored in changes when clicking somewhere
+	  else.
+	
+	  Simply find the address that has the same selected entity address all the time.
+	  Which is basically, one of the normal 2 addresses you can normally search for.
+	
+	  Same idea as above, find code that gets the correct seöected entity address. 
+	  Then simply hook it and log and save it.
+*/
+
+/*
   Eclipse Flyff Bypass VEH Debugger Detection:
   Attach CE debugger on the logon screen in flyff.
 
@@ -70,9 +113,13 @@ class FlyffClientEclipseFlyff : public FlyffClient {
                                            WPARAM wParam,
                                            LPARAM lParam );
 
+  std::unique_ptr<LocalPlayer> CreateLocalPlayer() override;
+
   void PreAddressSearch();
 
   void OnExit() override;
+
+  void PostAddressSearch();
 
  private:
   static HHOOK wnd_proc_hook_handle_;

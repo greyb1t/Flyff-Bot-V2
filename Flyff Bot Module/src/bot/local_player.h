@@ -25,7 +25,7 @@ class LocalPlayer : public Entity {
   float GetScrollDistance() const;
   void SetScrollDistance( float value ) const;
 
-  virtual bool IsEntitySelected();
+  bool IsEntitySelected();
 
   void SetMotion( int value ) const;
   virtual void MoveForward() const;

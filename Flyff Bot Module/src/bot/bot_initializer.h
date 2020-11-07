@@ -45,7 +45,8 @@ class BotInitializer {
   HINSTANCE instance_handle_;
   BotCore botcore_;
 
-  LPTOP_LEVEL_EXCEPTION_FILTER prev_filter_;
+  LPTOP_LEVEL_EXCEPTION_FILTER prev_filter_2_;
+  LPVOID prev_filter_;
 
   std::atomic_bool has_removed_exception_handler_;
 

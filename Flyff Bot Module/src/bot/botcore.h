@@ -21,6 +21,9 @@ class Bot;
 class Entity;
 
 using tEndScene = HRESULT( WINAPI* )( LPDIRECT3DDEVICE9 device );
+using tReset =
+    HRESULT( WINAPI* )( LPDIRECT3DDEVICE9 device,
+                        D3DPRESENT_PARAMETERS* pPresentationParameters );
 
 using tD3DXVec3Project = D3DXVECTOR3*( WINAPI* )( D3DXVECTOR3* pOut,
                                                   const D3DXVECTOR3* pV,
@@ -53,6 +56,9 @@ class BotCore {
   ~BotCore() = default;
 
   static HRESULT WINAPI EndSceneHooked( LPDIRECT3DDEVICE9 device );
+  static HRESULT WINAPI
+  ResetHooked( LPDIRECT3DDEVICE9 device,
+               D3DPRESENT_PARAMETERS* pPresentationParameters );
 
   static D3DXVECTOR3* WINAPI
   D3DXVec3ProjectHooked( D3DXVECTOR3* out,

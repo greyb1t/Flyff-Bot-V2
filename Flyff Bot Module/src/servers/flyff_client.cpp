@@ -165,11 +165,21 @@ void FlyffClient::InitializeDefaultHooks() {
                         ( sizeof( DWORD* ) * kEncSceneVTableIndex );
   DWORD endscene_ptr_addr = *reinterpret_cast<DWORD*>( endscene_addr );
 
+  const int kResetVTableIndex = 16;
+
+  DWORD reset_addr = *reinterpret_cast<DWORD*>( device ) +
+                     ( sizeof( DWORD* ) * kResetVTableIndex );
+  DWORD reset_ptr_addr = *reinterpret_cast<DWORD*>( reset_addr );
+
   device->Release();
 
   Hook endscene_hook;
   endscene_hook.original_function = ( void* )endscene_ptr_addr;
   endscene_hook.hook_callback = BotCore::EndSceneHooked;
+
+  Hook reset_hook;
+  reset_hook.original_function = ( void* )reset_ptr_addr;
+  reset_hook.hook_callback = BotCore::ResetHooked;
 
   Hook d3dvec3project_hook;
   d3dvec3project_hook.original_function = reinterpret_cast<void*>(
@@ -187,6 +197,7 @@ void FlyffClient::InitializeDefaultHooks() {
   hook_manager_.Begin();
 
   hook_manager_.AddHook( HookType::EndScene, endscene_hook );
+  hook_manager_.AddHook( HookType::Reset, reset_hook );
   hook_manager_.AddHook( HookType::D3DVec3Project, d3dvec3project_hook );
   hook_manager_.AddHook( HookType::GetCursorPos, getcursorpos_hook );
   hook_manager_.AddHook( HookType::GetKeyState, getkeystate_hook );
@@ -198,6 +209,7 @@ void FlyffClient::RemoveDefaultHooks() {
   hook_manager_.Begin();
 
   hook_manager_.RemoveHook( HookType::EndScene );
+  hook_manager_.RemoveHook( HookType::Reset );
   hook_manager_.RemoveHook( HookType::D3DVec3Project );
   hook_manager_.RemoveHook( HookType::GetCursorPos );
   hook_manager_.RemoveHook( HookType::GetKeyState );

@@ -12,7 +12,7 @@ class LocalPlayerIgnite : public LocalPlayer {
   bool IsRunning() const override;
 
   virtual std::unique_ptr<Entity> GetSelectedEntity();
-  bool IsEntitySelected() override;
+  // bool IsEntitySelected() override;
 
   void MoveForward() const override;
   bool IsWalkingBackwards() const override;

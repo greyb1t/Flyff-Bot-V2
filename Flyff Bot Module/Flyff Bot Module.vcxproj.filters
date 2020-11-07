@@ -228,6 +228,12 @@
     <ClInclude Include="src\bot\options\avoid_engaged_monsters.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\utils\software_bp_hook.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\bot\logic_specialization\local_player_eclipse.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -402,6 +408,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\bot\options\avoid_engaged_monsters.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\utils\software_bp_hook.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bot\logic_specialization\local_player_eclipse.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

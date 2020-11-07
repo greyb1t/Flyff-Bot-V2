@@ -109,6 +109,9 @@ void LocalPlayer::SetScrollDistance( float value ) const {
 }
 
 bool LocalPlayer::IsEntitySelected() {
+  return GetSelectedEntity()->GetPointerAddress() != 0;
+
+  /*
   const auto selected_entity_address =
       client_->GetClientVar( MemoryContants::kSelectedEntityAddress );
   const auto selected_entity_offset =
@@ -116,6 +119,7 @@ bool LocalPlayer::IsEntitySelected() {
   int val = gwinmem::CurrentProcess().Read<int>( selected_entity_address,
                                                  { selected_entity_offset } );
   return !!val;
+  */
 }
 
 void LocalPlayer::SetMotion( int value ) const {

@@ -353,12 +353,12 @@ void TabWindow1::OnButtonClick( HWND hCtrl, UINT ctrlId ) {
         return;
       }
 
-      const auto selected_entity = local_player->GetSelectedEntity();
-
       if ( !local_player->IsEntitySelected() ) {
         gwingui::messagebox::Error( TEXT( "Please select an entity." ) );
         return;
       }
+
+      const auto selected_entity = local_player->GetSelectedEntity();
 
       gwingui::editcontrol::SetText(
           GWH( EDIT_WHITELISTED_NAME ),
@@ -527,12 +527,12 @@ void TabWindow1::OnButtonClick( HWND hCtrl, UINT ctrlId ) {
         return;
       }
 
-      const auto selected_entity = local_player->GetSelectedEntity();
-
       if ( !local_player->IsEntitySelected() ) {
         gwingui::messagebox::Error( TEXT( "Please select an entity." ) );
         return;
       }
+
+      const auto selected_entity = local_player->GetSelectedEntity();
 
       gwingui::editcontrol::SetText(
           GWH( EDIT_WHITELISTED_PLAYER_NAME ),

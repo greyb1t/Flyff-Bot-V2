@@ -153,8 +153,8 @@ bool Bot::GetEntityScreenPosition( const Entity& entity,
 
   // Shrink the rect to avoid clicking the edges of something that is a window
   // in the window
-  //neuz_window_rect = gwingui::drawing::GrowRect( neuz_window_rect, -100, -100 );
-  neuz_window_rect = gwingui::drawing::GrowRect( neuz_window_rect, -200, -200 );
+  neuz_window_rect = gwingui::drawing::GrowRect( neuz_window_rect, -100, -100 );
+  // neuz_window_rect = gwingui::drawing::GrowRect( neuz_window_rect, -200, -200 );
 
   if ( PtInRect( &neuz_window_rect, entity_screen_pos ) )
     return true;

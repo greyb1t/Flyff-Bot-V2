@@ -36,19 +36,7 @@ std::unique_ptr<Entity> LocalPlayerIgnite::GetSelectedEntity() {
       return std::move( entity );
   }
 
-  return client_->CreateEntity( -1 );
-}
-
-bool LocalPlayerIgnite::IsEntitySelected() {
-  const auto selected_entity_address =
-      client_->GetClientVar( MemoryContants::kSelectedEntityAddress );
-  const auto selected_entity_offset =
-      client_->GetClientVar( MemoryContants::kSelectedEntityOffset );
-
-  int32_t val = gwinmem::CurrentProcess().Read<int32_t>(
-      selected_entity_address, { selected_entity_offset } );
-
-  return val != -1;
+  return client_->CreateEntity( 0 );
 }
 
 void LocalPlayerIgnite::MoveForward() const {

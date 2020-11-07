@@ -454,16 +454,16 @@ void BotAIOneVsOne::UpdateInternal() {
         break;
       }
 
-      std::unique_ptr<Entity> selected_entity =
-          local_player->GetSelectedEntity();
-
-      if ( selected_entity->GetPointerAddress() == -1 ) {
+      if ( !local_player->IsEntitySelected() ) {
         logging::Log( TEXT(
             "The selected entity could not be found in the entity list.\n" ) );
 
         SetNextState( OneVsOneStates::kFindingTarget );
         return;
       }
+
+      std::unique_ptr<Entity> selected_entity =
+          local_player->GetSelectedEntity();
 
       // Is the selected entity different from the intended entity?
       if ( selected_entity->GetPointerAddress() !=

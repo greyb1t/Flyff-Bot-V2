@@ -2,7 +2,7 @@
 
 void __Trace2( const char* format, ... );
 
-#define ENABLE_DEBUGGING 0
+#define ENABLE_DEBUGGING 1
 #define TO_CONSOLE 1
 
 #if ENABLE_DEBUGGING
